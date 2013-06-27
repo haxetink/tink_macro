@@ -1,9 +1,10 @@
-package tink.macro.tools;
+package tink.macro;
 
 import haxe.macro.Context;
 import haxe.macro.Expr;
+
 using Lambda;
-using tink.macro.tools.ExprTools;
+using tink.macro.Exprs;
 
 class Printer {
 	static var binops = '+,*,/,-,=,==,!=,>,>=,<,<=,&,|,^,&&,||,<<,>>,>>>,%,NONE,...,=>'.split(',');
