@@ -2,7 +2,6 @@ package tink.macro;
 
 import haxe.macro.Context;
 import haxe.macro.Expr;
-import tink.macro.helpers.Bouncer;
 
 using tink.macro.Positions;
 using tink.core.Outcome;

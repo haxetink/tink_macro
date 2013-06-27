@@ -1,4 +1,4 @@
-package tink.macro.helpers;
+package tink.macro;
 
 #if macro
 	import haxe.macro.Context;
@@ -7,8 +7,7 @@ package tink.macro.helpers;
 	using tink.macro.Positions;
 	using tink.macro.Exprs;
 #end
-class Bouncer {
-	//TODO: as is, a more less empty class is generated in the output. This is unneccessary.
+@:exclude class Bouncer {
 	#if macro
 		static var idCounter = 0;
 		static var bounceMap = new Map<Int,Void->Expr>();
@@ -16,13 +15,13 @@ class Bouncer {
 		static public function bounce(f:Void->Expr, ?pos) {
 			var id = idCounter++;
 			bounceMap.set(id, f);
-			return 'tink.macro.helpers.Bouncer.catchBounce'.resolve(pos).call([id.toExpr(pos)], pos);
+			return 'tink.macro.Bouncer.catchBounce'.resolve(pos).call([id.toExpr(pos)], pos);
 		}
 		static public function outerTransform(e:Expr, transform:Expr->Expr) {
 			var id = idCounter++,
 				pos = e.pos;
 			outerMap.set(id, transform);
-			return 'tink.macro.helpers.Bouncer.makeOuter'.resolve(pos).call([e], pos).field('andBounce', pos).call([id.toExpr(pos)], pos);
+			return 'tink.macro.Bouncer.makeOuter'.resolve(pos).call([e], pos).field('andBounce', pos).call([id.toExpr(pos)], pos);
 		}		
 		static function doOuter(id:Int, e:Expr) {
 			return
@@ -38,10 +37,10 @@ class Bouncer {
 				else
 					Context.currentPos().error('unknown id ' + id);	
 		}
-	#end
+	#else
 	static public function makeOuter<A>(a:A):Bouncer 
 		return null;
-	
+	#end
 	macro public function andBounce(ethis:Expr, id:Int) {
 		return
 			switch (ethis.expr) {

@@ -6,10 +6,11 @@ package tink.macro;
 	typedef _Exprs = Exprs;
 	typedef _Functions = Functions;
 	typedef _Metadatas = Metadatas;
-	typedef _Bouncer = tink.macro.helpers.Bouncer;
+	typedef _Bouncer = Bouncer;
 	typedef _Types = Types;
 	typedef _Binops = Ops.Binary;
 	typedef _Unops = Ops.Unary;
+	typedef _Outcomes = tink.core.Outcome.OutcomeTools;
 #end
 class Tools {
 	static var idCounter = 0;	
