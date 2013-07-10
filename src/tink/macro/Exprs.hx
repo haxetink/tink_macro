@@ -43,7 +43,7 @@ class Exprs {
 				if (Reflect.hasField(rules, s)) 
 					Reflect.field(rules, s)
 				else if (s.startsWith('tmp')) {
-					// Reflect.setField(rules, s, MacroTools.tempName(String, '__tink' + s.substr(3)));
+					Reflect.setField(rules, s, Tools.tempName(String, '__tink' + s.substr(3)));
 					replace(s);
 				}
 				else s;
