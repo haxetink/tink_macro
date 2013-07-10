@@ -229,11 +229,11 @@ class Exprs {
 				}
 	}
 
-	static public function map(source:Expr, f:Expr->Array<VarDecl>->Expr, ctx:Array<VarDecl>, ?pos:Position):Expr {
+	static public function typedMap(source:Expr, f:Expr->Array<VarDecl>->Expr, ctx:Array<VarDecl>, ?pos:Position):Expr {
 		if (ctx == null) ctx = [];
 		
 		function rec(e, ?inner)
-			return map(e, f, inner == null ? ctx : inner, pos);
+			return typedMap(e, f, inner == null ? ctx : inner, pos);
 		if (source == null || source.expr == null) return source;
 		var mappedSource = f(source, ctx);
 		if (mappedSource != source) return mappedSource;
@@ -354,7 +354,7 @@ class Exprs {
 				var ret = [];
 				for (v in vars)
 				{
-					var vExpr = v.expr == null ? null : map(v.expr, f, ctx);
+					var vExpr = v.expr == null ? null : typedMap(v.expr, f, ctx);
 					if (v.type == null && vExpr != null)
 						v.type = vExpr.typeof(ctx).sure().toComplex();
 					ctx.push({ name:v.name, expr:null, type:v.type });
@@ -370,7 +370,7 @@ class Exprs {
 	static public function typedMapArray(source:Array<Expr>, f:Expr->Array<VarDecl>->Expr, ctx:Array<VarDecl>, ?pos) {
 		var ret = [];
 		for (e in source)
-			ret.push(map(e, f, ctx, pos));
+			ret.push(typedMap(e, f, ctx, pos));
 		return ret;
 	}
 	
