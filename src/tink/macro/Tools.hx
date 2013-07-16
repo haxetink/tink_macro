@@ -3,6 +3,7 @@ package tink.macro;
 #if macro
 	import haxe.macro.Context;
 	typedef _Positions = Positions;
+	typedef _ExprTools = haxe.macro.ExprTools;
 	typedef _Exprs = Exprs;
 	typedef _Functions = Functions;
 	typedef _Metadatas = Metadatas;
