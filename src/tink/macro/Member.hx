@@ -176,6 +176,7 @@ abstract Member(Field) from Field to Field {
 				}
 			}
 		}
-		this.access.push(add);
+		if (add != null)
+			this.access.push(add);
 	}
 }
