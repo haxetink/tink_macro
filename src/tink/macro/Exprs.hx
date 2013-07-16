@@ -452,12 +452,6 @@ class Exprs {
 	static public inline function resolve(s:String, ?pos) 
 		return drill(s.split('.'), pos);
 	
-	// static public function lazyType(expr:Expr, ?locals) {
-	// 	return (function () {
-	// 		return typeof(expr, locals).sure();
-	// 	}).lazyComplex();
-	// }
-	
 	static public function typeof(expr:Expr, ?locals) {
 		return
 			try {
