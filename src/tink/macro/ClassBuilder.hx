@@ -14,19 +14,19 @@ class ClassBuilder {
 	var memberList:Array<Member>;
 	var macros:Map<String,Field>;
 	var constructor:Null<Constructor>;
-	var localClass:ClassType;
+	public var target(default, null):ClassType;//TODO: this could be lazy
 	var superFields:Map<String,Bool>;
 	
 	public function new() { 
 		this.memberMap = new Map();
 		this.memberList = [];
 		this.macros = new Map();
-		this.localClass = Context.getLocalClass().get();
+		this.target = Context.getLocalClass().get();
 		
-		switch (localClass.kind) {
+		switch (target.kind) {
 			case KAbstractImpl(a):
 				//TODO: remove this whole workaround
-				var meta = localClass.meta;
+				var meta = target.meta;
 				for (tag in a.get().meta.get())
 					if (!meta.has(tag.name)) 
 						meta.add(tag.name, tag.params, tag.pos);					
@@ -46,7 +46,7 @@ class ClassBuilder {
 	
 	public function getConstructor():Constructor {
 		if (constructor == null) 
-			if (localClass.superClass != null && localClass.superClass.t.get().constructor != null) {
+			if (target.superClass != null && target.superClass.t.get().constructor != null) {
 				try {
 					var ctor = Context.getLocalClass().get().superClass.t.get().constructor.get();
 					var func = Context.getTypedExpr(ctor.expr()).getFunction().sure();
@@ -75,7 +75,7 @@ class ClassBuilder {
 		return this.constructor == null;
 		
 	public function export(?verbose):Array<Field> {
-		var ret = (constructor == null || localClass.isInterface) ? [] : [constructor.toHaxe()];
+		var ret = (constructor == null || target.isInterface) ? [] : [constructor.toHaxe()];
 		for (member in memberList) {
 			if (member.isBound)
 				switch (member.kind) {//TODO: this seems like an awful place for a cleanup. If all else fails, this should go into a separate plugin (?)
@@ -101,12 +101,12 @@ class ClassBuilder {
 	
 	public function hasOwnMember(name:String):Bool
 		return 
-			macros.exists(name) || (memberMap.exists(name));
+			macros.exists(name) || memberMap.exists(name);
 	
 	public function hasSuperField(name:String):Bool {
 		if (superFields == null) {
 			superFields = new Map();
-			var cl = localClass.superClass;
+			var cl = target.superClass;
 			while (cl != null) {
 				var c = cl.t.get();
 				for (f in c.fields.get())
