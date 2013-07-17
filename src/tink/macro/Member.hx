@@ -98,7 +98,7 @@ abstract Member(Field) from Field to Field {
 		return param;
 	}
 	inline function get_isStatic() return hasAccess(AStatic);
-	inline function set_isStatic(param) {
+	function set_isStatic(param) {
 		changeAccess(
 			param ? AStatic : null, 
 			param ? null : AStatic
@@ -116,7 +116,7 @@ abstract Member(Field) from Field to Field {
 				}
 		return null;
 	}
-	inline function set_isPublic(param) {
+	function set_isPublic(param) {
 		if (param == null) {
 			changeAccess(null, APublic);
 			changeAccess(null, APrivate);
@@ -138,7 +138,7 @@ abstract Member(Field) from Field to Field {
 				}
 		return null;
 	}
-	inline function set_isBound(param) {
+	function set_isBound(param) {
 		if (param == null) {
 			changeAccess(null, AInline);
 			changeAccess(null, ADynamic);
