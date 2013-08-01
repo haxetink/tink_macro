@@ -214,7 +214,7 @@ class Types {
 			TPath({
 				pack : ['haxe','macro'],
 				name : 'MacroType',
-				params : [TPExpr('tink.macro.tools.TypeTools.getType'.resolve().call([register(f).toExpr()]))],
+				params : [TPExpr('tink.macro.Types.getType'.resolve().call([register(f).toExpr()]))],
 				sub : null,				
 			});
 	}
