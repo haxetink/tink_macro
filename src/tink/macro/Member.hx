@@ -116,6 +116,7 @@ abstract Member(Field) from Field to Field {
 				}
 		return null;
 	}
+	
 	function set_isPublic(param) {
 		if (param == null) {
 			changeAccess(null, APublic);
@@ -157,6 +158,7 @@ abstract Member(Field) from Field to Field {
 				if (x == a) return true;
 		return false;
 	}
+	
 	function changeAccess(add:Access, remove:Access) {
 		var i = 0;
 		if (this.access == null)
