@@ -2,7 +2,7 @@ package tink.macro;
 
 import haxe.macro.Expr;
 
-using tink.macro.Tools;
+using tink.Macro;
 
 class Constructor {
 	var oldStatements:Array<Expr>;
@@ -12,6 +12,7 @@ class Constructor {
 	var afterArgs:Array<FunctionArg>;
 	var pos:Position;
 	var onGenerateHooks:Array<Function->Void>;
+	var superCall:Expr;
 	public var isPublic:Null<Bool>;
 	
 	public function new(f:Function, ?isPublic:Null<Bool> = null, ?pos:Position) {
@@ -43,6 +44,12 @@ class Constructor {
 						default: oldStatements = [f.expr]; 
 					}
 			}
+		superCall = 
+			if (oldStatements.length == 0) [].toBlock();
+			else switch oldStatements[0] {
+				case macro super($a{_}): oldStatements.shift();
+				default: [].toBlock();
+			}
 	}
 	public function addStatement(e:Expr, ?prepend) 
 		if (prepend)
@@ -68,7 +75,7 @@ class Constructor {
 			isPublic = true;
 	
 	function toBlock() 
-		return nuStatements.concat(oldStatements).toBlock(pos);
+		return [superCall].concat(nuStatements).concat(oldStatements).toBlock(pos);
 	
 	public function onGenerate(hook) 
 		this.onGenerateHooks.push(hook);

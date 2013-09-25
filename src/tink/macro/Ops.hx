@@ -2,8 +2,7 @@ package tink.macro;
 
 import haxe.macro.Expr;
 
-using tink.core.Outcome;
-using tink.macro.Tools;
+using tink.Macro;
 
 class Binary {
 	static public function get(o:Binop, e:Expr) 
@@ -29,11 +28,10 @@ class Binary {
 	
 	static public inline function make(op:Binop, e1:Expr, e2:Expr, ?pos) 
 		return Exprs.binOp(e1, e2, op, pos);
-	}
-
+}
 
 class Unary {
-	static public function get(o:Unop, e:Expr, postfix:Bool = false) {
+	static public function get(o:Unop, e:Expr, postfix:Bool = false)
 		return
 			switch e.expr {
 				case EUnop(op, postFix, arg):
@@ -46,8 +44,8 @@ class Unary {
 				default: 
 					e.pos.makeFailure('expected unary operation ' + o);
 			}
-	}
-	static public function getUnop(e:Expr) {
+
+	static public function getUnop(e:Expr)
 		return
 			switch e.expr {
 				case EUnop(op, postFix, arg):
@@ -55,8 +53,7 @@ class Unary {
 				default:
 					e.pos.makeFailure('expected unary operation but found ' + Type.enumConstructor(e.expr));					
 			}
-	}
-	static public function make(op:Unop, e:Expr, ?postFix = false, ?pos) {
+
+	static public function make(op:Unop, e:Expr, ?postFix = false, ?pos)
 		return EUnop(op, postFix, e).at(pos);
-	}
 }

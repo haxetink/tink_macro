@@ -24,15 +24,9 @@ typedef ParamSubst = {
 
 class Exprs {
 
-	static public inline function is(e:Expr, c:ComplexType) {
+	static public inline function is(e:Expr, c:ComplexType)
 		return ECheckType(e, c).at(e.pos).typeof().isSuccess();
-	}
-	static var annotCounter = 0;
-	static var annotations = new Map<Int,Dynamic>();
-	static public function tag<D>(e:Expr, data:D) {
-		annotations.set(annotCounter, data);
-		return [(annotCounter++).toExpr(e.pos), e].toBlock(e.pos);
-	}
+	
 	static public function finalize(e:Expr, ?nuPos:Position, ?rules:Dynamic<String>, ?skipFields = false, ?callPos:PosInfos) {
 		if (nuPos == null)
 			nuPos = Context.currentPos();
@@ -43,7 +37,7 @@ class Exprs {
 				if (Reflect.hasField(rules, s)) 
 					Reflect.field(rules, s)
 				else if (s.startsWith('tmp')) {
-					Reflect.setField(rules, s, Tools.tempName(String, '__tink' + s.substr(3)));
+					Reflect.setField(rules, s, Macro.tempName(String, '__tink' + s.substr(3)));
 					replace(s);
 				}
 				else s;
@@ -80,14 +74,8 @@ class Exprs {
 				}
 		});
 	}
-	static public function untag<D>(e:Expr):{data:D, e:Expr } {
-		return
-			switch (e.expr) {
-				case EBlock(exprs): { e: exprs[1], data: annotations.get(exprs[0].getInt().sure()) };
-				default: e.reject();
-			}
-	}
-	static public function withPrivateAccess(e:Expr) {
+	
+	static public function withPrivateAccess(e:Expr)
 		return 
 			e.transform(function (e:Expr) 
 				return
@@ -97,13 +85,10 @@ class Exprs {
 						default: e;
 					}
 			);
-	}
-	static public function getPrivate(e:Expr, field:String, ?pos) {
-		return EMeta( { name: ':privateAccess', params: [], pos: pos }, e.field(field, pos)).at(pos);
-	}
-	static public function partial<D>(c:ComplexType, data:D, ?pos) 
-		return ECheckType(macro null, c).at(pos).tag(data);
-	
+			
+	static public function getPrivate(e:Expr, field:String, ?pos:Position)
+		return macro @:pos(pos.sanitize()) @:privateAccess $e.$field;
+
 	static public function substitute(source:Expr, vars:Dynamic<Expr>, ?pos) 
 		return 
 			transform(source, function (e:Expr) {
@@ -120,8 +105,10 @@ class Exprs {
 	
 	static public inline function ifNull(e:Expr, fallback:Expr) 
 		return
-			if (e.getIdent().equals('null')) fallback;
-			else e;
+			switch e {
+				case macro null: fallback;
+				default: e;
+			}
 	
 	static public function substParams(source:Expr, subst:ParamSubst, ?pos):Expr 
 		return crawl(
@@ -130,10 +117,8 @@ class Exprs {
 			function (c:ComplexType) 
 				return
 					switch (c) {
-						case TPath(p):
-							if (p.pack.length == 0 && subst.exists(p.name)) 
-								subst.get(p.name);
-							else c;
+						case TPath({ pack: [], name: name }) if (subst.exists(name)):
+							subst.get(name);
 						default: c;
 					}
 			, pos);
@@ -141,35 +126,32 @@ class Exprs {
 	static public function transform(source:Expr, transformer:Expr->Expr, ?pos):Expr 
 		return crawl(source, transformer, function (t) return t, pos);
 	
-	static function crawlArray(a:Array<Dynamic>, transformer:Expr->Expr, retyper:ComplexType-> ComplexType, pos:Position):Array<Dynamic> {
-		if (a == null) return a;
-		var ret = [];
-		for (v in a)
-			ret.push(crawl(v, transformer, retyper, pos));
-		return ret;
-	}
+	static function crawlArray(a:Array<Dynamic>, transformer:Expr->Expr, retyper:ComplexType-> ComplexType, pos:Position):Array<Dynamic>
+		return
+			if (a == null) a;
+			else 
+				[for (v in a)
+					crawl(v, transformer, retyper, pos)
+				];
+			
 	static public function getIterType(target:Expr) 
 		return 
-			(macro {
+			(macro @:pos(target.pos) {
 				var t = null,
 					target = $target;
 				for (i in target)
 					t = i;
 				t;
-			}).finalize(target.pos).typeof();
+			}).typeof();
 	
 	static public function yield(e:Expr, yielder:Expr->Expr):Expr {
 		inline function rec(e) 
 			return yield(e, yielder);
 		return
-			if (e == null) null;
-			else if (e.expr == null) e;
+			if (e == null || e.expr == null) e;
 			else switch (e.expr) {
 				case EVars(_):
-					(macro @:pos(e.pos) var x = { var x = 5; } ).typeof().sure();
-					throw 'unreachable';//the above should cause an error
-				case EParenthesis(e):
-					EParenthesis(rec(e)).at(e.pos);
+					e.pos.error('Variable declaration not supported here');
 				case EBlock(exprs) if (exprs.length > 0): 
 					exprs = exprs.copy();
 					exprs.push(rec(exprs.pop()));
@@ -186,12 +168,6 @@ class Exprs {
 					EFor(it, rec(expr)).at(e.pos);
 				case EWhile(cond, body, normal):
 					EWhile(cond, rec(body), normal).at(e.pos);
-				case ECheckType(e, t):
-					ECheckType(rec(e), t).at(e.pos);
-				case EMeta(s, e):
-					EMeta(s, rec(e)).at(e.pos);
-				case EUntyped(e):
-					EUntyped(rec(e)).at(e.pos);
 				case EBreak, EContinue: e;
 				case EBinop(OpArrow, value, jump) if (jump.expr == EContinue || jump.expr == EBreak):
 					macro @:pos(e.pos) {
@@ -202,7 +178,7 @@ class Exprs {
 			}
 	}
 			
-	static function crawl(target:Dynamic, transformer:Expr->Expr, retyper:ComplexType->ComplexType, pos:Position):Dynamic {
+	static function crawl(target:Dynamic, transformer:Expr->Expr, retyper:ComplexType->ComplexType, pos:Position):Dynamic
 		return
 			if (Std.is(target, Array)) 
 				crawlArray(target, transformer, retyper, pos);
@@ -210,13 +186,13 @@ class Exprs {
 				switch (Inspect.typeof(target)) {
 					case TNull, TInt, TFloat, TBool, TFunction, TUnknown, TClass(_): target;
 					case TEnum(e): 
-						if (Inspect.getEnum(target) == ComplexType) return retyper(target);
-						else {
+						// if (Inspect.getEnum(target) == ComplexType) return retyper(target);
+						// else {
 							var ret:Dynamic = Inspect.createEnumIndex(e, Inspect.enumIndex(target), crawlArray(Inspect.enumParameters(target), transformer, retyper, pos));
 							return
 								if (Inspect.getEnum(ret) == ComplexType) retyper(ret);
 								else ret;							
-						}
+						// }
 					case TObject:
 						var ret:Dynamic = { };
 						for (field in Reflect.fields(target))
@@ -227,13 +203,17 @@ class Exprs {
 						}
 						ret;
 				}
-	}
-
+	
+	//TODO: this whole thing needs an overhaul
 	static public function typedMap(source:Expr, f:Expr->Array<VarDecl>->Expr, ctx:Array<VarDecl>, ?pos:Position):Expr {
 		if (ctx == null) ctx = [];
 		
 		function rec(e, ?inner)
 			return typedMap(e, f, inner == null ? ctx : inner, pos);
+		
+		function def(name:String, ?e:Expr, ?t:ComplexType)
+			return { name: name, expr: e, type: t };
+		
 		if (source == null || source.expr == null) return source;
 		var mappedSource = f(source, ctx);
 		if (mappedSource != source) return mappedSource;
@@ -260,10 +240,10 @@ class Exprs {
 			case ENew(t, params): ENew(t, params.typedMapArray(f, ctx, pos));
 			case EBinop(op, e1, e2): EBinop(op, rec(e1), rec(e2));
 			case EObjectDecl(fields):
-				var newFields = [];
-				for (field in fields)
-					newFields.push( { field:field.field, expr:rec(field.expr) } );
-				EObjectDecl(newFields);
+				EObjectDecl([for (field in fields) { 
+					field: field.field, 
+					expr: rec(field.expr) 
+				}]);
 			case ESwitch(expr, cases, def):
 				var newCases = cases;
 				newCases = [];
@@ -309,12 +289,11 @@ class Exprs {
 							newCases.push( { expr: rec(c.expr, innerCtx), values: caseValues } );
 						}
 					case _:
-						for (c in cases) {
-							var caseValues = [];
-							for (v in c.values) 
-								caseValues.push(rec(v));
-							newCases.push( { expr: rec(c.expr), values: caseValues } );
-						}
+						for (c in cases) 
+							newCases.push({
+								expr: rec(c.expr), 
+								values: [for (v in c.values) rec(v)] 
+							});
 				}
 				ESwitch(expr, newCases, rec(def));
 			case EFor(it, expr):
@@ -336,24 +315,21 @@ class Exprs {
 						Context.error("Internal error in " + mappedSource.toString(), mappedSource.pos);
 				}
 			case ETry(e, catches):
-				var newCatches = [];
-				for (c in catches)
-				{
-					var innerCtx = ctx.copy();
-					innerCtx.push({ name:c.name, expr: null, type:c.type });
-					newCatches.push({name:c.name, expr:rec(c.expr, innerCtx), type:c.type});
-				}
-				ETry(rec(e), newCatches);
+				ETry(
+					rec(e), 
+					[for (c in catches) {
+						name: c.name, 
+						expr: rec(c.expr, ctx.concat([def(c.name, c.type)])), 
+						type: c.type
+					}]
+				);
 			case EFunction(name, func):
-				var innerCtx = ctx.copy();
-				for (arg in func.args)
-					innerCtx.push( { name:arg.name, type:arg.type, expr:null } );
-				func.expr = rec(func.expr, innerCtx);
+				func.expr = rec(func.expr, ctx.concat([for (arg in func.args) def(arg.name, arg.type)]));
 				EFunction(name, func);
 			case EVars(vars):
+				//This is incorrect. When declaring multiple variables, they are declared in the previous context "at once"
 				var ret = [];
-				for (v in vars)
-				{
+				for (v in vars) {
 					var vExpr = v.expr == null ? null : typedMap(v.expr, f, ctx);
 					if (v.type == null && vExpr != null)
 						v.type = vExpr.typeof(ctx).sure().toComplex();
@@ -367,22 +343,16 @@ class Exprs {
 		return ret.at(pos == null ? source.pos : pos);
 	}
 	
-	static public function typedMapArray(source:Array<Expr>, f:Expr->Array<VarDecl>->Expr, ctx:Array<VarDecl>, ?pos) {
-		var ret = [];
-		for (e in source)
-			ret.push(typedMap(e, f, ctx, pos));
-		return ret;
-	}
+	static public function typedMapArray(source:Array<Expr>, f:Expr->Array<VarDecl>->Expr, ctx:Array<VarDecl>, ?pos) 
+		return [for (e in source) typedMap(e, f, ctx, pos)];
 	
 	static public inline function iterate(target:Expr, body:Expr, ?loopVar:String = 'i', ?pos:Position) 
 		return EFor(EIn(loopVar.resolve(pos), target).at(pos), body).at(pos);
 	
-	static public function toFields(object:Dynamic<Expr>, ?pos:Position) {
-		var args = [];
-		for (field in Reflect.fields(object))
-			args.push( { field:field, expr: untyped Reflect.field(object, field) } );
-		return EObjectDecl(args).at(pos);
-	}
+	static public function toFields(object:Dynamic<Expr>, ?pos:Position)
+		return EObjectDecl([for (field in Reflect.fields(object))
+			{ field:field, expr: untyped Reflect.field(object, field) }
+		]).at(pos);
 
 	static public inline function log(e:Expr, ?pos:PosInfos):Expr {
 		haxe.Log.trace(e.toString(), pos);
@@ -393,13 +363,12 @@ class Exprs {
 		return e.pos.error(reason);
 	
 	static public inline function toString(e:Expr):String 
-		// return tink.macro.tools.Printer.printExpr('', e);
 		return new haxe.macro.Printer().printExpr(e);
 		
 	static public inline function at(e:ExprDef, ?pos:Position) 
 		return {
 			expr: e,
-			pos: pos.getPos()
+			pos: pos.sanitize()
 		};
 	
 	static public inline function instantiate(s:String, ?args:Array<Expr>, ?params:Array<TypeParam>, ?pos:Position) 
@@ -427,7 +396,7 @@ class Exprs {
 		return ECall(e, params == null ? [] : params).at(pos);
 		
 	static public inline function toExpr(v:Dynamic, ?pos:Position) 
-		return Context.makeExpr(v, pos.getPos());
+		return Context.makeExpr(v, pos.sanitize());
 		
 	static public inline function toArray(exprs:Iterable<Expr>, ?pos) 
 		return EArrayDecl(exprs.array()).at(pos);
@@ -452,7 +421,7 @@ class Exprs {
 	static public inline function resolve(s:String, ?pos) 
 		return drill(s.split('.'), pos);
 	
-	static public function typeof(expr:Expr, ?locals) {
+	static public function typeof(expr:Expr, ?locals)
 		return
 			try {
 				if (locals != null) 
@@ -466,18 +435,14 @@ class Exprs {
 			catch (e:Dynamic) {
 				expr.pos.makeFailure(e);
 			}				
-	}	
+		
 	static public inline function cond(cond:Expr, cons:Expr, ?alt:Expr, ?pos) 
 		return EIf(cond, cons, alt).at(pos);
 		
 	static public function isWildcard(e:Expr) 
 		return 
-			switch(e.expr) {
-				case EConst(c):
-					switch (c) {
-						case CIdent(s): s == '_';
-						default: false;
-					}
+			switch e {
+				case macro _: true;
 				default: false;
 			}
 			
@@ -538,86 +503,4 @@ class Exprs {
 	static inline var NOT_A_STRING = "string constant expected";
 	static inline var NOT_A_NAME = "name expected";
 	static inline var NOT_A_FUNCTION = "function expected";
-	static inline var EMPTY_EXPRESSION = "expression expected";	
-	
-	static public function match(expr:Expr, pattern:Expr) 
-		return new Matcher().match(expr, pattern);
-	
-}
-
-private class Matcher {
-	var exprs:Dynamic<Expr>;
-	var strings:Dynamic<String>;
-	public function new() {
-		this.exprs = {};
-		this.strings = {};
-	}
-	public function match(expr:Expr, pattern:Expr) {
-		return
-			try {
-				recurse(expr, pattern);
-				Success({ 
-					exprs: exprs, 
-					strings: strings,//TODO: deprecate
-					names: strings,
-					pos: expr.pos
-				});
-			}
-			catch (e:String) Failure(e);
-	}
-	function matchObject(x1:Dynamic, x2:Dynamic) {
-		if (x2 == null) throw Std.string(x2) + ' expected but found ' + Std.string(x1);
-		for (f in Reflect.fields(x1)) 
-			matchAny(Reflect.field(x1, f), Reflect.field(x2, f));
-	}
-	function matchString(s1:String, s2:String) {
-		if (s2 == null) 
-			equal(s1, s2);
-		else if (s2.startsWith('eval__') || s2.startsWith('NAME__')) 
-			Reflect.setField(strings, s2.substr(6), s1);
-		else
-			equal(s1, s2);
-	}
-	function equal(x1:Dynamic, x2:Dynamic) {
-		if (x1 != x2) throw Std.string(x2) + ' expected but found ' + Std.string(x1);
-	}
-	function matchAny(x1:Dynamic, x2:Dynamic) {
-		switch (Inspect.typeof(x1)) {
-			case TNull, TInt, TFloat, TBool: equal(x1, x2);
-			case TObject: 
-				if (Std.is(x1.expr, ExprDef)) recurse(x1, x2);
-				else matchObject(x1, x2);
-			case TFunction: 
-				throw 'unexpected';
-			case TClass(c):
-				if (c == Array) matchArray(x1, x2);
-				else if (c == String) matchString(x1, x2);
-				else throw 'unexpected';
-			case TEnum(_): matchEnum(x1, x2);
-			case TUnknown:
-		}
-	}
-	function matchArray(a1:Array<Dynamic>, a2:Array<Dynamic>) {
-		equal(a1.length, a2.length);
-		for (i in 0...a1.length)
-			matchAny(a1[i], a2[i]);
-	}
-	function matchEnum(e1:Dynamic, e2:Dynamic) {
-		equal(Inspect.enumConstructor(e1), Inspect.enumConstructor(e2));
-		matchArray(Inspect.enumParameters(e1), Inspect.enumParameters(e2));
-	}
-	function recurse(expr:Expr, pattern:Expr) {
-		if (pattern == null) throw 'nothing expected but found ' + expr.toString();
-		switch (pattern.getIdent()) {
-			case Success(s):
-				if (s.startsWith('$')) 
-					Reflect.setField(exprs, s.substr(1), expr); 
-				else if (s.startsWith('EXPR__')) 
-					Reflect.setField(exprs, s.substr(6), expr); 
-				else
-					matchEnum(expr.expr, pattern.expr);
-			default: 
-				matchEnum(expr.expr, pattern.expr);
-		}
-	}
 }

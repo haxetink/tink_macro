@@ -15,22 +15,24 @@ using tink.core.Outcome;
 class Types {
 	static var types = new Map<Int,Void->Type>();
 	static var idCounter = 0;
-	macro static public function getType(id:Int):Type {
+	
+	macro static public function getType(id:Int):Type
 		return types.get(id)();
-	}
-	static public function getID(t:Type, ?reduced = true) {
-		if (reduced)
-			t = reduce(t);
-		return
-			switch (t) {
-				case TAbstract(t, _): t.toString();
-				case TInst(t, _): t.toString();
-				case TEnum(t, _): t.toString();
-				case TType(t, _): t.toString();
-				default: null;
-			}
-	}
-	static public function accessToName(v:VarAccess, ?read = true) {
+	
+	static public function getID(t:Type, ?reduced = true) 
+		return 
+			if (reduced)
+				getID(reduce(t), false);
+			else
+				switch (t) {
+					case TAbstract(t, _): t.toString();
+					case TInst(t, _): t.toString();
+					case TEnum(t, _): t.toString();
+					case TType(t, _): t.toString();
+					default: null;
+				}
+	
+	static public function accessToName(v:VarAccess, ?read = true) 
 		return
 			switch (v) {
 				case AccNormal, AccInline: 'default';
@@ -40,7 +42,7 @@ class Types {
 				default:
 					throw 'not implemented';
 			}		
-	}
+
 	static function getDeclaredFields(t:ClassType, out:Array<ClassField>, marker:Map<String,Bool>) {
 		for (field in t.fields.get()) 
 			if (!marker.exists(field.name)) {
@@ -50,9 +52,8 @@ class Types {
 		if (t.isInterface)
 			for (t in t.interfaces)
 				getDeclaredFields(t.t.get(), out, marker);
-		else 
-			if (t.superClass != null)
-				getDeclaredFields(t.superClass.t.get(), out, marker);		
+		else if (t.superClass != null)
+			getDeclaredFields(t.superClass.t.get(), out, marker);		
 	}
 	
 	static var fieldsCache = new Map();
@@ -80,7 +81,7 @@ class Types {
 									switch (member.typeof()) {
 										case Success(t): t;
 										case Failure(f):
-											switch (reduce(field.type)) {
+											switch reduce(field.type) {
 												case TFun(args, _):
 													var fArgs = [],
 														fParams = [];
@@ -144,23 +145,23 @@ class Types {
 	
 	static public function isSubTypeOf(t:Type, of:Type, ?pos) 
 		return 
-			ECheckType(ECheckType('null'.resolve(), toComplex(t)).at(pos), toComplex(of)).at(pos).typeof();
+			ECheckType(ECheckType(macro null, toComplex(t)).at(pos), toComplex(of)).at(pos).typeof();
 	
 	static public function isDynamic(t:Type) 
-		return switch(reduce(t)) {
+		return switch reduce(t) {
 			case TDynamic(_): true;
 			default: false;
 		}
 	
-	static public function toType(t:ComplexType, ?pos) 
-		return [
-			'_'.define(t, pos),
-			'_'.resolve(pos)
-		].toBlock(pos).typeof();
+	static public function toType(t:ComplexType, ?pos:Position) 
+		return (macro @:pos(pos.sanitize()) {
+			var v:$t = null;
+			v;
+		}).typeof();
 	
-	static public inline function instantiate(t:TypePath, ?args, ?pos) {
+	static public inline function instantiate(t:TypePath, ?args, ?pos) 
 		return ENew(t, args == null ? [] : args).at(pos);
-	}
+	
 	static public function asTypePath(s:String, ?params):TypePath {
 		var parts = s.split('.');
 		var name = parts.pop(),
@@ -177,39 +178,38 @@ class Types {
 			sub: sub
 		};
 	}
+	
 	static public inline function asComplexType(s:String, ?params) 
 		return TPath(asTypePath(s, params));
 	
 	static public inline function reduce(type:Type, ?once) 
 		return Context.follow(type, once);
 	
-	static public function isVar(field:ClassField) {
+	static public function isVar(field:ClassField) 
 		return switch (field.kind) {
 			case FVar(_, _): true;
 			default: false;
 		}
-	}
+	
 	static public function register(type:Void->Type):Int {
-		var id = idCounter++;
-		types.set(id, type);
-		return id;
+		types.set(idCounter, type);
+		return idCounter++;
 	}
-	static function paramsToComplex(params:Array<Type>):Array<TypeParam> {
-		var ret = [];
-		for (p in params) 
-			ret.push(TPType(toComplex(p, true)));
-		return ret;
-	}
+	
+	static function paramsToComplex(params:Array<Type>):Array<TypeParam> 
+		return [for (p in params) TPType(toComplex(p))];
+	
 	static function baseToComplex(t:BaseType, params:Array<Type>) 
 		return asComplexType(t.module + '.' + t.name, paramsToComplex(params));
 	
-	static public function toComplex(type:Type, ?pretty = false):ComplexType {
+	static public function toComplex(type:Type):ComplexType {
 		var ret = haxe.macro.TypeTools.toComplexType(type);
 		if (ret == null)
 			ret = lazyComplex(function () return type);	
 		return ret;
 	}
-	static public function lazyComplex(f:Void->Type) {
+	
+	static public function lazyComplex(f:Void->Type)
 		return
 			TPath({
 				pack : ['haxe','macro'],
@@ -217,5 +217,4 @@ class Types {
 				params : [TPExpr('tink.macro.Types.getType'.resolve().call([register(f).toExpr()]))],
 				sub : null,				
 			});
-	}
 }

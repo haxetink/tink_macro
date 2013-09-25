@@ -13,8 +13,8 @@ abstract PhysicalType<T>(Either<Class<T>, Enum<T>>) {
 	public function toString() 
 		return 
 			switch this {
-				case Left(c): return Type.getClassName(c);
-				case Right(e): return Type.getEnumName(e);
+				case Left(c): Type.getClassName(c);
+				case Right(e): Type.getEnumName(e);
 			}
 			
 	public function check(v:T) 
@@ -37,10 +37,10 @@ class Base extends TestCase {
 		currentTest.posInfos = c;
 		throw currentTest;
 	}
-	function throws<A>(f:Void->Void, t:PhysicalType<A>, ?check:A->Bool, ?pos:PosInfos):Void {
+	function throws<A>(f:Void->Void, ?t:PhysicalType<A>, ?check:A->Bool, ?pos:PosInfos):Void {
 		try f()
 		catch (e:Dynamic) {
-			if (!t.check(e)) fail('Exception $e not of type $t', pos);
+			if (t != null && !t.check(e)) fail('Exception $e not of type $t', pos);
 			if (check != null && !check(e)) fail('Exception $e does not satisfy condition', pos);
 			assertTrue(true);
 			return;

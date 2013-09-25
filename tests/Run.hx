@@ -1,24 +1,28 @@
 package ;
 
-#if !macro
-	import haxe.unit.TestCase;
-	import haxe.unit.TestRunner;
-	import neko.Lib;
-#else
-	import tink.macro.Member;
-	import tink.macro.Constructor;
-	import tink.macro.ClassBuilder;
-	using tink.macro.Tools;
-#end
+import haxe.unit.*;
 
 class Run {
 	#if !macro 
-		static var tests:Array<TestCase> = [];
-		static function main() {
-			test();//it compiles!!!
-		}
+	static function main() 
+		test();//It compiles ...
+	#else
+	static var cases:Array<TestCase> = [
+		new Exprs(),
+		new Types(),
+		new Positions(),
+	];
 	#end
 	macro static function test() {
-		return macro null;
+		var runner = new TestRunner();
+		for (c in cases)
+			runner.add(c);
+		runner.run();
+		if (!runner.result.success)
+			haxe.macro.Context.error(runner.result.toString(), haxe.macro.Context.currentPos());
+		
+		return macro {
+			trace('Let\'s ship it!');
+		}
 	}
 }
