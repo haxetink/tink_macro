@@ -3,13 +3,14 @@ package tink.macro;
 import haxe.macro.Context;
 import haxe.macro.Expr;
 import tink.core.Error;
+
 using tink.macro.Positions;
 using tink.core.Outcome;
 
 class Positions {
 	static public function getOutcome<D, F>(pos:Position, outcome:Outcome<D, F>):D
 		return 
-			switch (outcome) {
+			switch outcome {
 				case Success(d): d;
 				case Failure(f): pos.error(f);
 			}

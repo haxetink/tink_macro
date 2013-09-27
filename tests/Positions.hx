@@ -2,6 +2,7 @@ package ;
 
 import haxe.macro.Context;
 import haxe.macro.Expr;
+
 using tink.Macro;
 
 class Positions extends Base {

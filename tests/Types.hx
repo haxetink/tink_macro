@@ -2,6 +2,7 @@ package ;
 
 import haxe.macro.Expr;
 import haxe.macro.Context;
+
 using tink.Macro;
 
 class Types extends Base {
@@ -23,8 +24,8 @@ class Types extends Base {
 	}	
 	
 	function testFields() {
-		var iterator = type(macro : haxe.ds.StringMap<Arrayish>).getFields(true).sure().filter(function (c) return c.name == 'iterator')[0];
-		var expected = type(macro : Void -> Iterator<Arrayish>);
+		var expected = type(macro : Void -> Iterator<Arrayish>),
+			iterator = type(macro : haxe.ds.StringMap<Arrayish>).getFields(true).sure().filter(function (c) return c.name == 'iterator')[0];
 		
 		assertSuccess(iterator.type.isSubTypeOf(expected));
 		assertSuccess(expected.isSubTypeOf(iterator.type));
@@ -43,4 +44,3 @@ class Types extends Base {
 		Macro.pos().makeBlankType().toString();
 	}
 }
-
