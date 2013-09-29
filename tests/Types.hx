@@ -3,7 +3,7 @@ package ;
 import haxe.macro.Expr;
 import haxe.macro.Context;
 
-using tink.Macro;
+using tink.MacroApi;
 
 class Types extends Base {
 	function type(c:ComplexType)
@@ -35,12 +35,12 @@ class Types extends Base {
 		assertSuccess((macro : Int).toType());
 		assertFailure((macro : Tni).toType());
 		function blank()
-			return type(Macro.pos().makeBlankType());
+			return type(MacroApi.pos().makeBlankType());
 		
 		var bool = type(macro : Bool);
 		assertTrue(blank().isSubTypeOf(bool).isSuccess());
 		assertTrue(bool.isSubTypeOf(blank()).isSuccess());
 		
-		Macro.pos().makeBlankType().toString();
+		MacroApi.pos().makeBlankType().toString();
 	}
 }

@@ -1,7 +1,7 @@
 package ;
 
 import haxe.macro.Expr;
-using tink.Macro;
+using tink.MacroApi;
 
 class Exprs extends Base {
 	function exprEq(e1:Expr, e2:Expr) {

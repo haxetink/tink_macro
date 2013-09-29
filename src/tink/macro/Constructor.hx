@@ -2,7 +2,7 @@ package tink.macro;
 
 import haxe.macro.Expr;
 
-using tink.Macro;
+using tink.MacroApi;
 
 class Constructor {
 	var oldStatements:Array<Expr>;
@@ -18,7 +18,7 @@ class Constructor {
 	public function new(f:Function, ?isPublic:Null<Bool> = null, ?pos:Position) {
 		this.nuStatements = [];
 		this.isPublic = isPublic;
-		this.pos = pos.getPos();
+		this.pos = pos.sanitize();
 		
 		this.onGenerateHooks = [];
 		this.args = [];

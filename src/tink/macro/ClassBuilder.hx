@@ -5,7 +5,7 @@ import haxe.macro.Type;
 import haxe.macro.Context;
 import haxe.macro.Printer;
 
-using tink.Macro;
+using tink.MacroApi;
 using Lambda;
 
 class ClassBuilder {

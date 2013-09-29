@@ -3,7 +3,7 @@ package ;
 import haxe.macro.Context;
 import haxe.macro.Expr;
 
-using tink.Macro;
+using tink.MacroApi;
 
 class Positions extends Base {
 	function stringCompare<A>(v1:A, v2:A) 

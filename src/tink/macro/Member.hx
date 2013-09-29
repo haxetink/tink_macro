@@ -1,7 +1,7 @@
 package tink.macro;
 
 import haxe.macro.Expr;
-using tink.Macro;
+using tink.MacroApi;
 
 abstract Member(Field) from Field to Field {
 	static public function prop(name:String, t:ComplexType, pos, ?noread = false, ?nowrite = false):Member {

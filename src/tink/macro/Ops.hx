@@ -2,7 +2,7 @@ package tink.macro;
 
 import haxe.macro.Expr;
 
-using tink.Macro;
+using tink.MacroApi;
 
 class Binary {
 	static public function get(o:Binop, e:Expr) 
