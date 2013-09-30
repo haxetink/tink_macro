@@ -12,7 +12,7 @@ class Positions {
 		return 
 			switch outcome {
 				case Success(d): d;
-				case Failure(f): pos.error(f);
+				case Failure(f): sanitize(pos).error(f);
 			}
 	
 	static public function makeBlankType(pos:Position):ComplexType 
