@@ -46,6 +46,14 @@ abstract Member(Field) from Field to Field {
 				case FFun(f): Success(f);
 				default: pos.makeFailure('Field should be function');
 			}
+			
+	public function getVar(?pure = false) 
+		return
+			switch kind {
+				case FVar(t, e): Success({ get: 'default', set: 'default', type: t, expr: e });
+				case FProp(get, set, t, e) if (!pure): Success({ get: get, set: set, type: t, expr: e });
+				default: pos.makeFailure('Field should be a variable ' + if (pure) '' else 'or property');
+			}
 	
 	public function addMeta(name, ?pos, ?params) {
 		if (this.meta == null)
@@ -65,7 +73,7 @@ abstract Member(Field) from Field to Field {
 					return Success(tag);
 				}
 			}
-		return Failure('missing @$name');
+		return pos.makeFailure('missing @$name');
 	}
 	
 	public function publish() 
