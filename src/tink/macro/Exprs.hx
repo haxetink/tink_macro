@@ -205,7 +205,7 @@ class Exprs {
 				}
 	
 	//TODO: this whole thing needs an overhaul
-	static public function typedMap(source:Expr, f:Expr->Array<VarDecl>->Expr, ctx:Array<VarDecl>, ?pos:Position):Expr {
+	static public function typedMap(source:Expr, f:Expr->Array<VarDecl>->Expr, ?ctx:Array<VarDecl>, ?pos:Position):Expr {
 		if (ctx == null) ctx = [];
 		
 		function rec(e, ?inner)
