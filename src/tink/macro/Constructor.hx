@@ -1,8 +1,14 @@
 package tink.macro;
 
 import haxe.macro.Expr;
-
+import tink.core.Pair;
 using tink.MacroApi;
+
+enum FieldInit {
+	Value(e:Expr);
+	Arg(?t:ComplexType, ?noPublish:Bool);
+	OptArg(?e:Expr, ?t:ComplexType, ?noPublish:Bool);
+}
 
 class Constructor {
 	var oldStatements:Array<Expr>;
@@ -15,7 +21,7 @@ class Constructor {
 	var superCall:Expr;
 	public var isPublic:Null<Bool>;
 	
-	public function new(f:Function, ?isPublic:Null<Bool> = null, ?pos:Position) {
+	public function new(f:Function, ?isPublic:Null<Bool> = null, ?pos:Position, ?meta:Metadata) {
 		this.nuStatements = [];
 		this.isPublic = isPublic;
 		this.pos = pos.sanitize();
@@ -56,19 +62,30 @@ class Constructor {
 			this.nuStatements.unshift(e)
 		else
 			this.nuStatements.push(e);
+	
+	public function addArg(name:String, ?t:ComplexType, ?e:Expr, ?opt = false) 
+		args.push( { name : name, opt : opt || e != null, type : t, value: e } );
+	
+	public function init(name:String, pos:Position, with:FieldInit, ?prepend:Bool) {
+		var e =
+			switch with {
+				case Arg(t, noPublish):
+					if (noPublish != true) 
+						publish();
+					args.push( { name : name, opt : false, type : t } );
+					name.resolve(pos);
+				case OptArg(e, t, noPublish):
+					if (noPublish != true) 
+						publish();
+					args.push( { name : name, opt : true, type : t, value: e } );
+					name.resolve(pos);
+				case Value(e): e;
+			}
 			
-	public function init(name:String, pos:Position, ?e:Expr, ?def:Expr, ?prepend:Bool, ?t:ComplexType) {
-		if (e == null) {
-			e = name.resolve(pos);
-			args.push( { name : name, opt : def != null, type : t, value : def } );
-			if (isPublic == null) 
-				isPublic = true;
-		}
-		if (t != null)
-			e = ECheckType(e, t).at(e.pos);
-		var s = EUntyped('this'.resolve(pos)).at(pos).field(name, pos).assign(e, pos);
-			
-		addStatement(s, prepend);
+		var tmp = MacroApi.tempName();
+		
+		addStatement(macro @:pos(pos) if (false) { var $tmp = this.$name; $i{tmp} = $e; }, true);
+		addStatement(macro @:pos(pos) (untyped this).$name = $e, prepend);
 	}
 	public inline function publish() 
 		if (isPublic == null) 
@@ -88,6 +105,7 @@ class Constructor {
 			params: []
 		};
 		for (hook in onGenerateHooks) hook(f);
+		onGenerateHooks = [];
 		return {
 			name: 'new',
 			doc : null,

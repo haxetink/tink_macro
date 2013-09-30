@@ -44,14 +44,16 @@ class ClassBuilder {
 				addMember(field);
 	}
 	
-	public function getConstructor():Constructor {
+	public function getConstructor(?fallback:Function):Constructor {
 		if (constructor == null) 
-			if (target.superClass != null && target.superClass.t.get().constructor != null) {
+			if (fallback != null)
+				new Constructor(fallback);
+			else if (target.superClass != null && target.superClass.t.get().constructor != null) {
 				try {
 					var ctor = Context.getLocalClass().get().superClass.t.get().constructor.get();
 					var func = Context.getTypedExpr(ctor.expr()).getFunction().sure();
 					
-					//TODO: Make sure the code below is no longer necessary
+					//TODO: Check that the code below is no longer necessary
 					// for (arg in func.args)
 						// arg.type = null;
 						
@@ -87,18 +89,16 @@ class ClassBuilder {
 		}
 		for (m in macros)
 			ret.push(m);
+		
 		if (verbose) 
 			for (field in ret) 
 				Context.warning(new Printer().printField(field), field.pos);
+		
 		return ret;		
 	}
 	public function iterator():Iterator<Member>
 		return this.memberList.copy().iterator();
 		
-	public function getOwnMember(name:String):Member
-		return 
-			memberMap.get(name);
-	
 	public function hasOwnMember(name:String):Bool
 		return 
 			macros.exists(name) || memberMap.exists(name);
@@ -136,7 +136,8 @@ class ClassBuilder {
 			
 		if (hasOwnMember(m.name)) 
 			m.pos.error('duplicate member declaration ' + m.name);
-			
+		if (!m.isStatic && hasSuperField(m.name))
+			m.overrides = true;
 		memberMap.set(m.name, m);
 		if (front) 
 			memberList.unshift(m);
