@@ -205,8 +205,8 @@ Will convert a `Type` to a `ComplexType`. Ideally this is done with `Context.toC
 
 - `function asExpr(f:Function, ?name:String, ?pos:Position):Expr`  
 Converts a function to an expression, i.e. a local function definition.
-- `function func(body:Expr, ?args:Array<FunctionArg>, ?ret:ComplexType, ?params:Array<TypeParamDecl>, ?mkRet = true):Function`
-Builds a `Function` from an expression. By default, the body is returned. Set `mkRet` to false otherwise.
+- `function func(body:Expr, ?args, ?ret:ComplexType, ?params:Array<TypeParamDecl>, ?makeReturn = true):Function`  
+Builds a `Function` from an expression. By default, the body is returned.
 - `function toArg(name:String, ?t:ComplexType, ?opt = false, ?value:Expr = null):FunctionArg`  
 A shorthand to create function arguments.
 - `function getArgIdents(f:Function):Array<Expr>`  
