@@ -51,13 +51,13 @@ Traces the string representation of an expression and returns it.
 
 - `function isWildcard(e:Expr):Bool`  
 Checks whether an expression is the identifier `_`
-- `function getInt(e:Expr):Outcome<Int, MacroError<String>>`  
+- `function getInt(e:Expr):Outcome<Int, tink.core.Error>`  
 Attempts extracting an integer constant from an expression
-- `function getString(e:Expr):Outcome<String, MacroError<String>>`  
+- `function getString(e:Expr):Outcome<String, tink.core.Error>`  
 Attempts extracting a string constant from an expression
-- `function getIdent(e:Expr):Outcome<String, MacroError<String>>`  
+- `function getIdent(e:Expr):Outcome<String, tink.core.Error>`  
 Attempts extracting an identifier from an expression. Note that an identifier can be a CIdent or CType, with the only difference being the capitalization of the first letter.
-- `function getName(e:Expr):Outcome<String, MacroError<String>>`  
+- `function getName(e:Expr):Outcome<String, tink.core.Error>`  
 Attempts extracting a name, i.e. a string constant or identifier from an expression
 
 #### Building simple expressions
@@ -186,9 +186,9 @@ Returns a String identifier for a type if available. By default, the type will b
 Attempts to get all fields of a type. By default, this call will perform a parameter substitution, i.e. called on `Array<Int>`, `pop` will be of type `Void->Int`. With `substituteParams = false`, `pop` will be of type `Void->Array.T` instead. 
 - `function toString(t:ComplexType):String`  
 Converts a `ComplextType` to corresponding Haxe code. No such thing exists for `Type` as it is actually is automatically converted to rather readable strings.
-- `function isSubTypeOf(t:Type, of:Type, ?pos:Position):Outcome < Type, MacroError<Dynamic> >`  
+- `function isSubTypeOf(t:Type, of:Type, ?pos:Position):Outcome < Type, tink.core.Error >`  
 Checks whether one type is a subtype of another. Returns an `Outcome` to give back information on *why* `t` is not a subtype of `of`.
-- `function toType(t:ComplexType, ?pos:Position):Outcome<Type, MacroError<Dynamic>>`  
+- `function toType(t:ComplexType, ?pos:Position):Outcome<Type, tink.core.Error>`  
 Attempts converting a `ComplextType` to a `Type`. This can fail for a number of reasons, such as no actual type being known for a supplied path.
 - `function asTypePath(s:String, ?params:Array<TypeParam>):TypePath`  
 Will build a `TypePath` from a '.'-separated path.
@@ -221,9 +221,9 @@ Attempts to decompose an expression into the parts of a binary operation.
 - `function make(op:Binop, e1:Expr, e2:Expr, ?pos:Position):Expr`  
 Builds a binary operation. Just syntactic sugar for the `Expr::binOp` listed above. It's often easier to read.
 
-- `function get(o:Unop, e:Expr, postfix:Bool = false):Outcome<{ e:Expr, pos:Position }, MacroError<String>>`  
+- `function get(o:Unop, e:Expr, postfix:Bool = false):Outcome<{ e:Expr, pos:Position }, tink.core.Error>`  
 Attempts to extract a specific unary operation from an expression.
-- `function getUnop(e:Expr):Outcome<{ op:Unop, e:Expr, postFix:Bool, pos:Position }, MacroError<String>>`  
+- `function getUnop(e:Expr):Outcome<{ op:Unop, e:Expr, postFix:Bool, pos:Position }, tink.core.Error>`  
 Attempts to decompose an expression into the parts of a unary operation.
 
 ### Metadata tools - tink.macro.Metadatas
