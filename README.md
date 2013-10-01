@@ -116,39 +116,52 @@ Attempts to determine the type of an expression. Note that you can use `locals` 
 Will traverse an expression inside out and build a new one through the supplied transformer.
 - `function substitute(source:Expr, vars:Dynamic<Expr>, ?pos:Position):Expr`  
 Will build a new expression substituting identifiers given found as fields of `vars` through the corresponding expressions.
-- `function substParams(source:Expr, rule: { var exists(default, null):String->Bool; var get(default, null):String->ComplexType; }, ?pos:Position)`  
-Traverse an expression and replace any *type* that looks like a type parameter following the given `rule`. A `StringMap` is a perfect match here, but you can do whatever you want.
+- `function substParams(source:Expr, rule: ParamSubst, ?pos:Position):Expr`  
+Traverse an expression and replace any *type* that looks like a type parameter following the given `rule` of the following structure:
+
+	```
+	typedef ParamSubst = { 
+		var exists(default, null):String->Bool; 
+		var get(default, null):String->ComplexType; 
+	}
+	```
+	
+	A `StringMap` is a natural fit here, but you can do whatever you want.
 - `function typedMap(source:Expr, f:Expr->Array<Var>->Expr, ?ctx:Array<Var>, ?pos:Position):Expr`  
 Similar to transform, but handles expressions in top-down order and keeps track of variable declarations, function arguments etc. Only expressions that are not changed by the transformer function `f` are traversed further. The second argument to `f` is the current context that you can use in `typeof` to determine the type of a subexpression.
 - `function bounce(f:Void->Expr, ?pos:Position):Expr`  
 This is a way to "bounce" out of a macro for a while. Assume you have this expression: `{ var a = 5, b = 6; a + b; }` and you want to analyze the second statement, you either have to track variables manually or do a `typedMap` but that may be too much work. What you would do here is something like this (stupid example):  
-```
-function onBounce() { trace(block[1].typeof().sure()); return block[1]; }
-[block[0], onBounce.bounce(block[1].pos)].toBlock();
-```
+
+	```
+	function onBounce() { trace(block[1].typeof().sure()); return block[1]; }
+	[block[0], onBounce.bounce(block[1].pos)].toBlock();
+	```
+
 - `function yield(source:Expr, yielder:Expr->Expr):Expr`  
 This will traverse an expression and will apply the `yielder` to the "leafs", which in this context are the subexpressions that determine a return value. Example:
-```
-yield(
-	macro if (foo) bar else { var x = y; for (i in a) bla; }, 
-	function (e) return macro trace($e)
-); 
-//becomes
-if (foo) trace(bar) else { var x = y; for (i in a) trace(bla); }
-```
-To implement array comprehensions yourself with this you would do:
-```
-e.transform(function (e) return switch e {
-	case macro [for ($it) $body]:
-		macro {
-			var __ret = [];
-			for ($it) ${body.yield(function (e) return macro __ret.push(e))};
-			__ret;
-		}
-	default: e;
-});
-```
-- `function ()
+
+	```
+	yield(
+		macro if (foo) bar else { var x = y; for (i in a) bla; }, 
+		function (e) return macro trace($e)
+	); 
+	//becomes
+	if (foo) trace(bar) else { var x = y; for (i in a) trace(bla); }
+	```
+	
+	To implement array comprehensions yourself with this you would do:
+	
+	```
+	e.transform(function (e) return switch e {
+		case macro [for ($it) $body]:
+			macro {
+				var __ret = [];
+				for ($it) ${body.yield(function (e) return macro __ret.push(e))};
+				__ret;
+			}
+		default: e;
+	});
+	```
 
 ### Position tools - tink.macro.Positions
 
@@ -192,8 +205,8 @@ Will convert a `Type` to a `ComplexType`. Ideally this is done with `Context.toC
 
 - `function asExpr(f:Function, ?name:String, ?pos:Position):Expr`  
 Converts a function to an expression, i.e. a local function definition.
-- `function func(body:Expr, ?args:Array<FunctionArg>, ?ret:ComplexType, ?params:Array<TypeParamDecl>, ?makeReturn = true):Function`
-Builds a `Function` from an expression. By default, the body is returned.
+- `function func(body:Expr, ?args:Array<FunctionArg>, ?ret:ComplexType, ?params:Array<TypeParamDecl>, ?mkRet = true):Function`
+Builds a `Function` from an expression. By default, the body is returned. Set `mkRet` to false otherwise.
 - `function toArg(name:String, ?t:ComplexType, ?opt = false, ?value:Expr = null):FunctionArg`  
 A shorthand to create function arguments.
 - `function getArgIdents(f:Function):Array<Expr>`  
@@ -217,7 +230,7 @@ Attempts to decompose an expression into the parts of a unary operation.
 
 - `function toMap(m:Metadata):Map<String, Array<Array<Expr>>`
 Will deconstruct an array of metadata tags to a `Map` mapping the tag names to an array of the argument lists of each tag with that name. So `@foo(1) @foo(2) @bar` becomes `["foo" => [[1], [2]], "bar" => [[]]]`
-- `function getValues(m:Metadata, name:String):Array<Array<Expr>>
+- `function getValues(m:Metadata, name:String):Array<Array<Expr>>`  
 Will construct an array of the of the arguments lists of all occurences of the tag `name` in a given `Metadata`. The result is the same as `m.toMap()[name]` only it's far more efficient.
 
 # Build infrastructure
