@@ -4,7 +4,7 @@ Explained in current marketing speak, `tink_macro` is *the* macro toolkit ;)
 
 ### History and Mission
 
-Historically, this library's predecessor for Haxe 2 started out when macros were a completely new feature. Title "the ultimate macro utility belt" it implemented reification and expression pattern matching before they were Haxe language features, and added a higher level macro tooling API (for string conversion, expression traversal and what not) to fill in the holes that the standard library left.
+Historically, this library's predecessor for Haxe 2 started out when macros were a completely new feature. Boldly titled "the ultimate macro utility belt" it implemented reification and expression pattern matching before they were Haxe language features, and added a higher level macro tooling API (for string conversion, expression traversal and what not) to fill in the holes that the standard library left.
 
 As Haxe evolved and some of the functionality has been integrated/reimplemented in the standard library or even as first class language feature, the mission of `tink_macro` has shifted. Rather than being a standalone solution for macro programming, it is now a complement to all the things the Haxe language and the `haxe.macro` package can do out of the box.
 
