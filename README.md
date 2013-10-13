@@ -320,7 +320,7 @@ class Constructor {
 	function publish():Void; 
 	function addStatement(e:Expr, ?prepend = false):Void;
 	function addArg(name:String, ?t:ComplexType, ?e:Expr, ?opt = false)
-	function init(name:String, pos:Position, with:FieldInit, ?prepend:Bool):Void;
+	function init(name:String, pos:Position, with:FieldInit, ?options:{ ?prepend:Bool, ?bypass:Bool }):Void;
 	function onGenerate(hook:Expr->Expr):Void;
 }
 ```
@@ -347,15 +347,13 @@ To add a constructor argument, you can just use `addArg`.
 
 ### Field initialization
 
-The `init` method is the swiss army knife of initializing fields. The `prepend` parameter works the same as for `addStatement`. As for the rest, the behavior is somewhat magical.
+The `init` method is the swiss army knife of initializing fields. The `options.prepend` flag works the same as `prepend` for `addStatement`. As for `options.bypass`, the behavior is somewhat magical.
 
 #### Setter bypass
 
-It is important to know that when you initialize a field this way, existing setters will by bypassed. That's particularly helpful if your setter triggers a side effect that you don't want triggered. This is achieved by generating the assignment as `(untyped this).$name = $value`. To make the code typesafe again, this is prefixed with `if (false) { var __tmp = this.$name; __tmp = $value; }`. This code is later thrown out by the compiler. Its role is to ensure type safety without interfering with the normal typing order.
+It is important to know that when you initialize a field with `options.bypass` set to true, existing setters will by bypassed. That's particularly helpful if your setter triggers a side effect that you don't want triggered. This is achieved by generating the assignment as `(untyped this).$name = $value`. To make the code typesafe again, this is prefixed with `if (false) { var __tmp = this.$name; __tmp = $value; }`. This code is later thrown out by the compiler. Its role is to ensure type safety without interfering with the normal typing order.
 
 Please do note, that the value will be in the generated code twice, therefore if it is an expression that calls a macro, the macro will be called twice.
-
-If you want to call the setter or avoid these tricks then use `addStatement` instead.
 
 #### Initialization options
 

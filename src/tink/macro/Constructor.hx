@@ -66,7 +66,9 @@ class Constructor {
 	public function addArg(name:String, ?t:ComplexType, ?e:Expr, ?opt = false) 
 		args.push( { name : name, opt : opt || e != null, type : t, value: e } );
 	
-	public function init(name:String, pos:Position, with:FieldInit, ?prepend:Bool) {
+	public function init(name:String, pos:Position, with:FieldInit, ?options:{ ?prepend:Bool, ?bypass:Bool }) {
+		if (options == null) 
+			options = {};
 		var e =
 			switch with {
 				case Arg(t, noPublish):
@@ -84,8 +86,12 @@ class Constructor {
 			
 		var tmp = MacroApi.tempName();
 		
-		addStatement(macro @:pos(pos) if (false) { var $tmp = this.$name; $i{tmp} = $e; }, true);
-		addStatement(macro @:pos(pos) (untyped this).$name = $e, prepend);
+		if (options.bypass) {
+			addStatement(macro @:pos(pos) if (false) { var $tmp = this.$name; $i{tmp} = $e; }, true);
+			addStatement(macro @:pos(pos) (untyped this).$name = $e, options.prepend);			
+		}
+		else 
+			addStatement(macro @:pos(pos) this.$name = $e, options.prepend);
 	}
 	public inline function publish() 
 		if (isPublic == null) 
