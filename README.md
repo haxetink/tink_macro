@@ -12,18 +12,23 @@ As Haxe evolved and some of the functionality has been integrated/reimplemented 
 
 The library is build on top of the haxe macro API and `tink_core`, having two major parts:
 
-1. Extended macro API
+1. [Extended macro API](#macro-api)
  - Expression tools
- - Position tools
- - Type tools
- - Function tools
- - Operation tools
- - Metadata tools
+  - [Basic helpers](#basic-helpers)
+  - [Extracting constants](#extracting-constants)
+  - [Shortcuts](#shortcuts)
+  - [Type inspection](#type-inspection)
+  - [Advanced transformations](#advanced-transformations)
+ - [Position tools](#position-tools)
+ - [Type tools](#type-tools)
+ - [Function tools](#function-tools)
+ - [Operation tools](#operation-tools)
+ - [Metadata tools](#metadata-tools)
  
 2. A `@:build` infrastructure.
- - Member
- - ClassBuilder
- - Constructor
+ - [Member](#member)
+ - [ClassBuilder](#classbuilder)
+ - [Constructor](#constructor)
 
 # Macro API
 
@@ -60,9 +65,9 @@ Attempts extracting an identifier from an expression. Note that an identifier ca
 - `function getName(e:Expr):Outcome<String, tink.core.Error>`  
 Attempts extracting a name, i.e. a string constant or identifier from an expression
 
-#### Building simple expressions
+#### Shortcuts
 
-Often reification is prefereable to these shortcuts.
+Often reification is prefereable to these shortcuts - if applicable. Unlike reification, the position of these expressions will default to `Context.currentPos()` rather than the position where they were created.
 
 - `function toExpr(v:Dynamic, ?pos:Position):Expr`  
 Converts a constant to a corresponding haXe expression. For example `5` would become `{ expr: EConst(CInt('5'), pos: pos }`
@@ -82,9 +87,6 @@ A shortcut to drill, only with a '.'-separated path. Especially helpful when cal
 A shorthand to return the sum of two expressions
 - `function assign(target:Expr, value:Expr, ?pos:Position):Expr`
 Generates an assign statement.
-
-#### Building complex expressions
-
 - `function toBlock(exprs:Iterable<Expr>, ?pos:Position):Expr`  
 Takes multiple expressions and turns them into a block
 - `function toMBlock(exprs:Array<Block>, ?pos:Position):Expr`  
@@ -110,7 +112,7 @@ Inspects, whether an expression can be iterated over and if so returns the eleme
 - `function typeof(expr:Expr, ?locals:Array<Var>):Outcome<Type, tink.core.Error>`  
 Attempts to determine the type of an expression. Note that you can use `locals` to hint the compiler the type of certain identifiers. For example if you are in a build macro, and you want to get the type of a subexpression of a method body, you could "fake" the other members of the class as local variables, because in that context, the other members do not yet exists from the compiler's perspective.
 
-#### Advanced stuff
+#### Advanced transformations
 
 - `function transform(source:Expr, transformer:Expr->Expr, ?pos:Position):Expr`  
 Will traverse an expression inside out and build a new one through the supplied transformer.
