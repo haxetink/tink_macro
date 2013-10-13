@@ -4,7 +4,7 @@ Explained in current marketing speak, `tink_macro` is *the* macro toolkit ;)
 
 ### History and Mission
 
-Historically, this library's predecessor for Haxe 2 started out when macros were a completely new feature. Title "the ultimate macro utility belt" it implemented reification and expression pattern matching before they were Haxe language features, and added a higher level macro tooling API (for string conversion, expression traversal and what not) to fill in the holes that the standard library left.
+Historically, this library's predecessor for Haxe 2 started out when macros were a completely new feature. Boldly titled "the ultimate macro utility belt" it implemented reification and expression pattern matching before they were Haxe language features, and added a higher level macro tooling API (for string conversion, expression traversal and what not) to fill in the holes that the standard library left.
 
 As Haxe evolved and some of the functionality has been integrated/reimplemented in the standard library or even as first class language feature, the mission of `tink_macro` has shifted. Rather than being a standalone solution for macro programming, it is now a complement to all the things the Haxe language and the `haxe.macro` package can do out of the box.
 
@@ -51,13 +51,13 @@ Traces the string representation of an expression and returns it.
 
 - `function isWildcard(e:Expr):Bool`  
 Checks whether an expression is the identifier `_`
-- `function getInt(e:Expr):Outcome<Int, MacroError<String>>`  
+- `function getInt(e:Expr):Outcome<Int, tink.core.Error>`  
 Attempts extracting an integer constant from an expression
-- `function getString(e:Expr):Outcome<String, MacroError<String>>`  
+- `function getString(e:Expr):Outcome<String, tink.core.Error>`  
 Attempts extracting a string constant from an expression
-- `function getIdent(e:Expr):Outcome<String, MacroError<String>>`  
+- `function getIdent(e:Expr):Outcome<String, tink.core.Error>`  
 Attempts extracting an identifier from an expression. Note that an identifier can be a CIdent or CType, with the only difference being the capitalization of the first letter.
-- `function getName(e:Expr):Outcome<String, MacroError<String>>`  
+- `function getName(e:Expr):Outcome<String, tink.core.Error>`  
 Attempts extracting a name, i.e. a string constant or identifier from an expression
 
 #### Building simple expressions
@@ -116,39 +116,52 @@ Attempts to determine the type of an expression. Note that you can use `locals` 
 Will traverse an expression inside out and build a new one through the supplied transformer.
 - `function substitute(source:Expr, vars:Dynamic<Expr>, ?pos:Position):Expr`  
 Will build a new expression substituting identifiers given found as fields of `vars` through the corresponding expressions.
-- `function substParams(source:Expr, rule: { var exists(default, null):String->Bool; var get(default, null):String->ComplexType; }, ?pos:Position)`  
-Traverse an expression and replace any *type* that looks like a type parameter following the given `rule`. A `StringMap` is a perfect match here, but you can do whatever you want.
+- `function substParams(source:Expr, rule: ParamSubst, ?pos:Position):Expr`  
+Traverse an expression and replace any *type* that looks like a type parameter following the given `rule` of the following structure:
+
+	```
+	typedef ParamSubst = { 
+		var exists(default, null):String->Bool; 
+		var get(default, null):String->ComplexType; 
+	}
+	```
+	
+	A `StringMap` is a natural fit here, but you can do whatever you want.
 - `function typedMap(source:Expr, f:Expr->Array<Var>->Expr, ?ctx:Array<Var>, ?pos:Position):Expr`  
 Similar to transform, but handles expressions in top-down order and keeps track of variable declarations, function arguments etc. Only expressions that are not changed by the transformer function `f` are traversed further. The second argument to `f` is the current context that you can use in `typeof` to determine the type of a subexpression.
 - `function bounce(f:Void->Expr, ?pos:Position):Expr`  
 This is a way to "bounce" out of a macro for a while. Assume you have this expression: `{ var a = 5, b = 6; a + b; }` and you want to analyze the second statement, you either have to track variables manually or do a `typedMap` but that may be too much work. What you would do here is something like this (stupid example):  
-```
-function onBounce() { trace(block[1].typeof().sure()); return block[1]; }
-[block[0], onBounce.bounce(block[1].pos)].toBlock();
-```
+
+	```
+	function onBounce() { trace(block[1].typeof().sure()); return block[1]; }
+	[block[0], onBounce.bounce(block[1].pos)].toBlock();
+	```
+
 - `function yield(source:Expr, yielder:Expr->Expr):Expr`  
 This will traverse an expression and will apply the `yielder` to the "leafs", which in this context are the subexpressions that determine a return value. Example:
-```
-yield(
-	macro if (foo) bar else { var x = y; for (i in a) bla; }, 
-	function (e) return macro trace($e)
-); 
-//becomes
-if (foo) trace(bar) else { var x = y; for (i in a) trace(bla); }
-```
-To implement array comprehensions yourself with this you would do:
-```
-e.transform(function (e) return switch e {
-	case macro [for ($it) $body]:
-		macro {
-			var __ret = [];
-			for ($it) ${body.yield(function (e) return macro __ret.push(e))};
-			__ret;
-		}
-	default: e;
-});
-```
-- `function ()
+
+	```
+	yield(
+		macro if (foo) bar else { var x = y; for (i in a) bla; }, 
+		function (e) return macro trace($e)
+	); 
+	//becomes
+	if (foo) trace(bar) else { var x = y; for (i in a) trace(bla); }
+	```
+	
+	To implement array comprehensions yourself with this you would do:
+	
+	```
+	e.transform(function (e) return switch e {
+		case macro [for ($it) $body]:
+			macro {
+				var __ret = [];
+				for ($it) ${body.yield(function (e) return macro __ret.push(e))};
+				__ret;
+			}
+		default: e;
+	});
+	```
 
 ### Position tools - tink.macro.Positions
 
@@ -173,9 +186,9 @@ Returns a String identifier for a type if available. By default, the type will b
 Attempts to get all fields of a type. By default, this call will perform a parameter substitution, i.e. called on `Array<Int>`, `pop` will be of type `Void->Int`. With `substituteParams = false`, `pop` will be of type `Void->Array.T` instead. 
 - `function toString(t:ComplexType):String`  
 Converts a `ComplextType` to corresponding Haxe code. No such thing exists for `Type` as it is actually is automatically converted to rather readable strings.
-- `function isSubTypeOf(t:Type, of:Type, ?pos:Position):Outcome < Type, MacroError<Dynamic> >`  
+- `function isSubTypeOf(t:Type, of:Type, ?pos:Position):Outcome < Type, tink.core.Error >`  
 Checks whether one type is a subtype of another. Returns an `Outcome` to give back information on *why* `t` is not a subtype of `of`.
-- `function toType(t:ComplexType, ?pos:Position):Outcome<Type, MacroError<Dynamic>>`  
+- `function toType(t:ComplexType, ?pos:Position):Outcome<Type, tink.core.Error>`  
 Attempts converting a `ComplextType` to a `Type`. This can fail for a number of reasons, such as no actual type being known for a supplied path.
 - `function asTypePath(s:String, ?params:Array<TypeParam>):TypePath`  
 Will build a `TypePath` from a '.'-separated path.
@@ -192,7 +205,7 @@ Will convert a `Type` to a `ComplexType`. Ideally this is done with `Context.toC
 
 - `function asExpr(f:Function, ?name:String, ?pos:Position):Expr`  
 Converts a function to an expression, i.e. a local function definition.
-- `function func(body:Expr, ?args:Array<FunctionArg>, ?ret:ComplexType, ?params:Array<TypeParamDecl>, ?makeReturn = true):Function`
+- `function func(body:Expr, ?args, ?ret:ComplexType, ?params:Array<TypeParamDecl>, ?makeReturn = true):Function`  
 Builds a `Function` from an expression. By default, the body is returned.
 - `function toArg(name:String, ?t:ComplexType, ?opt = false, ?value:Expr = null):FunctionArg`  
 A shorthand to create function arguments.
@@ -208,16 +221,16 @@ Attempts to decompose an expression into the parts of a binary operation.
 - `function make(op:Binop, e1:Expr, e2:Expr, ?pos:Position):Expr`  
 Builds a binary operation. Just syntactic sugar for the `Expr::binOp` listed above. It's often easier to read.
 
-- `function get(o:Unop, e:Expr, postfix:Bool = false):Outcome<{ e:Expr, pos:Position }, MacroError<String>>`  
+- `function get(o:Unop, e:Expr, postfix:Bool = false):Outcome<{ e:Expr, pos:Position }, tink.core.Error>`  
 Attempts to extract a specific unary operation from an expression.
-- `function getUnop(e:Expr):Outcome<{ op:Unop, e:Expr, postFix:Bool, pos:Position }, MacroError<String>>`  
+- `function getUnop(e:Expr):Outcome<{ op:Unop, e:Expr, postFix:Bool, pos:Position }, tink.core.Error>`  
 Attempts to decompose an expression into the parts of a unary operation.
 
 ### Metadata tools - tink.macro.Metadatas
 
 - `function toMap(m:Metadata):Map<String, Array<Array<Expr>>`
 Will deconstruct an array of metadata tags to a `Map` mapping the tag names to an array of the argument lists of each tag with that name. So `@foo(1) @foo(2) @bar` becomes `["foo" => [[1], [2]], "bar" => [[]]]`
-- `function getValues(m:Metadata, name:String):Array<Array<Expr>>
+- `function getValues(m:Metadata, name:String):Array<Array<Expr>>`  
 Will construct an array of the of the arguments lists of all occurences of the tag `name` in a given `Metadata`. The result is the same as `m.toMap()[name]` only it's far more efficient.
 
 # Build infrastructure
