@@ -200,8 +200,8 @@ A shortcut to `asTypePath` to build a `ComplexType` from a '.'-separated path.
 Reduces a type by following `TType` and resolving `TLazy`.
 - `function isVar(field:ClassField):Bool`  
 Will tell you whether a field is a variable or not. Signature is likely to change soon.
-- `function toComplex(type:Type):ComplexType`  
-Will convert a `Type` to a `ComplexType`. Ideally this is done with `Context.toComplexType` but for monomorphs and the like, this builtin method fails and `tink_macro` uses a hack to make it work none the less.
+- `function toComplex(type:Type, ?option:{ ?direct: Bool }):ComplexType`  
+Will convert a `Type` to a `ComplexType`. Ideally this is done with `Context.toComplexType` but for monomorphs and the like, this builtin method fails and `tink_macro` uses a hack to make it work none the less. You can also use `{ direct : true }` to force this hack in case the translation fails (which can be the case with private types).
 
 ### Function tools - tink.macro.Functions
 

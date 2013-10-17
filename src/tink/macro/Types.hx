@@ -202,8 +202,10 @@ class Types {
 	static function baseToComplex(t:BaseType, params:Array<Type>) 
 		return asComplexType(t.module + '.' + t.name, paramsToComplex(params));
 	
-	static public function toComplex(type:Type):ComplexType {
-		var ret = haxe.macro.TypeTools.toComplexType(type);
+	static public function toComplex(type:Type, ?options:{ ?direct: Bool }):ComplexType {
+		var ret = 
+			if (options == null || options.direct != true) haxe.macro.TypeTools.toComplexType(type);
+			else null;
 		if (ret == null)
 			ret = lazyComplex(function () return type);	
 		return ret;

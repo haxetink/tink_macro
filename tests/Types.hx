@@ -3,6 +3,7 @@ package ;
 import haxe.macro.Expr;
 import haxe.macro.Context;
 
+using tink.CoreApi;
 using tink.MacroApi;
 
 class Types extends Base {
