@@ -10,8 +10,8 @@ typedef Types = tink.macro.Types;
 typedef Binops = tink.macro.Ops.Binary;
 typedef Unops = tink.macro.Ops.Unary;
 
-typedef Outcome<D, F> = tink.core.Outcome<D, F>;
-typedef OutcomeTools = tink.core.Outcome.OutcomeTools;
+typedef MacroOutcome<D, F> = tink.core.Outcome<D, F>;
+typedef MacroOutcomeTools = tink.core.Outcome.OutcomeTools;
 //TODO: consider adding stuff from haxe.macro.Expr here
 
 class MacroApi {
