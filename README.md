@@ -13,22 +13,22 @@ As Haxe evolved and some of the functionality has been integrated/reimplemented 
 The library is build on top of the haxe macro API and `tink_core`, having two major parts:
 
 1. [Extended macro API](#macro-api)
- - Expression tools
-  - [Basic helpers](#basic-helpers)
-  - [Extracting constants](#extracting-constants)
-  - [Shortcuts](#shortcuts)
-  - [Type inspection](#type-inspection)
-  - [Advanced transformations](#advanced-transformations)
- - [Position tools](#position-tools)
- - [Type tools](#type-tools)
- - [Function tools](#function-tools)
- - [Operation tools](#operation-tools)
- - [Metadata tools](#metadata-tools)
+    - Expression tools
+        - [Basic helpers](#basic-helpers)
+        - [Extracting constants](#extracting-constants)
+        - [Shortcuts](#shortcuts)
+        - [Type inspection](#type-inspection)
+        - [Advanced transformations](#advanced-transformations)
+    - [Position tools](#position-tools)
+    - [Type tools](#type-tools)
+    - [Function tools](#function-tools)
+    - [Operation tools](#operation-tools)
+    - [Metadata tools](#metadata-tools)
  
 2. A `@:build` infrastructure.
- - [Member](#member)
- - [ClassBuilder](#classbuilder)
- - [Constructor](#constructor)
+    - [Member](#member)
+    - [ClassBuilder](#classbuilder)
+    - [Constructor](#constructor)
 
 # Macro API
 
