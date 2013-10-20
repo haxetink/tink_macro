@@ -317,7 +317,7 @@ As for the rest of the members, you can just iterate over them. It's worth notin
 
 You can add a member. If you try adding a member named `"new"`, you'll get an exception. So don't do it. Read up on constructors below. If you try adding a duplicate member, you will get a compilation error at the second member's `Position`. If you add a member that already exists in the super class, the `override` is added automatically.
 
-And when you're done, you can `export` everything to an array of fields. If you set `verbose` to true, you will get compiler warnings for every generated field at the position of the field. This is way you can see the generated code even if the application does cannot compile for some reason.
+And when you're done, you can `export` everything to an array of fields. If you set `verbose` to true, you will get compiler warnings for every generated field at the position of the field. This is way you can see the generated code even if the application cannot compile for some reason.
 
 The intended use is with `run` that will send the same `ClassBuilder` through a number of functions, exporting once at the end. This reduces the overhead introduced by the `ClassBuilder`.
 
@@ -386,4 +386,4 @@ Here, `Value` will just use a plain expression, whereas `Arg` and `OptArg` will 
 
 ### Expression level transformation
 
-Because the state of a constructor is rather delicate, the API prohibits you to just mess around with the whole constructor body at an expression level. For that to happen, you can register `onGenerate` hooks. These will be called when the corresponding `ClassBuilder` is does its export. The hooks are cleared after the export.
+Because the state of a constructor is rather delicate, the API prohibits you to just mess around with the whole constructor body at an expression level. For that to happen, you can register `onGenerate` hooks. These will be called when the corresponding `ClassBuilder` does its export. The hooks are cleared after the export.
