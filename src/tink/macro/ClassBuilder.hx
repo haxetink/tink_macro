@@ -48,28 +48,36 @@ class ClassBuilder {
 		if (constructor == null) 
 			if (fallback != null)
 				new Constructor(fallback);
-			else if (target.superClass != null && target.superClass.t.get().constructor != null) {
-				try {
-					var ctor = Context.getLocalClass().get().superClass.t.get().constructor.get();
-					var func = Context.getTypedExpr(ctor.expr()).getFunction().sure();
-					
-					//TODO: Check that the code below is no longer necessary
-					// for (arg in func.args)
-						// arg.type = null;
-						
-					func.expr = "super".resolve().call(func.getArgIdents());
-					constructor = new Constructor(func);
-					if (ctor.isPublic)
-						constructor.publish();					
+			else {
+				var sup = target.superClass;
+				while (sup != null) {
+					var cl = sup.t.get();
+					if (cl.constructor != null) {
+						try {
+							var ctor = cl.constructor.get();
+							var func = Context.getTypedExpr(ctor.expr()).getFunction().sure();
+							
+							for (arg in func.args) //this is to deal with type parameter substitutions
+								arg.type = null;
+								
+							func.expr = "super".resolve().call(func.getArgIdents());
+							constructor = new Constructor(func);
+							if (ctor.isPublic)
+								constructor.publish();					
+						}
+						catch (e:Dynamic) {//fails for unknown reason
+							if (e == 'assert')
+								neko.Lib.rethrow(e);
+							constructor = new Constructor(null);
+						}
+						break;
+					}
+					else sup = cl.superClass;
 				}
-				catch (e:Dynamic) {//fails for unknown reason
-					if (e == 'assert')
-						neko.Lib.rethrow(e);
+				if (constructor == null)
 					constructor = new Constructor(null);
-				}
 			}
-			else
-				constructor = new Constructor(null);
+				
 		return constructor;
 	}
 	

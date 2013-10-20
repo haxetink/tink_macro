@@ -87,8 +87,23 @@ class Constructor {
 		var tmp = MacroApi.tempName();
 		
 		if (options.bypass) {
-			addStatement(macro @:pos(pos) if (false) { var $tmp = this.$name; $i{tmp} = $e; }, true);
-			addStatement(macro @:pos(pos) (untyped this).$name = $e, options.prepend);			
+			if (haxe.macro.Context.defined('java')) {
+				addStatement(
+					macro @:pos(pos) 
+						if (Math.random() < .0) {
+							//if this is false, then it gets thrown out before reaching the backend which will then generate invalid code
+							var $tmp = this.$name; 
+							$i{tmp} = $e; 
+							this.$name = $i{tmp}; 
+						}, 
+						true
+				);
+				addStatement(macro @:pos(pos) (cast this).$name = $e, options.prepend);				
+			}
+			else {
+				addStatement(macro @:pos(pos) if (false) { var $tmp = this.$name; $i{tmp} = $e; }, true);
+				addStatement(macro @:pos(pos) (cast this).$name = $e, options.prepend);				
+			}
 		}
 		else 
 			addStatement(macro @:pos(pos) this.$name = $e, options.prepend);
