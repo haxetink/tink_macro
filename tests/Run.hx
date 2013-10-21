@@ -15,6 +15,7 @@ class Run {
 	#end
 	macro static function test() {
 		var runner = new TestRunner();
+		tink.macro.ClassBuilder;
 		for (c in cases)
 			runner.add(c);
 		runner.run();

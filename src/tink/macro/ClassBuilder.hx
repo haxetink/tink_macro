@@ -16,7 +16,7 @@ class ClassBuilder {
 	var constructor:Null<Constructor>;
 	public var target(default, null):ClassType;//TODO: this could be lazy
 	var superFields:Map<String,Bool>;
-	
+	var keepers:Array<Expr>;//hack to force field generation
 	public function new() { 
 		this.memberMap = new Map();
 		this.memberList = [];
@@ -38,7 +38,7 @@ class ClassBuilder {
 				macros.set(field.name, field)
 			else if (field.name == 'new') {
 				var m:Member = field;
-				this.constructor = new Constructor(m.getFunction().sure(), m.isPublic, m.pos);
+				this.constructor = new Constructor(this, m.getFunction().sure(), m.isPublic, m.pos);
 			}
 			else
 				addMember(field);
@@ -47,7 +47,7 @@ class ClassBuilder {
 	public function getConstructor(?fallback:Function):Constructor {
 		if (constructor == null) 
 			if (fallback != null)
-				new Constructor(fallback);
+				new Constructor(this, fallback);
 			else {
 				var sup = target.superClass;
 				while (sup != null) {
@@ -61,21 +61,21 @@ class ClassBuilder {
 								arg.type = null;
 								
 							func.expr = "super".resolve().call(func.getArgIdents());
-							constructor = new Constructor(func);
+							constructor = new Constructor(this, func);
 							if (ctor.isPublic)
 								constructor.publish();					
 						}
 						catch (e:Dynamic) {//fails for unknown reason
 							if (e == 'assert')
 								neko.Lib.rethrow(e);
-							constructor = new Constructor(null);
+							constructor = new Constructor(this, null);
 						}
 						break;
 					}
 					else sup = cl.superClass;
 				}
 				if (constructor == null)
-					constructor = new Constructor(null);
+					constructor = new Constructor(this, null);
 			}
 				
 		return constructor;

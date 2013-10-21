@@ -1,6 +1,7 @@
 package tink.macro;
 
 import haxe.macro.Expr;
+import haxe.macro.Context;
 import tink.core.Pair;
 using tink.MacroApi;
 
@@ -19,10 +20,13 @@ class Constructor {
 	var pos:Position;
 	var onGenerateHooks:Array<Function->Void>;
 	var superCall:Expr;
+	var owner:ClassBuilder;
+	var keepers:Array<Expr>;//hack to force field generation
 	public var isPublic:Null<Bool>;
 	
-	public function new(f:Function, ?isPublic:Null<Bool> = null, ?pos:Position, ?meta:Metadata) {
+	public function new(owner:ClassBuilder, f:Function, ?isPublic:Null<Bool> = null, ?pos:Position, ?meta:Metadata) {
 		this.nuStatements = [];
+		this.owner = owner;
 		this.isPublic = isPublic;
 		this.pos = pos.sanitize();
 		
@@ -30,6 +34,7 @@ class Constructor {
 		this.args = [];
 		this.beforeArgs = [];
 		this.afterArgs = [];
+		this.keepers = [];
 		
 		this.oldStatements = 
 			if (f == null) [];
@@ -67,6 +72,9 @@ class Constructor {
 		args.push( { name : name, opt : opt || e != null, type : t, value: e } );
 	
 	public function init(name:String, pos:Position, with:FieldInit, ?options:{ ?prepend:Bool, ?bypass:Bool }) {
+		@:privateAccess 
+			if (owner.memberMap.exists('name'))
+				owner.memberMap.get('name').addMeta(':isVar');
 		if (options == null) 
 			options = {};
 		var e =
@@ -87,23 +95,13 @@ class Constructor {
 		var tmp = MacroApi.tempName();
 		
 		if (options.bypass) {
-			if (haxe.macro.Context.defined('java')) {
-				addStatement(
-					macro @:pos(pos) 
-						if (Math.random() < .0) {
-							//if this is false, then it gets thrown out before reaching the backend which will then generate invalid code
-							var $tmp = this.$name; 
-							$i{tmp} = $e; 
-							this.$name = $i{tmp}; 
-						}, 
-						true
-				);
-				addStatement(macro @:pos(pos) (cast this).$name = $e, options.prepend);				
+			if (Context.defined('dce') && Context.definedValue('dce') == 'full') {
+				if (keepers.length == 0)
+					keepers.push(macro return);
+				keepers.push(macro this.$name = $e);
 			}
-			else {
-				addStatement(macro @:pos(pos) if (false) { var $tmp = this.$name; $i{tmp} = $e; }, true);
-				addStatement(macro @:pos(pos) (cast this).$name = $e, options.prepend);				
-			}
+			addStatement(macro @:pos(pos) if (false) { var $tmp = this.$name; $i{tmp} = $e; }, true);
+			addStatement(macro @:pos(pos) (cast this).$name = $e, options.prepend);				
 		}
 		else 
 			addStatement(macro @:pos(pos) this.$name = $e, options.prepend);
@@ -113,7 +111,11 @@ class Constructor {
 			isPublic = true;
 	
 	function toBlock() 
-		return [superCall].concat(nuStatements).concat(oldStatements).toBlock(pos);
+		return [superCall]
+			.concat(nuStatements)
+			.concat(oldStatements)
+			.concat(keepers)
+			.toBlock(pos);
 	
 	public function onGenerate(hook) 
 		this.onGenerateHooks.push(hook);
