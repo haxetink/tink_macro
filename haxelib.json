@@ -4,8 +4,8 @@
 	"license": "MIT",
 	"tags": ["tink", "macro", "utility"],
 	"description": "The macro toolkit ;)",
-	"version": "0.0.2-beta",
-	"releasenote": "Support haxe/java oddities.",
+	"version": "0.0.3-beta",
+	"releasenote": "Sidestep dce issues.",
 	"contributors": ["back2dos"],
 	"dependencies": {
 		"tink_core": "1.0.0-beta.4"

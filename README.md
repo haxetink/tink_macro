@@ -336,7 +336,7 @@ class Constructor {
 	function addStatement(e:Expr, ?prepend = false):Void;
 	function addArg(name:String, ?t:ComplexType, ?e:Expr, ?opt = false)
 	function init(name:String, pos:Position, with:FieldInit, ?options:{ ?prepend:Bool, ?bypass:Bool }):Void;
-	function onGenerate(hook:Expr->Expr):Void;
+	function onGenerate(hook:Function->Void):Void;
 }
 ```
 
@@ -352,7 +352,7 @@ The constructor starts out without `private` or `public`. Use `isPublic` and `pu
 
 ### Initial super call
 
-If the first statement in a constructor is a `super` call (which is true for automatically generated ones), then modification of the constructor through this API will maintain that property. Generally, that's also the suggested way to go. If you *need* to execute things *before* that's a symptom of a [fragile base class](http://en.wikipedia.org/wiki/Fragile_base_class). Still, if *absolutely* want to do it, the slightest modification can be used to not match the `super` call detection. If the first statement is `@later super(...)`, then it will not be detected as a super call and will not be treated specially.
+If the first statement in a constructor is a `super` call (which is true for automatically generated ones), then modification of the constructor through this API will maintain that property. Generally, that's also the suggested way to go. If you *need* to execute things *before* that's a symptom of a [fragile base class](http://en.wikipedia.org/wiki/Fragile_base_class). Still, if *absolutely* want to do it, the slightest modification can be used to not match the `super` call detection. If the first statement is `@later super(...)` or `(super(...))` or whatever that is not an immediate call to super, then it will not be detected as a super call and will not be treated specially.
 
 ### Simple modifications
 
@@ -368,7 +368,9 @@ The `init` method is the swiss army knife of initializing fields. The `options.p
 
 It is important to know that when you initialize a field with `options.bypass` set to true, existing setters will by bypassed. That's particularly helpful if your setter triggers a side effect that you don't want triggered. This is achieved by generating the assignment as `(untyped this).$name = $value`. To make the code typesafe again, this is prefixed with `if (false) { var __tmp = this.$name; __tmp = $value; }`. This code is later thrown out by the compiler. Its role is to ensure type safety without interfering with the normal typing order.
 
-Please do note, that the value will be in the generated code twice, therefore if it is an expression that calls a macro, the macro will be called twice.
+Setter bypass also causes the field to gain an `@:isVar`. And currently, with `-dce full`, additional code will be generated to avoid the field to be eliminated.
+
+Please do note, that `value` will be in the generated code twice, therefore if it is an expression that calls a macro, the macro will be called twice.
 
 #### Initialization options
 
