@@ -4,8 +4,8 @@
 	"license": "MIT",
 	"tags": ["tink", "macro", "utility"],
 	"description": "The macro toolkit ;)",
-	"version": "0.0.3-beta",
-	"releasenote": "Sidestep dce issues.",
+	"version": "0.0.4-beta",
+	"releasenote": "Setter bypass fix.",
 	"contributors": ["back2dos"],
 	"dependencies": {
 		"tink_core": "1.0.0-beta.4"

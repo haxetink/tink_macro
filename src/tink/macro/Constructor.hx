@@ -72,9 +72,6 @@ class Constructor {
 		args.push( { name : name, opt : opt || e != null, type : t, value: e } );
 	
 	public function init(name:String, pos:Position, with:FieldInit, ?options:{ ?prepend:Bool, ?bypass:Bool }) {
-		@:privateAccess 
-			if (owner.memberMap.exists('name'))
-				owner.memberMap.get('name').addMeta(':isVar');
 		if (options == null) 
 			options = {};
 		var e =
@@ -95,6 +92,11 @@ class Constructor {
 		var tmp = MacroApi.tempName();
 		
 		if (options.bypass) {
+			switch @:privateAccess owner.memberMap[name] {
+				case nil if (nil == null):
+				case member: member.addMeta(':isVar');
+			}
+			
 			if (Context.defined('dce') && Context.definedValue('dce') == 'full') {
 				if (keepers.length == 0)
 					keepers.push(macro return);
