@@ -4,8 +4,8 @@
 	"license": "MIT",
 	"tags": ["tink", "macro", "utility"],
 	"description": "The macro toolkit ;)",
-	"version": "0.1.0-beta",
-	"releasenote": "Allow getting members by name from ClassBuilder.",
+	"version": "0.1.1-beta",
+	"releasenote": "Fixed ClassBuilder.hasConstructor",
 	"contributors": ["back2dos"],
 	"dependencies": {
 		"tink_core": "1.0.0-beta.4"

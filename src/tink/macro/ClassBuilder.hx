@@ -82,7 +82,7 @@ class ClassBuilder {
 	}
 	
 	public function hasConstructor():Bool 
-		return this.constructor == null;
+		return this.constructor != null;
 		
 	public function export(?verbose):Array<Field> {
 		var ret = (constructor == null || target.isInterface) ? [] : [constructor.toHaxe()];
