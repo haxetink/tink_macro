@@ -92,9 +92,9 @@ class Constructor {
 		var tmp = MacroApi.tempName();
 		
 		if (options.bypass) {
-			switch @:privateAccess owner.memberMap[name] {
-				case nil if (nil == null):
-				case member: member.addMeta(':isVar');
+			switch owner.memberByName(name) {
+				case Success(member): member.addMeta(':isVar');
+				default:
 			}
 			
 			if (Context.defined('dce') && Context.definedValue('dce') == 'full') {

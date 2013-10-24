@@ -124,7 +124,11 @@ class ClassBuilder {
 		}
 		return superFields.get(name);
 	}
-	
+	public function memberByName(name:String, ?pos:Position)
+		return
+			if (memberMap.exists(name)) Success(memberMap.get(name));
+			else pos.makeFailure('unknown member $name');
+			
 	public function removeMember(member:Member):Bool 
 		return 
 			member != null 
