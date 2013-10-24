@@ -36,7 +36,7 @@ It is suggested to use this API by `using tink.MacroAPI;`
 
 Apart form `tink_macro` specific things, it will also use `haxe.macro.ExprTools` and `tink.core.Outcome`.
 
-### Expression tools - tink.macro.Exprs
+### Expression tools
 
 #### Basic helpers
 
@@ -165,7 +165,7 @@ This will traverse an expression and will apply the `yielder` to the "leafs", wh
 	});
 	```
 
-### Position tools - tink.macro.Positions
+### Position tools
 
 - `function sanitize(pos:Position):Position`  
 Returns the position itself or `Context.currentPos()` if it's null.
@@ -180,7 +180,7 @@ Creates a failed `Outcome` associated with the supplied position.
 - `function getOutcome<D, F>(pos:Position, outcome:Outcome<D, F>):D`  
 Attempts getting the result of the supplied outcome. If it is a failure, it will cause an error at the given position.
 
-### Type tools - tink.macro.Types
+### Type tools
 
 - `function getID(t:Type, ?reduced = true):Null<String>`  
 Returns a String identifier for a type if available. By default, the type will be reduced prior to getting its name (typedefs are resolved etc.). With `reduced = false` you can also get the name of a typedef.
@@ -203,7 +203,7 @@ Will tell you whether a field is a variable or not. Signature is likely to chang
 - `function toComplex(type:Type, ?option:{ ?direct: Bool }):ComplexType`  
 Will convert a `Type` to a `ComplexType`. Ideally this is done with `Context.toComplexType` but for monomorphs and the like, this builtin method fails and `tink_macro` uses a hack to make it work none the less. You can also use `{ direct : true }` to force this hack in case the translation fails (which can be the case with private types).
 
-### Function tools - tink.macro.Functions
+### Function tools
 
 - `function asExpr(f:Function, ?name:String, ?pos:Position):Expr`  
 Converts a function to an expression, i.e. a local function definition.
@@ -214,7 +214,7 @@ A shorthand to create function arguments.
 - `function getArgIdents(f:Function):Array<Expr>`  
 Will extract the argument list of a function as an expression list of identifiers (usefull when writing call-forwarding macros or the like).
 
-### Operation tools - tink.macro.Ops
+### Operation tools
 
 - `function get(o:Binop, e:Expr):Outcome<{ e1:Expr, e2:Expr, pos:Position }, tink.core.Error>`  
 Attempts to extract a specific binary operation from an expression.
@@ -228,7 +228,7 @@ Attempts to extract a specific unary operation from an expression.
 - `function getUnop(e:Expr):Outcome<{ op:Unop, e:Expr, postFix:Bool, pos:Position }, tink.core.Error>`  
 Attempts to decompose an expression into the parts of a unary operation.
 
-### Metadata tools - tink.macro.Metadatas
+### Metadata tools
 
 - `function toMap(m:Metadata):Map<String, Array<Array<Expr>>`
 Will deconstruct an array of metadata tags to a `Map` mapping the tag names to an array of the argument lists of each tag with that name. So `@foo(1) @foo(2) @bar` becomes `["foo" => [[1], [2]], "bar" => [[]]]`
