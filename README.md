@@ -139,7 +139,7 @@ This is a way to "bounce" out of a macro for a while. Assume you have this expre
 	[block[0], onBounce.bounce(block[1].pos)].toBlock();
 	```
 
-- `function yield(source:Expr, yielder:Expr->Expr):Expr`  
+- `function yield(source:Expr, yielder:Expr->Expr, ?options:{ ?leaveLoops:Bool }):Expr`  
 This will traverse an expression and will apply the `yielder` to the "leafs", which in this context are the subexpressions that determine a return value. Example:
 
 	```
@@ -165,6 +165,8 @@ This will traverse an expression and will apply the `yielder` to the "leafs", wh
 	});
 	```
 
+	If you set `options.leaveLoops` to `true`, then loops (both for and while) will be considered leafs. 
+	
 ### Position tools
 
 - `function sanitize(pos:Position):Position`  

@@ -144,9 +144,9 @@ class Exprs {
 				t;
 			}).typeof();
 	
-	static public function yield(e:Expr, yielder:Expr->Expr):Expr {
+	static public function yield(e:Expr, yielder:Expr->Expr, ?options: { ?leaveLoops: Bool }):Expr {
 		inline function rec(e) 
-			return yield(e, yielder);
+			return yield(e, yielder, options);
 		return
 			if (e == null || e.expr == null) e;
 			else switch (e.expr) {
@@ -164,9 +164,9 @@ class Exprs {
 					for (c in cases)
 						c.expr = rec(c.expr);
 					ESwitch(e, cases, rec(edef)).at(e.pos);
-				case EFor(it, expr):
+				case EFor(it, expr) if (options == null || options.leaveLoops != true):
 					EFor(it, rec(expr)).at(e.pos);
-				case EWhile(cond, body, normal):
+				case EWhile(cond, body, normal) if (options == null || options.leaveLoops != true):
 					EWhile(cond, rec(body), normal).at(e.pos);
 				case EBreak, EContinue: e;
 				case EBinop(OpArrow, value, jump) if (jump.expr == EContinue || jump.expr == EBreak):

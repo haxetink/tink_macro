@@ -4,8 +4,8 @@
 	"license": "MIT",
 	"tags": ["tink", "macro", "utility"],
 	"description": "The macro toolkit ;)",
-	"version": "0.1.1-beta",
-	"releasenote": "Fixed ClassBuilder.hasConstructor",
+	"version": "0.2.1-beta",
+	"releasenote": "Added options to yield",
 	"contributors": ["back2dos"],
 	"dependencies": {
 		"tink_core": "1.0.0-beta.4"

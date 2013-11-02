@@ -36,13 +36,14 @@ class Exprs extends Base {
 	
 	function testYield() {
 		function yielder(e) return macro @yield $e;
-		function test(x:Expr, e:Expr)
-			exprEq(x, e.yield(yielder));
+		function test(x:Expr, e:Expr, ?options)
+			exprEq(x, e.yield(yielder, options));
 			
 		test(macro @yield foo, macro foo);
 		test(macro @yield (foo), macro (foo));
 		test(macro for (_) @yield foo, macro for (_) foo);
 		test(macro while (_) @yield foo, macro while (_) foo);
+		test(macro @yield while (_) foo, macro while (_) foo, { leaveLoops: true });
 		test(macro @yield [while (_) foo], macro [while (_) foo]);
 	}
 	
