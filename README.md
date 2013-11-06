@@ -129,6 +129,7 @@ Traverse an expression and replace any *type* that looks like a type parameter f
 	```
 	
 	A `StringMap` is a natural fit here, but you can do whatever you want.
+	Note that if the type for a given name is a `TPath`, it will also be substituted for class names in `new` statements and for identifiers of that name.
 - `function typedMap(source:Expr, f:Expr->Array<Var>->Expr, ?ctx:Array<Var>, ?pos:Position):Expr`  
 Similar to transform, but handles expressions in top-down order and keeps track of variable declarations, function arguments etc. Only expressions that are not changed by the transformer function `f` are traversed further. The second argument to `f` is the current context that you can use in `typeof` to determine the type of a subexpression.
 - `function bounce(f:Void->Expr, ?pos:Position):Expr`  

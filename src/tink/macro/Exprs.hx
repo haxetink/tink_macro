@@ -113,7 +113,22 @@ class Exprs {
 	static public function substParams(source:Expr, subst:ParamSubst, ?pos):Expr 
 		return crawl(
 			source, 
-			function (e) return e, 
+			function (e) 
+				return switch e.expr {
+					case ENew({ pack: [], name: name }, args) if (subst.exists(name)):
+						switch subst.get(name) {
+							case TPath(p):
+								ENew(p, args).at(e.pos);
+							default: e;//TODO: report an error?
+						}
+					case EConst(CIdent(name)) if (subst.exists(name)):
+						switch subst.get(name) {
+							case TPath({ pack: pack, name: name }):
+								pack.concat([name]).drill(e.pos);
+							default: e;//TODO: report an error?
+						}
+					default: e;
+				},
 			function (c:ComplexType) 
 				return
 					switch (c) {

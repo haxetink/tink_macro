@@ -46,7 +46,6 @@ class Exprs extends Base {
 		test(macro @yield while (_) foo, macro while (_) foo, { leaveLoops: true });
 		test(macro @yield [while (_) foo], macro [while (_) foo]);
 	}
-	
 	function testSubstitute() {
 		exprEq(
 			macro foo.call(arg1, arg2), 
@@ -65,6 +64,19 @@ class Exprs extends Base {
 				'A' => macro : Int,
 				'B' => macro : String,
 				'C' => macro : Array<Float>
+			])
+		);
+		exprEq(
+			macro {
+				new Foo<Bar>(1, 2, 3);
+				Bar.foo();
+			},
+			(macro {
+				new X(1, 2, 3);
+				Y.foo();
+			}).substParams([
+				'X' => macro : Foo<Bar>,
+				'Y' => macro : Bar
 			])
 		);
 	}
