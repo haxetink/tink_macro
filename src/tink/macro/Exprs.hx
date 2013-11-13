@@ -395,19 +395,19 @@ class Exprs {
 	static public inline function define(name:String, ?init:Expr, ?typ:ComplexType, ?pos:Position) 
 		return at(EVars([ { name:name, type: typ, expr: init } ]), pos);
 	
-	static public inline function add(e1, e2, ?pos) 
+	static public inline function add(e1:Expr, e2, ?pos) 
 		return binOp(e1, e2, OpAdd, pos);
 		
-	static public inline function unOp(e, op, ?postFix = false, ?pos) 
+	static public inline function unOp(e:Expr, op, ?postFix = false, ?pos) 
 		return EUnop(op, postFix, e).at(pos);
 	
-	static public inline function binOp(e1, e2, op, ?pos) 
+	static public inline function binOp(e1:Expr, e2, op, ?pos) 
 		return EBinop(op, e1, e2).at(pos);
 		
-	static public inline function field(e, field, ?pos) 
+	static public inline function field(e:Expr, field, ?pos) 
 		return EField(e, field).at(pos);
 		
-	static public inline function call(e, ?params, ?pos) 
+	static public inline function call(e:Expr, ?params, ?pos) 
 		return ECall(e, params == null ? [] : params).at(pos);
 		
 	static public inline function toExpr(v:Dynamic, ?pos:Position) 
