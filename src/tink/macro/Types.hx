@@ -16,7 +16,7 @@ class Types {
 	static var types = new Map<Int,Void->Type>();
 	static var idCounter = 0;
 	
-	macro static public function getType(id:Int):Type
+	@:noUsing macro static public function getType(id:Int):Type
 		return types.get(id)();
 	
 	static public function getID(t:Type, ?reduced = true) 
