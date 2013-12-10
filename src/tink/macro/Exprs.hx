@@ -22,7 +22,25 @@ typedef ParamSubst = {
 	var get(default, null):String->ComplexType;
 }
 
+private class Heureka { public function new() {} }
+
 class Exprs {
+
+	static public function has(e:Expr, condition:Expr->Bool, ?options: { ?enterFunctions: Bool }) {
+		var enterFunctions = options != null && options.enterFunctions;
+		function seek(e:Expr)
+			switch e {
+				case { expr: EFunction(_) } if (options != null || options.enterFunctions != true):
+				case _ if (condition(e)): throw new Heureka();
+				default: haxe.macro.ExprTools.iter(e, seek);
+			}
+		
+		return try {
+			haxe.macro.ExprTools.iter(e, seek);
+			false;
+		}
+		catch (e:Heureka) true;
+	}
 
 	static public inline function is(e:Expr, c:ComplexType)
 		return ECheckType(e, c).at(e.pos).typeof().isSuccess();
@@ -37,7 +55,7 @@ class Exprs {
 				if (Reflect.hasField(rules, s)) 
 					Reflect.field(rules, s)
 				else if (s.startsWith('tmp')) {
-					Reflect.setField(rules, s, MacroApi.tempName('__tink' + s.substr(3)));
+					Reflect.setField(rules, s, MacroApi.tempName(s.substr(3)));
 					replace(s);
 				}
 				else s;
@@ -201,13 +219,11 @@ class Exprs {
 				switch (Inspect.typeof(target)) {
 					case TNull, TInt, TFloat, TBool, TFunction, TUnknown, TClass(_): target;
 					case TEnum(e): 
-						// if (Inspect.getEnum(target) == ComplexType) return retyper(target);
-						// else {
-							var ret:Dynamic = Inspect.createEnumIndex(e, Inspect.enumIndex(target), crawlArray(Inspect.enumParameters(target), transformer, retyper, pos));
-							return
-								if (Inspect.getEnum(ret) == ComplexType) retyper(ret);
-								else ret;							
-						// }
+						var ret:Dynamic = Inspect.createEnumIndex(e, Inspect.enumIndex(target), crawlArray(Inspect.enumParameters(target), transformer, retyper, pos));
+						if (Inspect.getEnum(ret) == ComplexType) 
+							retyper(ret);
+						else 
+							ret;							
 					case TObject:
 						var ret:Dynamic = { };
 						for (field in Reflect.fields(target))
@@ -416,7 +432,7 @@ class Exprs {
 	static public inline function toArray(exprs:Iterable<Expr>, ?pos) 
 		return EArrayDecl(exprs.array()).at(pos);
 		
-	static public inline function toMBlock(exprs, ?pos) 
+	static public inline function toMBlock(exprs:Array<Expr>, ?pos) 
 		return EBlock(exprs).at(pos);
 		
 	static public inline function toBlock(exprs:Iterable<Expr>, ?pos) 
