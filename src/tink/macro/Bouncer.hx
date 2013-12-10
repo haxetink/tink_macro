@@ -12,16 +12,23 @@ package tink.macro;
 		static var idCounter = 0;
 		static var bounceMap = new Map<Int,Void->Expr>();
 		static var outerMap = new Map<Int,Expr->Expr>();
-		static public function bounce(f:Void->Expr, ?pos) {
+		static public function bounceExpr(e:Expr, transform:Expr->Expr) {
+			var id = idCounter++,
+				pos = e.pos;
+			outerMap.set(id, transform);			
+			return macro @:pos(e.pos) tink.macro.Bouncer.catchBounceExpr($e, $v{id});
+		}
+		static public function bounce(f:Void->Expr, ?pos:Position) {
 			var id = idCounter++;
+			pos = pos.sanitize();
 			bounceMap.set(id, f);
-			return 'tink.macro.Bouncer.catchBounce'.resolve(pos).call([id.toExpr(pos)], pos);
+			return macro @:pos(pos) tink.macro.Bouncer.catchBounce($v{id});
 		}
 		static public function outerTransform(e:Expr, transform:Expr->Expr) {
 			var id = idCounter++,
 				pos = e.pos;
 			outerMap.set(id, transform);
-			return 'tink.macro.Bouncer.makeOuter'.resolve(pos).call([e], pos).field('andBounce', pos).call([id.toExpr(pos)], pos);
+			return macro @:pos(e.pos) tink.macro.Bouncer.makeOuter($e).andBounce($v{id});
 		}		
 		static function doOuter(id:Int, e:Expr) {
 			return
@@ -38,17 +45,19 @@ package tink.macro;
 					Context.currentPos().error('unknown id ' + id);	
 		}
 	#else
-	static public function makeOuter<A>(a:A):Bouncer 
+	@:noUsing static public function makeOuter<A>(a:A):Bouncer 
 		return null;
 	#end
-	macro public function andBounce(ethis:Expr, id:Int) {
+	@:noUsing macro public function andBounce(ethis:Expr, id:Int) 
 		return
 			switch (ethis.expr) {
 				case ECall(_, params): doOuter(id, params[0]);
 				default: ethis.reject();
 			}
-	}
-	macro static public function catchBounce(id:Int) {
+
+	@:noUsing macro static public function catchBounce(id:Int) 
 		return doBounce(id);
-	}
+	
+	@:noUsing macro static public function catchBounceExpr(e:Expr, id:Int)
+		return doOuter(id, e);
 }
