@@ -55,14 +55,15 @@ abstract Member(Field) from Field to Field {
 				default: pos.makeFailure('Field should be a variable ' + if (pure) '' else 'or property');
 			}
 	
-	public function addMeta(name, ?pos, ?params) {
+	public function addMeta(name, ?pos, ?params):Member {
 		if (this.meta == null)
 			this.meta = [];
 		this.meta.push({
 			name: name,
 			pos: if (pos == null) this.pos else pos,
 			params: if (params == null) [] else params
-		});		
+		});
+		return this;
 	}
 		
 	public function extractMeta(name) {
@@ -76,6 +77,7 @@ abstract Member(Field) from Field to Field {
 		return pos.makeFailure('missing @$name');
 	}
 	
+	public inline function asField():Field return this;
 	public function publish() 
 		if (this.access == null) this.access = [APublic];
 		else {
