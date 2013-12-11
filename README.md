@@ -6,7 +6,7 @@ Explained in current marketing speak, `tink_macro` is *the* macro toolkit ;)
 
 Historically, this library's predecessor for Haxe 2 started out when macros were a completely new feature. Boldly titled "the ultimate macro utility belt" it implemented reification and expression pattern matching before they were Haxe language features, and added a higher level macro tooling API (for string conversion, expression traversal and what not) to fill in the holes that the standard library left.
 
-As Haxe evolved and some of the functionality has been integrated/reimplemented in the standard library or even as first class language feature, the mission of `tink_macro` has shifted. Rather than being a standalone solution for macro programming, it is now a complement to all the things the Haxe language and the `haxe.macro` package can do out of the box.
+As Haxe evolved and some of the functionality has been integrated/reimplemented/superceeded in the standard library or even as first class language feature, the mission of `tink_macro` has shifted. Rather than being a standalone solution for macro programming, it is now a complement to all the things the Haxe language and the `haxe.macro` package can do out of the box.
 
 ### Overview
 
@@ -114,6 +114,8 @@ Attempts to determine the type of an expression. Note that you can use `locals` 
 
 #### Advanced transformations
 
+- `function has(e:Expr, condition:Expr->Bool, ?options: { ?enterFunctions: Bool })`
+This function actually does no transformation, but is very close to the rest of these functions. It allows you to check whether an expression has a sub-expression that satisfies `condition`. By default, it does not enter nested functions. 
 - `function transform(source:Expr, transformer:Expr->Expr, ?pos:Position):Expr`  
 Will traverse an expression inside out and build a new one through the supplied transformer.
 - `function substitute(source:Expr, vars:Dynamic<Expr>, ?pos:Position):Expr`  
@@ -278,6 +280,7 @@ abstract Member from Field to Field {
 	function extractMeta(name:String):Outcome<MetadataEntry, tink.core.Error>;
 	
 	function publish():Bool;
+	function asField():Field;
 }
 ```
 
@@ -288,6 +291,8 @@ The `publish` method will make a field `public` if it is not `private`. This can
 The `extractMeta` method will "peel of" the first tag with a given `name` - if available. Note that the tag will be removed from the member.
 
 The `getVar` method will get information about the field if it is a variable or yield failure otherwise. If `pure` is set to true, it will fail for properties also.
+
+At any time you can also use `asField` to interact with the data the good old way. Converting between `Member` and `Field` is without overhead.
 
 ## ClassBuilder
 
