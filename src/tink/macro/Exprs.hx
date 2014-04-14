@@ -99,7 +99,7 @@ class Exprs {
 				return
 					switch (e.expr) {
 						case EField(owner, field):
-							getPrivate(owner, field, e.pos);
+							getPrivate(owner, field, e.pos);//TODO: this needs to leave types untouched
 						default: e;
 					}
 			);
