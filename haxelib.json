@@ -8,7 +8,7 @@
 	"releasenote": "Added sub-expression testing",
 	"contributors": ["back2dos"],
 	"dependencies": {
-		"tink_core": "1.0.0-beta.5"
+		"tink_core": "1.0.0-rc.2"
 	},
 	"classPath": "src" 
 }
