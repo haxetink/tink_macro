@@ -60,7 +60,7 @@ class Types {
 	static public function getFields(t:Type, ?substituteParams = true) 
 		return
 			switch (reduce(t)) {
-				case TInst(c, _): 
+				case TInst(c, params): 
 					var id = c.toString(),
 						c = c.get();
 					if (!fieldsCache.exists(id)) {
@@ -72,62 +72,10 @@ class Types {
 					if (substituteParams && ret.isSuccess()) {
 						var e = ECheckType(macro null, toComplex(t)).at();
 						var fields = Reflect.copy(ret.sure());
-						ret = Success(fields);
 						
 						for (field in fields) 
-							if (field.isPublic) {
-								var member = e.field(field.name, e.pos);
-								field.type = 
-									switch (member.typeof()) {
-										case Success(t): t;
-										case Failure(f):
-											switch reduce(field.type) {
-												case TFun(args, _):
-													var fArgs = [],
-														fParams = [];
-													for (a in args)
-														fArgs.push(a.name.toArg());
-													var f = (macro null).func(fArgs, false); 
-													f.expr = EReturn(member.call(f.getArgIdents(), e.pos)).at(e.pos);
-													f.asExpr(e.pos).typeof().sure();
-												default:
-													f.throwSelf();
-											}
-									}	
-							}
-							else {
-								var kind = 
-									switch (field.kind) {
-										case FVar(read, write): 
-											FProp(accessToName(read), accessToName(write, true), field.pos.makeBlankType());
-										default: 
-											switch (reduce(field.type)) {
-												case TFun(args, _):
-													var argList = [];
-													for (arg in args)
-														argList.push(
-															arg.name.toArg(field.pos.makeBlankType())
-														);
-													FFun({
-														args : argList,
-														ret: field.pos.makeBlankType(),
-														expr: null,
-														params: []
-													});
-												default: null;
-											}
-									}
-								if (kind != null) {
-									var f = {
-										name: field.name,
-										pos: field.pos,
-										kind: kind,
-										access: [APrivate]
-									};				
-									field.type = ECheckType(e, TAnonymous([f])).at(e.pos).field(field.name, e.pos).typeof().sure();
-								}								
-							}
-						}
+							field.type = haxe.macro.TypeTools.applyTypeParameters(field.type, c.params, params);
+					}		
 					ret;
 				case TAnonymous(anon): Success(anon.get().fields);
 				default: Context.currentPos().makeFailure('type has no fields');
