@@ -4,11 +4,11 @@
 	"license": "MIT",
 	"tags": ["tink", "macro", "utility"],
 	"description": "The macro toolkit ;)",
-	"version": "0.3.0-beta",
-	"releasenote": "Added sub-expression testing",
+	"version": "0.4.0",
+	"releasenote": "Various improvements",
 	"contributors": ["back2dos"],
 	"dependencies": {
-		"tink_core": "1.0.0-rc.2"
+		"tink_core": "1.0.0-rc.3"
 	},
 	"classPath": "src" 
 }
