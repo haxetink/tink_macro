@@ -1,6 +1,7 @@
--lib tink_core
+-cp ../tink_core/src
 -cp src
 -cp tests
+-D tink_macro
 -main Run
 -neko bin/tests.n
 #iota start Run.bat
