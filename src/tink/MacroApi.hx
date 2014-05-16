@@ -29,4 +29,27 @@ class MacroApi {
 		
 	static public function pos() 
 		return haxe.macro.Context.currentPos();
+	
+	static public function onTypeNotFound(f:String->haxe.macro.Expr.TypeDefinition) 
+		haxe.macro.Context.onTypeNotFound(function (name:String) {
+			@:privateAccess Positions.errorFunc = @:privateAccess Positions.abortTypeBuild;
+			
+			var ret = 
+				try f(name)
+				catch (abort:tink.macro.Positions.AbortBuild) {
+					var cl = macro class {
+						static var __error = ${Positions.errorExpr(abort.pos, abort.message)};
+					}
+					var path = name.split('.');
+					cl.name = path.pop();
+					cl.pack = path;
+					cl.pos = abort.pos;
+					cl;
+				}
+				
+			@:privateAccess Positions.errorFunc = @:privateAccess Positions.contextError;	
+			
+			return ret;
+		});
+	
 }

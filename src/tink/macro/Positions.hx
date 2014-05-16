@@ -30,8 +30,17 @@ class Positions {
 			return Positions.error(pos, error);
 		}, pos);		
 
-	static public inline function error(pos:Position, error:Dynamic):Dynamic 
-		return Context.error(Std.string(error), sanitize(pos));
+
+	static public function error(pos:Position, error:Dynamic):Dynamic 
+		return errorFunc(sanitize(pos), Std.string(error));
+	
+	static function contextError(pos:Position, error:String):Dynamic 
+		return Context.error(error, pos);
+	
+	static function abortTypeBuild(pos:Position, error:String):Dynamic 
+		return throw new AbortBuild(error, pos);
+		
+	static var errorFunc = contextError;
 	
 	static public inline function warning<A>(pos:Position, warning:Dynamic, ?ret:A):A {
 		Context.warning(Std.string(warning), pos);
@@ -40,4 +49,7 @@ class Positions {
 
 	static public function makeFailure<A>(pos:Position, reason:String):Outcome<A, Error> 
 		return Failure(new Error(reason, pos));
+}
+
+class AbortBuild extends tink.core.Error {
 }
