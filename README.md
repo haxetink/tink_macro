@@ -10,25 +10,36 @@ As Haxe evolved and some of the functionality has been integrated/reimplemented/
 
 ### Overview
 
-The library is build on top of the haxe macro API and `tink_core`, having two major parts:
+The library is build on top of the haxe macro API and `tink_core`, having three major parts:
 
-1. [Extended macro API](#macro-api)
-    - Expression tools
-        - [Basic helpers](#basic-helpers)
-        - [Extracting constants](#extracting-constants)
-        - [Shortcuts](#shortcuts)
-        - [Type inspection](#type-inspection)
-        - [Advanced transformations](#advanced-transformations)
-    - [Position tools](#position-tools)
-    - [Type tools](#type-tools)
-    - [Function tools](#function-tools)
-    - [Operation tools](#operation-tools)
-    - [Metadata tools](#metadata-tools)
- 
-2. A `@:build` infrastructure.
-    - [Member](#member)
-    - [ClassBuilder](#classbuilder)
-    - [Constructor](#constructor)
+<!-- START INDEX -->
+- [Macro API](#macro-api)
+	- 
+		- [Expression Tools](#expression-tools)
+			- [Basic Helpers](#basic-helpers)
+			- [Extracting Constants](#extracting-constants)
+			- [Shortcuts](#shortcuts)
+			- [Type Inspection](#type-inspection)
+			- [Advanced Transformations](#advanced-transformations)
+		- [Position Tools](#position-tools)
+		- [Type Tools](#type-tools)
+		- [Function Tools](#function-tools)
+		- [Operation Tools](#operation-tools)
+		- [Metadata Tools](#metadata-tools)
+- [Build Infrastructure](#build-infrastructure)
+	- [Member](#member)
+	- [ClassBuilder](#classbuilder)
+	- [Constructor](#constructor)
+		- [Creation](#creation)
+		- [Visibility](#visibility)
+		- [Initial Super Call](#initial-super-call)
+		- [Simple Modifications](#simple-modifications)
+		- [Field Initialization](#field-initialization)
+			- [Setter Bypass](#setter-bypass)
+			- [Initialization Options](#initialization-options)
+		- [Expression Level Transformation](#expression-level-transformation)
+- [Type Resolution Infrastructure](#type-resolution-infrastructure)
+<!-- END INDEX -->
 
 # Macro API
 
@@ -36,91 +47,91 @@ It is suggested to use this API by `using tink.MacroAPI;`
 
 Apart form `tink_macro` specific things, it will also use `haxe.macro.ExprTools` and `tink.core.Outcome`.
 
-### Expression tools
+### Expression Tools
 
-#### Basic helpers
+#### Basic Helpers
 
-- `function at(e:ExprDef, ?pos:Position):Expr`  
+- `at(e:ExprDef, ?pos:Position):Expr`  
 A short hand for creating expression as for example `EReturn(value).at(position)`, instead of the more verbose `{ expr: EReturn(value), pos: position }`.
 If `pos` is omitted, it defaults to `Context.currentPos()`
-- `function ifNull(e:Expr, fallback:Expr):Expr`  
+- `ifNull(e:Expr, fallback:Expr):Expr`  
 Because optional arguments to macros actually are not `null`, but in fact `EConst(CIdent('null'))`, you can use this to easily substitute those against a default value.
-- `function reject(e:Expr, ?reason:String):Dynamic`  
+- `reject(e:Expr, ?reason:String):Dynamic`  
 Rejects an expression and displays a generic or custom error message
-- `function toString(e:Expr):String`  
+- `toString(e:Expr):String`  
 Converts an expression into the corresponding Haxe source code
-- `function log(e:Expr, ?pos:Position):Expr`  
+- `log(e:Expr, ?pos:Position):Expr`  
 Traces the string representation of an expression and returns it.
 
-#### Extracting constants
+#### Extracting Constants
 
-- `function isWildcard(e:Expr):Bool`  
+- `isWildcard(e:Expr):Bool`  
 Checks whether an expression is the identifier `_`
-- `function getInt(e:Expr):Outcome<Int, tink.core.Error>`  
+- `getInt(e:Expr):Outcome<Int, tink.core.Error>`  
 Attempts extracting an integer constant from an expression
-- `function getString(e:Expr):Outcome<String, tink.core.Error>`  
+- `getString(e:Expr):Outcome<String, tink.core.Error>`  
 Attempts extracting a string constant from an expression
-- `function getIdent(e:Expr):Outcome<String, tink.core.Error>`  
+- `getIdent(e:Expr):Outcome<String, tink.core.Error>`  
 Attempts extracting an identifier from an expression. Note that an identifier can be a CIdent or CType, with the only difference being the capitalization of the first letter.
-- `function getName(e:Expr):Outcome<String, tink.core.Error>`  
+- `getName(e:Expr):Outcome<String, tink.core.Error>`  
 Attempts extracting a name, i.e. a string constant or identifier from an expression
 
 #### Shortcuts
 
 Often reification is prefereable to these shortcuts - if applicable. Unlike reification, the position of these expressions will default to `Context.currentPos()` rather than the position where they were created.
 
-- `function toExpr(v:Dynamic, ?pos:Position):Expr`  
+- `toExpr(v:Dynamic, ?pos:Position):Expr`  
 Converts a constant to a corresponding haXe expression. For example `5` would become `{ expr: EConst(CInt('5'), pos: pos }`
-- `function field(e:Expr, field:String, ?pos:Position):Expr`  
+- `field(e:Expr, field:String, ?pos:Position):Expr`  
 Creates a field access to a given expression.
-- `function call(e:Expr, ?params:Array<Expr>, ?pos:Position):Expr`  
+- `call(e:Expr, ?params:Array<Expr>, ?pos:Position):Expr`  
 Creates a call to a given expression.
-- `function unOp(e:Expr, op:UnOp, ?postFix:Bool = false, ?pos:Position):Expr`  
+- `unOp(e:Expr, op:UnOp, ?postFix:Bool = false, ?pos:Position):Expr`  
 Creates a unary operation on a given expression.
-- `function binOp(e1:Expr, e2:Expr, op:BinOp, ?pos:Position):Expr`  
+- `binOp(e1:Expr, e2:Expr, op:BinOp, ?pos:Position):Expr`  
 Creates a binary operation on a given expression.
-- `function drill(parts:Array<String>, ?pos:Position):Expr`  
+- `drill(parts:Array<String>, ?pos:Position):Expr`  
 Creates an expression, that "drills" through an array of Strings as a chain of identifiers. For example `['foo', 'bar', 'baz'].drill()` will generate the code `foo.bar.baz`.
-- `function resolve(s:String, ?pos:Position):Expr`  
+- `resolve(s:String, ?pos:Position):Expr`  
 A shortcut to drill, only with a '.'-separated path. Especially helpful when calling global functions: `"haxe.Log.trace".resolve().call(["Hello world".toExpr()])`
-- `function add(e1:Expr, e2:Expr, ?pos:Position):Expr`  
+- `add(e1:Expr, e2:Expr, ?pos:Position):Expr`  
 A shorthand to return the sum of two expressions
-- `function assign(target:Expr, value:Expr, ?pos:Position):Expr`
+- `assign(target:Expr, value:Expr, ?pos:Position):Expr`
 Generates an assign statement.
-- `function toBlock(exprs:Iterable<Expr>, ?pos:Position):Expr`  
+- `toBlock(exprs:Iterable<Expr>, ?pos:Position):Expr`  
 Takes multiple expressions and turns them into a block
-- `function toMBlock(exprs:Array<Block>, ?pos:Position):Expr`  
+- `toMBlock(exprs:Array<Block>, ?pos:Position):Expr`  
 Takes multiple expressions and turns them into a *mutable* block, i.e. if you modify the `exprs` given to this function, the expression will be affected. Use this with care! Especially, do not return expressions to client code that you intend to modify further. This can lead to weird behavior and errors that are hard to track, even more so because all this happens at macro time.
-- `function toArray(exprs:Iterable<Expr>, ?pos:Position):Expr`  
+- `toArray(exprs:Iterable<Expr>, ?pos:Position):Expr`  
 Takes multiple expressions and turns them into an array declaration.
-- `function toFields(object:Dynamic<Expr>, ?pos:Position):Expr`  
+- `toFields(object:Dynamic<Expr>, ?pos:Position):Expr`  
 Takes a key-value-map and turns it into an object declaration.
-- `function define(name:String, ?init:Expr, ?typ:ComplexType, ?pos:Position):Expr`  
+- `define(name:String, ?init:Expr, ?typ:ComplexType, ?pos:Position):Expr`  
 Generates a variable declaration. Please note that the parent expression of a variable declaration must be a block.
-- `function cond(cond:ExprRequire<Bool>, cons:Expr, ?alt:Expr, ?pos:Position):Expr`  
+- `cond(cond:ExprRequire<Bool>, cons:Expr, ?alt:Expr, ?pos:Position):Expr`  
 Generates a simple if statement.
-- `function iterate(target:Expr, body:Expr, ?loopVar:String = 'i', ?pos:Position):Expr`  
+- `iterate(target:Expr, body:Expr, ?loopVar:String = 'i', ?pos:Position):Expr`  
 Will loop over `target` with a loop variable called `loopVar` using `body`-
 
-#### Type inspection
+#### Type Inspection
 
-- `function is(e:Expr, c:ComplexType):Bool`  
+- `is(e:Expr, c:ComplexType):Bool`  
 Tells you whether a given expression has a given type. 
 If you have a `Type` at hand, use `toComplex` to convert it to a complex type.
-- `function getIterType(target:Expr):Outcome<Type, tink.core.Error>`  
+- `getIterType(target:Expr):Outcome<Type, tink.core.Error>`  
 Inspects, whether an expression can be iterated over and if so returns the element type.
-- `function typeof(expr:Expr, ?locals:Array<Var>):Outcome<Type, tink.core.Error>`  
+- `typeof(expr:Expr, ?locals:Array<Var>):Outcome<Type, tink.core.Error>`  
 Attempts to determine the type of an expression. Note that you can use `locals` to hint the compiler the type of certain identifiers. For example if you are in a build macro, and you want to get the type of a subexpression of a method body, you could "fake" the other members of the class as local variables, because in that context, the other members do not yet exists from the compiler's perspective.
 
-#### Advanced transformations
+#### Advanced Transformations
 
-- `function has(e:Expr, condition:Expr->Bool, ?options: { ?enterFunctions: Bool })`
+- `has(e:Expr, condition:Expr->Bool, ?options: { ?enterFunctions: Bool })`
 This function actually does no transformation, but is very close to the rest of these functions. It allows you to check whether an expression has a sub-expression that satisfies `condition`. By default, it does not enter nested functions. 
-- `function transform(source:Expr, transformer:Expr->Expr, ?pos:Position):Expr`  
+- `transform(source:Expr, transformer:Expr->Expr, ?pos:Position):Expr`  
 Will traverse an expression inside out and build a new one through the supplied transformer.
-- `function substitute(source:Expr, vars:Dynamic<Expr>, ?pos:Position):Expr`  
+- `substitute(source:Expr, vars:Dynamic<Expr>, ?pos:Position):Expr`  
 Will build a new expression substituting identifiers given found as fields of `vars` through the corresponding expressions.
-- `function substParams(source:Expr, rule: ParamSubst, ?pos:Position):Expr`  
+- `substParams(source:Expr, rule: ParamSubst, ?pos:Position):Expr`  
 Traverse an expression and replace any *type* that looks like a type parameter following the given `rule` of the following structure:
 
 	```
@@ -132,9 +143,9 @@ Traverse an expression and replace any *type* that looks like a type parameter f
 	
 	A `StringMap` is a natural fit here, but you can do whatever you want.
 	Note that if the type for a given name is a `TPath`, it will also be substituted for class names in `new` statements and for identifiers of that name.
-- `function typedMap(source:Expr, f:Expr->Array<Var>->Expr, ?ctx:Array<Var>, ?pos:Position):Expr`  
+- `typedMap(source:Expr, f:Expr->Array<Var>->Expr, ?ctx:Array<Var>, ?pos:Position):Expr`  
 Similar to transform, but handles expressions in top-down order and keeps track of variable declarations, function arguments etc. Only expressions that are not changed by the transformer function `f` are traversed further. The second argument to `f` is the current context that you can use in `typeof` to determine the type of a subexpression.
-- `function bounce(f:Void->Expr, ?pos:Position):Expr`  
+- `bounce(f:Void->Expr, ?pos:Position):Expr`  
 This is a way to "bounce" out of a macro for a while. Assume you have this expression: `{ var a = 5, b = 6; a + b; }` and you want to analyze the second statement, you either have to track variables manually or do a `typedMap` but that may be too much work. What you would do here is something like this (stupid example):  
 
 	```
@@ -142,7 +153,7 @@ This is a way to "bounce" out of a macro for a while. Assume you have this expre
 	[block[0], onBounce.bounce(block[1].pos)].toBlock();
 	```
 
-- `function yield(source:Expr, yielder:Expr->Expr, ?options:{ ?leaveLoops:Bool }):Expr`  
+- `yield(source:Expr, yielder:Expr->Expr, ?options:{ ?leaveLoops:Bool }):Expr`  
 This will traverse an expression and will apply the `yielder` to the "leafs", which in this context are the subexpressions that determine a return value. Example:
 
 	```
@@ -170,77 +181,77 @@ This will traverse an expression and will apply the `yielder` to the "leafs", wh
 
 	If you set `options.leaveLoops` to `true`, then loops (both for and while) will be considered leafs. 
 	
-### Position tools
+### Position Tools
 
-- `function sanitize(pos:Position):Position`  
-Returns the position itself or `Context.currentPos()` if it's null.
-- `function makeBlankType(pos:Position):ComplexType`  
+- `sanitize(pos:Position):Position`  
+Returns the position ITself or `Context.currentPos()` if it's null.
+- `makeBlankType(pos:Position):ComplexType`  
 Builds a "blank type", i.e. `Unknown`. Useful when you want to defer work to type inference.
-- `function error(pos:Position, error:Dynamic):Dynamic`  
+- `error(pos:Position, error:Dynamic):Dynamic`  
 Raises an error at the given position.
-- `function errorExpr(pos:Position, error:Dynamic):Expr`  
+- `errorExpr(pos:Position, error:Dynamic):Expr`  
 Returns an expression, the later compilation of which will cause an error to be raised. This will let your macro continue normally unlike `error`, which causes execution to stop and can lead to more errors, because other "processable" code is never transformed to valid Haxe code and the user is burried in tons of error messages.
-- `function makeFailure<A, Reason>(pos:Position, reason:Reason):Outcome<A, tink.core.Error>`  
+- `makeFailure<A, Reason>(pos:Position, reason:Reason):Outcome<A, tink.core.Error>`  
 Creates a failed `Outcome` associated with the supplied position.
-- `function getOutcome<D, F>(pos:Position, outcome:Outcome<D, F>):D`  
+- `getOutcome<D, F>(pos:Position, outcome:Outcome<D, F>):D`  
 Attempts getting the result of the supplied outcome. If it is a failure, it will cause an error at the given position.
 
-### Type tools
+### Type Tools
 
-- `function getID(t:Type, ?reduced = true):Null<String>`  
+- `getID(t:Type, ?reduced = true):Null<String>`  
 Returns a String identifier for a type if available. By default, the type will be reduced prior to getting its name (typedefs are resolved etc.). With `reduced = false` you can also get the name of a typedef.
-- `function getFields(t:Type, ?substituteParams = true):Outcome<Array<ClassField>, Outcome<String>>`  
+- `getFields(t:Type, ?substituteParams = true):Outcome<Array<ClassField>, Outcome<String>>`  
 Attempts to get all fields of a type. By default, this call will perform a parameter substitution, i.e. called on `Array<Int>`, `pop` will be of type `Void->Int`. With `substituteParams = false`, `pop` will be of type `Void->Array.T` instead. 
-- `function toString(t:ComplexType):String`  
+- `toString(t:ComplexType):String`  
 Converts a `ComplextType` to corresponding Haxe code. No such thing exists for `Type` as it is actually is automatically converted to rather readable strings.
-- `function isSubTypeOf(t:Type, of:Type, ?pos:Position):Outcome < Type, tink.core.Error >`  
+- `isSubTypeOf(t:Type, of:Type, ?pos:Position):Outcome < Type, tink.core.Error >`  
 Checks whether one type is a subtype of another. Returns an `Outcome` to give back information on *why* `t` is not a subtype of `of`.
-- `function toType(t:ComplexType, ?pos:Position):Outcome<Type, tink.core.Error>`  
+- `toType(t:ComplexType, ?pos:Position):Outcome<Type, tink.core.Error>`  
 Attempts converting a `ComplextType` to a `Type`. This can fail for a number of reasons, such as no actual type being known for a supplied path.
-- `function asTypePath(s:String, ?params:Array<TypeParam>):TypePath`  
+- `asTypePath(s:String, ?params:Array<TypeParam>):TypePath`  
 Will build a `TypePath` from a '.'-separated path.
-- `function asComplexType(s:String, ?params:Array<TypeParam>):ComplexType`  
+- `asComplexType(s:String, ?params:Array<TypeParam>):ComplexType`  
 A shortcut to `asTypePath` to build a `ComplexType` from a '.'-separated path.
-- `function reduce(type:Type, ?once:Bool):Type`  
+- `reduce(type:Type, ?once:Bool):Type`  
 Reduces a type by following `TType` and resolving `TLazy`.
-- `function isVar(field:ClassField):Bool`  
+- `isVar(field:ClassField):Bool`  
 Will tell you whether a field is a variable or not. Signature is likely to change soon.
-- `function toComplex(type:Type, ?option:{ ?direct: Bool }):ComplexType`  
+- `toComplex(type:Type, ?option:{ ?direct: Bool }):ComplexType`  
 Will convert a `Type` to a `ComplexType`. Ideally this is done with `Context.toComplexType` but for monomorphs and the like, this builtin method fails and `tink_macro` uses a hack to make it work none the less. You can also use `{ direct : true }` to force this hack in case the translation fails (which can be the case with private types).
 
-### Function tools
+### Function Tools
 
-- `function asExpr(f:Function, ?name:String, ?pos:Position):Expr`  
+- `asExpr(f:Function, ?name:String, ?pos:Position):Expr`  
 Converts a function to an expression, i.e. a local function definition.
-- `function func(body:Expr, ?args, ?ret:ComplexType, ?params:Array<TypeParamDecl>, ?makeReturn = true):Function`  
+- `func(body:Expr, ?args, ?ret:ComplexType, ?params:Array<TypeParamDecl>, ?makeReturn = true):Function`  
 Builds a `Function` from an expression. By default, the body is returned.
-- `function toArg(name:String, ?t:ComplexType, ?opt = false, ?value:Expr = null):FunctionArg`  
+- `toArg(name:String, ?t:ComplexType, ?opt = false, ?value:Expr = null):FunctionArg`  
 A shorthand to create function arguments.
-- `function getArgIdents(f:Function):Array<Expr>`  
+- `getArgIdents(f:Function):Array<Expr>`  
 Will extract the argument list of a function as an expression list of identifiers (usefull when writing call-forwarding macros or the like).
 
-### Operation tools
+### Operation Tools
 
-- `function get(o:Binop, e:Expr):Outcome<{ e1:Expr, e2:Expr, pos:Position }, tink.core.Error>`  
+- `get(o:Binop, e:Expr):Outcome<{ e1:Expr, e2:Expr, pos:Position }, tink.core.Error>`  
 Attempts to extract a specific binary operation from an expression.
-- `function getBinop(e:Expr):Outcome<{ e1:Expr, e2:Expr, pos:Position, op:Binop }, tink.core.Error>`  
+- `getBinop(e:Expr):Outcome<{ e1:Expr, e2:Expr, pos:Position, op:Binop }, tink.core.Error>`  
 Attempts to decompose an expression into the parts of a binary operation.
-- `function make(op:Binop, e1:Expr, e2:Expr, ?pos:Position):Expr`  
+- `make(op:Binop, e1:Expr, e2:Expr, ?pos:Position):Expr`  
 Builds a binary operation. Just syntactic sugar for the `Expr::binOp` listed above. It's often easier to read.
 
-- `function get(o:Unop, e:Expr, postfix:Bool = false):Outcome<{ e:Expr, pos:Position }, tink.core.Error>`  
+- `get(o:Unop, e:Expr, postfix:Bool = false):Outcome<{ e:Expr, pos:Position }, tink.core.Error>`  
 Attempts to extract a specific unary operation from an expression.
-- `function getUnop(e:Expr):Outcome<{ op:Unop, e:Expr, postFix:Bool, pos:Position }, tink.core.Error>`  
+- `getUnop(e:Expr):Outcome<{ op:Unop, e:Expr, postFix:Bool, pos:Position }, tink.core.Error>`  
 Attempts to decompose an expression into the parts of a unary operation.
 
-### Metadata tools
+### Metadata Tools
 
-- `function toMap(m:Metadata):Map<String, Array<Array<Expr>>`
+- `toMap(m:Metadata):Map<String, Array<Array<Expr>>`
 Will deconstruct an array of metadata tags to a `Map` mapping the tag names to an array of the argument lists of each tag with that name. So `@foo(1) @foo(2) @bar` becomes `["foo" => [[1], [2]], "bar" => [[]]]`
-- `function getValues(m:Metadata, name:String):Array<Array<Expr>>`  
+- `getValues(m:Metadata, name:String):Array<Array<Expr>>`  
 Will construct an array of the of the arguments lists of all occurences of the tag `name` in a given `Metadata`. The result is the same as `m.toMap()[name]` only it's far more efficient.
 
-# Build infrastructure
+# Build Infrastructure
 
 Writing build macros can sometimes be a little tedious. But `tink_macro` is here to help!
 
@@ -358,21 +369,21 @@ When a `Constructor` is created automatically and without `fallback` a call to t
 
 The constructor starts out without `private` or `public`. Use `isPublic` and `publish` to control visibility analogously to `Member`.
 
-### Initial super call
+### Initial Super Call
 
 If the first statement in a constructor is a `super` call (which is true for automatically generated ones), then modification of the constructor through this API will maintain that property. Generally, that's also the suggested way to go. If you *need* to execute things *before* that's a symptom of a [fragile base class](http://en.wikipedia.org/wiki/Fragile_base_class). Still, if *absolutely* want to do it, the slightest modification can be used to not match the `super` call detection. If the first statement is `@later super(...)` or `(super(...))` or whatever that is not an immediate call to super, then it will not be detected as a super call and will not be treated specially.
 
-### Simple modifications
+### Simple Modifications
 
 Adding any statements to the constructor is unsurprisingly achieved by `addStatement`. Setting `prepend` to true, you can add the statement at the very beginning of the constructor, but after the `super` call if one was detected. Again, relying on order can be indicative of a fragile design.
 
 To add a constructor argument, you can just use `addArg`.
 
-### Field initialization
+### Field Initialization
 
 The `init` method is the swiss army knife of initializing fields. The `options.prepend` flag works the same as `prepend` for `addStatement`. As for `options.bypass`, the behavior is somewhat magical.
 
-#### Setter bypass
+#### Setter Bypass
 
 It is important to know that when you initialize a field with `options.bypass` set to true, existing setters will by bypassed. That's particularly helpful if your setter triggers a side effect that you don't want triggered. This is achieved by generating the assignment as `(untyped this).$name = $value`. To make the code typesafe again, this is prefixed with `if (false) { var __tmp = this.$name; __tmp = $value; }`. This code is later thrown out by the compiler. Its role is to ensure type safety without interfering with the normal typing order.
 
@@ -380,7 +391,7 @@ Setter bypass also causes the field to gain an `@:isVar`. And currently, with `-
 
 Please do note, that `value` will be in the generated code twice, therefore if it is an expression that calls a macro, the macro will be called twice.
 
-#### Initialization options
+#### Initialization Options
 
 The different options for initialization are as follows:
 
@@ -394,6 +405,23 @@ enum FieldInit {
 
 Here, `Value` will just use a plain expression, whereas `Arg` and `OptArg` will use a mandatory or optional argument respectively. Buth have a `noPublish` field. If left to default, their use will cause an implicit `publish()`
 
-### Expression level transformation
+### Expression Level Transformation
 
 Because the state of a constructor is rather delicate, the API prohibits you to just mess around with the whole constructor body at an expression level. For that to happen, you can register `onGenerate` hooks. These will be called when the corresponding `ClassBuilder` does its export. The hooks are cleared after the export.
+
+# Type Resolution Infrastructure
+
+The plain `Context.onTypeNotFound` API has two major drawbacks:
+
+1. There is no way for two resolvers to communicate with one another. As soon as the first one is able to create a fallback type, all subsequent ones are not invoked.
+2. Calls to `Context.error` from within a type resolver will cause abortion of the call, which makes error reporting tricky.
+
+In `tink_macro` we define the following:
+
+```
+typedef TypeResolution = Ref<Either<String, TypeDefinition>>;
+```
+
+This is the current state of the resolution, meaning we either have a `String`, which is the name of the type that wasn't found, or a `TypeDefinition` which is a "proposal" given by already invoked resolvers.
+
+To register a type resolver, you can add a callback to `tink.MacroApi.typeNotFound` which is a `Signal<TypeResolution>`.
