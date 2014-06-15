@@ -39,7 +39,7 @@ The library is build on top of the haxe macro API and `tink_core`, having three 
 			- [Initialization Options](#initialization-options)
 		- [Expression Level Transformation](#expression-level-transformation)
 - [Type Resolution Infrastructure](#type-resolution-infrastructure)
- 
+
 <!-- END INDEX -->
 
 # Macro API
