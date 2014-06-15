@@ -3,6 +3,7 @@ package tink;
 import haxe.macro.Expr.TypeDefinition;
 
 using tink.CoreApi;
+using tink.macro.Positions;
 
 typedef Positions = tink.macro.Positions;
 typedef ExprTools = haxe.macro.ExprTools;
@@ -41,33 +42,51 @@ class MacroApi {
 	static function get_typeNotFound() {
 		if (typeNotFound == null) {
 			var trigger = Signal.trigger();
-			haxe.macro.Context.onMacroContextReused(function () return false);
-			haxe.macro.Context.onTypeNotFound(function (name:String) {
-				@:privateAccess Positions.errorFunc = @:privateAccess Positions.abortTypeBuild;
+			
+			var listening = false;
+			
+			function register() {
+				if (listening) return;
+				listening = true;
 				
-				var def = Ref.to(Left(name));
-				
-				try trigger.trigger(def)
-				catch (abort:tink.macro.Positions.AbortBuild) {
-					var cl = macro class {
-						static var __error = ${Positions.errorExpr(abort.pos, abort.message)};
-					}
-					var path = name.split('.');
-					cl.name = path.pop();
-					cl.pack = path;
-					cl.pos = abort.pos;
-					def.value = Right(cl);
-				}
+				haxe.macro.Context.onTypeNotFound(function (name:String) {
+					@:privateAccess Positions.errorFunc = @:privateAccess Positions.abortTypeBuild;
 					
-				@:privateAccess Positions.errorFunc = @:privateAccess Positions.contextError;	
-				
-				return switch def.value {
-					case Right(def): def;
-					default: null;
-				}
+					var def = Ref.to(Left(name));
+					
+					try trigger.trigger(def)
+					catch (abort:tink.macro.Positions.AbortBuild) {
+						var cl = macro class {
+							static var __error = ${Positions.errorExpr(abort.pos, abort.message)};
+						}
+						var path = name.split('.');
+						cl.name = path.pop();
+						cl.pack = path;
+						cl.pos = abort.pos;
+						def.value = Right(cl);
+					}
+						
+					@:privateAccess Positions.errorFunc = @:privateAccess Positions.contextError;	
+					
+					return switch def.value {
+						case Right(def): def;
+						default: null;
+					}
+				});
+			}
+			
+			register();
+			
+			haxe.macro.Context.onMacroContextReused(function () {
+				listening = false;
+				return true;
 			});
 			
-			typeNotFound = trigger.asSignal();
+			var ret = trigger.asSignal();
+			typeNotFound = new Signal(function (cb) {
+				register();
+				return ret.handle(cb);
+			});
 		}
 		return typeNotFound;
 	}
