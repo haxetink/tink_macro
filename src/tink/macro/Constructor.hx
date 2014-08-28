@@ -97,7 +97,7 @@ class Constructor {
 				default:
 			}
 			
-			if (Context.defined('dce') && Context.definedValue('dce') == 'full') {
+			if (!Context.defined('js') && Context.defined('dce') && Context.definedValue('dce') == 'full') {
 				if (keepers.length == 0)
 					keepers.push(macro return);
 				keepers.push(macro this.$name = $e);
