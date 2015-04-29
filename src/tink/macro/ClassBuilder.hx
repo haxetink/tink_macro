@@ -14,26 +14,22 @@ class ClassBuilder {
 	var memberList:Array<Member>;
 	var macros:Map<String,Field>;
 	var constructor:Null<Constructor>;
-	public var target(default, null):ClassType;//TODO: this could be lazy
+	public var target(default, null):ClassType;
 	var superFields:Map<String,Bool>;
-	var keepers:Array<Expr>;//hack to force field generation
-	public function new() { 
+		
+	public function new(?target, ?fields) { 
+		if (target == null) 
+			target = Context.getLocalClass().get();
+			
+		if (fields == null)
+			fields = Context.getBuildFields();
+			
 		this.memberMap = new Map();
 		this.memberList = [];
 		this.macros = new Map();
-		this.target = Context.getLocalClass().get();
+		this.target = target;
 		
-		switch (target.kind) {
-			case KAbstractImpl(a):
-				//TODO: remove this whole workaround
-				var meta = target.meta;
-				for (tag in a.get().meta.get())
-					if (!meta.has(tag.name)) 
-						meta.add(tag.name, tag.params, tag.pos);					
-			default:
-		}
-		
-		for (field in Context.getBuildFields()) 
+		for (field in fields) 
 			if (field.access.has(AMacro))
 				macros.set(field.name, field)
 			else if (field.name == 'new') {

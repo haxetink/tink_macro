@@ -21,7 +21,6 @@ class Constructor {
 	var onGenerateHooks:Array<Function->Void>;
 	var superCall:Expr;
 	var owner:ClassBuilder;
-	var keepers:Array<Expr>;//hack to force field generation
 	public var isPublic:Null<Bool>;
 	
 	public function new(owner:ClassBuilder, f:Function, ?isPublic:Null<Bool> = null, ?pos:Position, ?meta:Metadata) {
@@ -34,7 +33,6 @@ class Constructor {
 		this.args = [];
 		this.beforeArgs = [];
 		this.afterArgs = [];
-		this.keepers = [];
 		
 		this.oldStatements = 
 			if (f == null) [];
@@ -97,11 +95,6 @@ class Constructor {
 				default:
 			}
 			
-			if (!Context.defined('js') && Context.defined('dce') && Context.definedValue('dce') == 'full') {
-				if (keepers.length == 0)
-					keepers.push(macro return);
-				keepers.push(macro this.$name = $e);
-			}
 			addStatement(macro @:pos(pos) if (false) { var $tmp = this.$name; $i{tmp} = $e; }, true);
 			addStatement(macro @:pos(pos) (cast this).$name = $e, options.prepend);				
 		}
@@ -116,7 +109,6 @@ class Constructor {
 		return [superCall]
 			.concat(nuStatements)
 			.concat(oldStatements)
-			.concat(keepers)
 			.toBlock(pos);
 	
 	public function onGenerate(hook) 
