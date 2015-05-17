@@ -180,6 +180,11 @@ class Exprs {
 	static public function yield(e:Expr, yielder:Expr->Expr, ?options: { ?leaveLoops: Bool }):Expr {
 		inline function rec(e) 
 			return yield(e, yielder, options);
+			
+		if (options == null)
+			options = { };
+			
+		var loops = options.leaveLoops != true;
 		return
 			if (e == null || e.expr == null) e;
 			else switch (e.expr) {
@@ -197,9 +202,9 @@ class Exprs {
 					for (c in cases)
 						c.expr = rec(c.expr);
 					ESwitch(e, cases, rec(edef)).at(e.pos);
-				case EFor(it, expr) if (options == null || options.leaveLoops != true):
+				case EFor(it, expr) if (loops):
 					EFor(it, rec(expr)).at(e.pos);
-				case EWhile(cond, body, normal) if (options == null || options.leaveLoops != true):
+				case EWhile(cond, body, normal) if (loops):
 					EWhile(cond, rec(body), normal).at(e.pos);
 				case EBreak, EContinue: e;
 				case EBinop(OpArrow, value, jump) if (jump.expr == EContinue || jump.expr == EBreak):
@@ -234,149 +239,7 @@ class Exprs {
 						}
 						ret;
 				}
-	
-	//TODO: this whole thing needs an overhaul
-	static public function typedMap(source:Expr, f:Expr->Array<VarDecl>->Expr, ?ctx:Array<VarDecl>, ?pos:Position):Expr {
-		if (ctx == null) ctx = [];
-		
-		function rec(e, ?inner)
-			return typedMap(e, f, inner == null ? ctx : inner, pos);
-		
-		function def(name:String, ?e:Expr, ?t:ComplexType)
-			return { name: name, expr: e, type: t };
-		
-		if (source == null || source.expr == null) return source;
-		var mappedSource = f(source, ctx);
-		if (mappedSource != source) return mappedSource;
-		
-		var ret = switch(mappedSource.expr) {
-			case ECheckType(e, t): ECheckType(rec(e), t);
-			case ECast(e, t): ECast(rec(e), t);
-			case EArray(e1, e2): EArray(rec(e1), rec(e2));
-			case EField(e, field): EField(rec(e), field);
-			case EParenthesis(e):  EParenthesis(rec(e));
-			case ECall(e, params): ECall(rec(e), typedMapArray(params, f, ctx, pos));
-			case EIf(econd, eif, eelse): EIf(rec(econd), rec(eif), rec(eelse));
-			case ETernary(econd, eif, eelse): ETernary(rec(econd), rec(eif), rec(eelse));
-			case EBlock(exprs): EBlock(exprs.typedMapArray(f, ctx.copy(), pos));
-			case EArrayDecl(exprs): EArrayDecl(exprs.typedMapArray(f, ctx, pos));
-			case EIn(e1, e2): EIn(rec(e1), rec(e2));
-			case EWhile(econd, e, normalWhile): EWhile(rec(econd), rec(e), normalWhile);
-			case EUntyped(e): EUntyped(rec(e));
-			case EThrow(e): EThrow(rec(e));
-			case EReturn(e): EReturn(rec(e));
-			case EDisplay(e, t): EDisplay(rec(e), t);
-			case EDisplayNew(t): EDisplayNew(t);
-			case EUnop(op, postFix, e): EUnop(op, postFix, rec(e));
-			case ENew(t, params): ENew(t, params.typedMapArray(f, ctx, pos));
-			case EBinop(op, e1, e2): EBinop(op, rec(e1), rec(e2));
-			case EObjectDecl(fields):
-				EObjectDecl([for (field in fields) { 
-					field: field.field, 
-					expr: rec(field.expr) 
-				}]);
-			case ESwitch(expr, cases, def):
-				var newCases = cases;
-				newCases = [];
-				expr = rec(expr); 
-				switch (expr.typeof(ctx).sure().reduce()) {
-					case TEnum(e, _):
-						var enumDef = e.get();
-						for (c in cases) {
-							var caseValues = [],
-								innerCtx = ctx.copy();
-							for (v in c.values) {
-								var newVal = v;
-								switch (v.expr) {
-									case ECall(e, params):
-										switch (e.getIdent()) {
-											case Success(s):
-												if (!enumDef.constructs.exists(s))
-													e.reject('Constructor is not a part of ' + enumDef.name);
-												newVal = enumDef.module.split('.').concat([enumDef.name, s]).drill(e.pos); 
-												if (caseValues.length == 0) {
-													switch (newVal.typeof(ctx).sure().reduce()) {
-														case TFun(args, _):
-															for (arg in 0...args.length) {
-																innerCtx.push({ 
-																	name:params[arg].getName().sure(), 
-																	type: args[arg].t.toComplex(), 
-																	expr: null 
-																});
-															}
-														default:
-															e.reject('Constructor may not have arguments');
-													}
-												}
-												newVal = newVal.call(params, v.pos);
-											default:
-												e.reject();
-										}
-									default:
-										v.reject();
-								}
-								caseValues.push(rec(newVal));
-							}
-							newCases.push( { expr: rec(c.expr, innerCtx), values: caseValues } );
-						}
-					case _:
-						for (c in cases) 
-							newCases.push({
-								expr: rec(c.expr), 
-								values: [for (v in c.values) rec(v)] 
-							});
-				}
-				ESwitch(expr, newCases, rec(def));
-			case EFor(it, expr):
-				switch(it.expr) {
-					case EIn(itIdent, itExpr):
-						var innerCtx = ctx.copy();
-						switch(itExpr.typeof(ctx)) {
-							case Success(t):
-								if (t.getID() == "IntIter")
-									innerCtx.push( { name:itIdent.getIdent().sure(), type: "Int".asComplexType(), expr:null } );
-								else
-									innerCtx.push( { name:itIdent.getIdent().sure(), type: null, expr:itExpr.field("iterator").call().field("next").call() } );
-								EFor(it, rec(expr, innerCtx));
-							default:
-								innerCtx.push( { name:itIdent.getIdent().sure(), type: null, expr:itExpr.field("iterator").call().field("next").call() } );
-								EFor(it, rec(expr, innerCtx));
-						}
-					default: 
-						Context.error("Internal error in " + mappedSource.toString(), mappedSource.pos);
-				}
-			case ETry(e, catches):
-				ETry(
-					rec(e), 
-					[for (c in catches) {
-						name: c.name, 
-						expr: rec(c.expr, ctx.concat([def(c.name, c.type)])), 
-						type: c.type
-					}]
-				);
-			case EFunction(name, func):
-				func.expr = rec(func.expr, ctx.concat([for (arg in func.args) def(arg.name, arg.type)]));
-				EFunction(name, func);
-			case EVars(vars):
-				//This is incorrect. When declaring multiple variables, they are declared in the previous context "at once"
-				var ret = [];
-				for (v in vars) {
-					var vExpr = v.expr == null ? null : typedMap(v.expr, f, ctx);
-					if (v.type == null && vExpr != null)
-						v.type = vExpr.typeof(ctx).sure().toComplex();
-					ctx.push({ name:v.name, expr:null, type:v.type });
-					ret.push({ name:v.name, expr:vExpr == null ? null : vExpr, type:v.type });
-				}
-				EVars(ret);
-			default:
-				mappedSource.expr;
-		}
-		return ret.at(pos == null ? source.pos : pos);
-	}
-	
-	static public function typedMapArray(source:Array<Expr>, f:Expr->Array<VarDecl>->Expr, ctx:Array<VarDecl>, ?pos) 
-		return [for (e in source) typedMap(e, f, ctx, pos)];
-	
+				
 	static public inline function iterate(target:Expr, body:Expr, ?loopVar:String = 'i', ?pos:Position) 
 		return EFor(EIn(loopVar.resolve(pos), target).at(pos), body).at(pos);
 	
@@ -436,10 +299,7 @@ class Exprs {
 		return EBlock(exprs).at(pos);
 		
 	static public inline function toBlock(exprs:Iterable<Expr>, ?pos) 
-		return toMBlock(Lambda.array(exprs), pos);
-		
-	static inline function isUC(s:String) 
-		return StringTools.fastCodeAt(s, 0) < 0x5B;
+		return toMBlock(Lambda.array(exprs), pos);		
 		
 	static public function drill(parts:Array<String>, ?pos:Position, ?target:Expr) {
 		if (target == null) 
