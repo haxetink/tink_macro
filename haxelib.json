@@ -1,1 +1,20 @@
-{"name":"tink_macro","license":"MIT","tags":["tink","macro","utility"],"classPath":"src","description":"The macro toolkit ;)","contributors":["back2dos"],"releasenote":"Extended API.","version":"0.5.0","url":"http://haxetink.org/tink_macro","dependencies":{"tink_core":""}}
+{
+	"name": "tink_macro",
+	"license": "MIT",
+	"tags": [
+		"tink",
+		"macro",
+		"utility"
+	],
+	"classPath": "src",
+	"description": "The macro toolkit ;)",
+	"contributors": [
+		"back2dos"
+	],
+	"releasenote": "Let go some legacy code.",
+	"version": "0.6.0",
+	"url": "http://haxetink.org/tink_macro",
+	"dependencies": {
+		"tink_core": ""
+	}
+}
