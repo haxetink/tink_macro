@@ -21,6 +21,7 @@ class Constructor {
 	var onGenerateHooks:Array<Function->Void>;
 	var superCall:Expr;
 	var owner:ClassBuilder;
+	var meta:Metadata;
 	public var isPublic:Null<Bool>;
 	
 	public function new(owner:ClassBuilder, f:Function, ?isPublic:Null<Bool> = null, ?pos:Position, ?meta:Metadata) {
@@ -33,6 +34,7 @@ class Constructor {
 		this.args = [];
 		this.beforeArgs = [];
 		this.afterArgs = [];
+		this.meta = meta;
 		
 		this.oldStatements = 
 			if (f == null) [];
@@ -129,7 +131,7 @@ class Constructor {
 			access : isPublic ? [APublic] : [],
 			kind :  FFun(f),
 			pos : pos,
-			meta : []
+			meta : this.meta,
 		}
 	}
 }
