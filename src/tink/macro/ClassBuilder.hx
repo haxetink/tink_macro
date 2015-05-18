@@ -34,7 +34,7 @@ class ClassBuilder {
 				macros.set(field.name, field)
 			else if (field.name == 'new') {
 				var m:Member = field;
-				this.constructor = new Constructor(this, m.getFunction().sure(), m.isPublic, m.pos, m.meta);
+				this.constructor = new Constructor(this, m.getFunction().sure(), m.isPublic, m.pos, field.meta);
 			}
 			else
 				addMember(field);
