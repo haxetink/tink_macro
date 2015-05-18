@@ -10,12 +10,13 @@ using Lambda;
 
 class ClassBuilder {
 	
-	var memberMap:Map<String,Member>;
 	var memberList:Array<Member>;
 	var macros:Map<String,Field>;
 	var constructor:Null<Constructor>;
 	public var target(default, null):ClassType;
 	var superFields:Map<String,Bool>;
+	
+	var initializeFrom:Array<Field>;
 		
 	public function new(?target, ?fields) { 
 		if (target == null) 
@@ -23,11 +24,19 @@ class ClassBuilder {
 			
 		if (fields == null)
 			fields = Context.getBuildFields();
-			
-		this.memberMap = new Map();
+		
+		this.initializeFrom = fields;
+		this.target = target;
+	}
+	
+	function init() {
+		if (initializeFrom == null) return;
+		
+		var fields = initializeFrom;
+		initializeFrom = null;
+		
 		this.memberList = [];
 		this.macros = new Map();
-		this.target = target;
 		
 		for (field in fields) 
 			if (field.access.has(AMacro))
@@ -36,11 +45,14 @@ class ClassBuilder {
 				var m:Member = field;
 				this.constructor = new Constructor(this, m.getFunction().sure(), m.isPublic, m.pos, field.meta);
 			}
-			else
-				addMember(field);
+			else 
+				doAddMember(field);
+				
+		
 	}
 	
 	public function getConstructor(?fallback:Function):Constructor {
+		init();
 		if (constructor == null) 
 			if (fallback != null)
 				new Constructor(this, fallback);
@@ -77,10 +89,13 @@ class ClassBuilder {
 		return constructor;
 	}
 	
-	public function hasConstructor():Bool 
+	public function hasConstructor():Bool {
+		init();
 		return this.constructor != null;
+	}
 		
 	public function export(?verbose):Array<Field> {
+		if (initializeFrom != null) return null;
 		var ret = (constructor == null || target.isInterface) ? [] : [constructor.toHaxe()];
 		for (member in memberList) {
 			if (member.isBound)
@@ -103,9 +118,11 @@ class ClassBuilder {
 	public function iterator():Iterator<Member>
 		return this.memberList.copy().iterator();
 		
-	public function hasOwnMember(name:String):Bool
+	public function hasOwnMember(name:String):Bool {
+		init();
 		return 
-			macros.exists(name) || memberMap.exists(name);
+			macros.exists(name) || memberByName(name).isSuccess();
+	}
 	
 	public function hasSuperField(name:String):Bool {
 		if (superFields == null) {
@@ -120,37 +137,47 @@ class ClassBuilder {
 		}
 		return superFields.get(name);
 	}
-	public function memberByName(name:String, ?pos:Position)
-		return
-			if (memberMap.exists(name)) Success(memberMap.get(name));
-			else pos.makeFailure('unknown member $name');
-			
-	public function removeMember(member:Member):Bool 
+	
+	public function memberByName(name:String, ?pos:Position) {
+		init();
+		for (m in memberList)
+			if (m.name == name) 
+				return Success(m);
+				
+		return pos.makeFailure('unknown member $name');
+	}
+	
+	public function removeMember(member:Member):Bool {
+		init();
 		return 
-			member != null 
-			&&
-			memberMap.get(member.name) == member 
-			&& 
-			memberMap.remove(member.name) 
-			&& 
 			memberList.remove(member);
+	}
 	
 	public function hasMember(name:String):Bool 
 		return hasOwnMember(name) || hasSuperField(name);
-	
-	public function addMember(m:Member, ?front:Bool = false):Member {
+
+	function doAddMember(m:Member, ?front:Bool = false):Member {
+		init();
+		
 		if (m.name == 'new') 
 			throw 'Constructor must not be registered as ordinary member';
 			
-		if (hasOwnMember(m.name)) 
-			m.pos.error('duplicate member declaration ' + m.name);
-		if (!m.isStatic && hasSuperField(m.name))
-			m.overrides = true;
-		memberMap.set(m.name, m);
+		//if (hasOwnMember(m.name)) 
+			//m.pos.error('duplicate member declaration ' + m.name);
+			
 		if (front) 
 			memberList.unshift(m);
 		else 
 			memberList.push(m);				
+			
+		return m;
+	}		
+		
+	public function addMember(m:Member, ?front:Bool = false):Member {
+		doAddMember(m, front);
+		
+		if (!m.isStatic && hasSuperField(m.name))
+			m.overrides = true;
 			
 		return m;
 	}
