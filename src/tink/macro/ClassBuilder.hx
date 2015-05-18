@@ -115,8 +115,10 @@ class ClassBuilder {
 		
 		return ret;		
 	}
-	public function iterator():Iterator<Member>
+	public function iterator():Iterator<Member> {
+		init();
 		return this.memberList.copy().iterator();
+	}
 		
 	public function hasOwnMember(name:String):Bool {
 		init();
