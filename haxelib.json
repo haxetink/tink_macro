@@ -11,8 +11,8 @@
 	"contributors": [
 		"back2dos"
 	],
-	"releasenote": "Let go some legacy code.",
-	"version": "0.6.0",
+	"releasenote": "Do not lose constructor metadata.",
+	"version": "0.6.1",
 	"url": "http://haxetink.org/tink_macro",
 	"dependencies": {
 		"tink_core": ""
