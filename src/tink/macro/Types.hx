@@ -10,7 +10,7 @@ import haxe.macro.Type;
 using tink.macro.Exprs;
 using tink.macro.Positions;
 using tink.macro.Functions;
-using tink.core.Outcome;
+using tink.CoreApi;
 
 class Types {
 	static var types = new Map<Int,Void->Type>();
