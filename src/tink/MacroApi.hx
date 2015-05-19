@@ -17,7 +17,7 @@ typedef Unops = tink.macro.Ops.Unary;
 
 //TODO: consider adding stuff from haxe.macro.Expr here
 typedef MacroOutcome<D, F> = tink.core.Outcome<D, F>;
-typedef MacroOutcomeTools = tink.core.Outcome.OutcomeTools;
+typedef MacroOutcomeTools = tink.OutcomeTools;
 
 typedef Option<T> = haxe.ds.Option<T>;
 
