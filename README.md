@@ -335,7 +335,7 @@ The first thing to point out is that constructors are handled separately. This i
 
 As for the rest of the members, you can just iterate over them. It's worth noting that the iterator runs over a snapshot made at the time of its creation, so removing and adding fields during iteration has no effect on the iteration itself.
 
-You can add a member. If you try adding a member named `"new"`, you'll get an exception. So don't do it. Read up on constructors below. If you try adding a duplicate member, you will get a compilation error at the second member's `Position`. If you add a member that already exists in the super class, the `override` is added automatically.
+You can add a member. If you try adding a member named `"new"`, you'll get an exception - so don't. Find out about how tink_macro handles constructors below. If you add a member that already exists in the super class, the `override` is added automatically.
 
 And when you're done, you can `export` everything to an array of fields. If you set `verbose` to true, you will get compiler warnings for every generated field at the position of the field. This is way you can see the generated code even if the application cannot compile for some reason.
 
@@ -343,7 +343,7 @@ The intended use is with `run` that will send the same `ClassBuilder` through a 
 
 ## Constructor
 
-Constructors are relatively tricky, especially when you have inheritance. If you do not specify a constructor, than that of the the super class is used. If you do specify one, then it needn't be compatible with the super class, but it needs to call it. Macros represent them as an instance field called `new` that must be a function. However if you think about it, a constructor belongs to a class, not an instance. So this is all a little dodgy.
+Constructors are relatively tricky, especially when you have inheritance. If you do not specify a constructor, than that of the the super class is used. If you do specify one, then it needn't be compatible with the super class, but it needs to call it. Macros represent them as an instance field called `new` that must be a function. However if you think about it, a constructor belongs to a class, not an instance. So this is all a little dodgy. The constructor API is an attempt to create a more rigid solution.
 
 The `Constructor` API is the result of countless struggles with constructors. Still it may not be for you. In that case feedback is appreciated and currently the suggested method is to deal with the constructor after you've exported all fields from the `ClassBuilder`.
 
