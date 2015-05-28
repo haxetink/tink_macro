@@ -14,7 +14,7 @@ using StringTools;
 using tink.macro.Positions;
 using tink.macro.Exprs;
 using tink.macro.Types;
-using tink.core.Outcome;
+using tink.CoreApi;
 
 typedef VarDecl = { name : String, type : ComplexType, expr : Null<Expr> };
 typedef ParamSubst = {
