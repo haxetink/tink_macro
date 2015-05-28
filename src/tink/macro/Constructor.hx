@@ -96,9 +96,7 @@ class Constructor {
 				case Success(member): member.addMeta(':isVar');
 				default:
 			}
-			
-			addStatement(macro @:pos(pos) if (false) { var $tmp = this.$name; $i{tmp} = $e; }, true);
-			addStatement(macro @:pos(pos) (cast this).$name = $e, options.prepend);				
+			addStatement(macro @:pos(pos) (cast this).$name = if (true) $e else this.$name, options.prepend);				
 		}
 		else 
 			addStatement(macro @:pos(pos) this.$name = $e, options.prepend);
