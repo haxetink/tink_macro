@@ -135,7 +135,7 @@ Will build a new expression substituting identifiers given found as fields of `v
 - `substParams(source:Expr, rule: ParamSubst, ?pos:Position):Expr`  
 Traverse an expression and replace any *type* that looks like a type parameter following the given `rule` of the following structure:
 
-	```
+	```haxe
 	typedef ParamSubst = { 
 		var exists(default, null):String->Bool; 
 		var get(default, null):String->ComplexType; 
@@ -149,7 +149,7 @@ Similar to transform, but handles expressions in top-down order and keeps track 
 - `bounce(f:Void->Expr, ?pos:Position):Expr`  
 This is a way to "bounce" out of a macro for a while. Assume you have this expression: `{ var a = 5, b = 6; a + b; }` and you want to analyze the second statement, you either have to track variables manually or do a `typedMap` but that may be too much work. What you would do here is something like this (stupid example):  
 
-	```
+	```haxe
 	function onBounce() { trace(block[1].typeof().sure()); return block[1]; }
 	[block[0], onBounce.bounce(block[1].pos)].toBlock();
 	```
@@ -157,7 +157,7 @@ This is a way to "bounce" out of a macro for a while. Assume you have this expre
 - `yield(source:Expr, yielder:Expr->Expr, ?options:{ ?leaveLoops:Bool }):Expr`  
 This will traverse an expression and will apply the `yielder` to the "leafs", which in this context are the subexpressions that determine a return value. Example:
 
-	```
+	```haxe
 	yield(
 		macro if (foo) bar else { var x = y; for (i in a) bla; }, 
 		function (e) return macro trace($e)
@@ -168,7 +168,7 @@ This will traverse an expression and will apply the `yielder` to the "leafs", wh
 	
 	To implement array comprehensions yourself with this you would do:
 	
-	```
+	```haxe
 	e.transform(function (e) return switch e {
 		case macro [for ($it) $body]:
 			macro {
@@ -260,7 +260,7 @@ Writing build macros can sometimes be a little tedious. But `tink_macro` is here
 
 Let's have a look at the most important type involved in build macros:
 
-```
+```haxe
 typedef Field = {
 	var name : String;
 	@:optional var doc : Null<String>;
@@ -275,7 +275,7 @@ No doubt, it gets the job done. There's a few things that could be nicer though.
 
 For this reason and more, we have `tink.macro.Member` which looks like this:
 
-```
+```haxe
 abstract Member from Field to Field {
 	var name(get, set):String;
 	var doc(get, set):Null<String>;
@@ -310,7 +310,7 @@ At any time you can also use `asField` to interact with the data the good old wa
 
 To make handling multiple fields easier, we have the `ClassBuilder` with the following API:
 
-```
+```haxe
 class ClassBuilder {	
 	var target(default, null):ClassType;
 	function new():Void;
@@ -349,7 +349,7 @@ The `Constructor` API is the result of countless struggles with constructors. St
 
 Constructors are represented by this API:
 
-```
+```haxe
 class Constructor {
 	var isPublic:Null<Bool>;
 	function publish():Void; 
@@ -396,7 +396,7 @@ Please do note, that `value` will be in the generated code twice, therefore if i
 
 The different options for initialization are as follows:
 
-```
+```haxe
 enum FieldInit {
 	Value(e:Expr);
 	Arg(?t:ComplexType, ?noPublish:Bool);
@@ -419,7 +419,7 @@ The plain `Context.onTypeNotFound` API has two major drawbacks:
 
 In `tink_macro` we define the following:
 
-```
+```haxe
 typedef TypeResolution = Ref<Either<String, TypeDefinition>>;
 ```
 
