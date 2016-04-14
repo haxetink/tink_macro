@@ -28,13 +28,13 @@ typedef ClassBuilder = tink.macro.ClassBuilder;
 typedef TypeResolution = Ref<Either<String, TypeDefinition>>;
 
 class MacroApi {
-	
-	static var idCounter = 0;	
-	
-	@:noUsing static public inline function tempName(?prefix:String = 'tmp'):String
-		return '__tink_' + prefix + Std.string(idCounter++);
-		
-	static public function pos() 
-		return haxe.macro.Context.currentPos();
+  
+  static var idCounter = 0;  
+  
+  @:noUsing static public inline function tempName(?prefix:String = 'tmp'):String
+    return '__tink_' + prefix + Std.string(idCounter++);
+    
+  static public function pos() 
+    return haxe.macro.Context.currentPos();
 
 }
