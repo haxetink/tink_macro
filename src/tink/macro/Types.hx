@@ -70,12 +70,12 @@ class Types {
           }
           var ret = fieldsCache.get(id);
           if (substituteParams && ret.isSuccess()) {
-            var e = ECheckType(macro null, toComplex(t)).at();
             var fields = Reflect.copy(ret.sure());
 
             for (field in fields)
               field.type = haxe.macro.TypeTools.applyTypeParameters(field.type, c.params, params);
           }
+          fieldsCache.remove(id);//TODO: find a proper solution to avoid stale cache
           ret;
         case TAnonymous(anon): Success(anon.get().fields);
         default: Context.currentPos().makeFailure('type has no fields');
