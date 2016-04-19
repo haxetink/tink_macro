@@ -44,7 +44,7 @@ The library is build on top of the haxe macro API and `tink_core`, having three 
 
 # Macro API
 
-It is suggested to use this API by `using tink.MacroAPI;`
+It is suggested to use this API by `using tink.MacroApi;`
 
 Apart form `tink_macro` specific things, it will also use `haxe.macro.ExprTools` and `tink.core.Outcome`.
 
@@ -409,20 +409,3 @@ Here, `Value` will just use a plain expression, whereas `Arg` and `OptArg` will 
 ### Expression Level Transformation
 
 Because the state of a constructor is rather delicate, the API prohibits you to just mess around with the whole constructor body at an expression level. For that to happen, you can register `onGenerate` hooks. These will be called when the corresponding `ClassBuilder` does its export. The hooks are cleared after the export.
-
-# Type Resolution Infrastructure
-
-The plain `Context.onTypeNotFound` API has two major drawbacks:
-
-1. There is no way for two resolvers to communicate with one another. As soon as the first one is able to create a fallback type, all subsequent ones are not invoked.
-2. Calls to `Context.error` from within a type resolver will cause abortion of the call, which makes error reporting tricky.
-
-In `tink_macro` we define the following:
-
-```haxe
-typedef TypeResolution = Ref<Either<String, TypeDefinition>>;
-```
-
-This is the current state of the resolution, meaning we either have a `String`, which is the name of the type that wasn't found, or a `TypeDefinition` which is a "proposal" given by already invoked resolvers.
-
-To register a type resolver, you can add a callback to `tink.MacroApi.typeNotFound` which is a `Signal<TypeResolution>`.
