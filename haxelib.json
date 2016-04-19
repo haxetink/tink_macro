@@ -11,8 +11,8 @@
 	"contributors": [
 		"back2dos"
 	],
-	"releasenote": "Add TypeMap.",
-	"version": "0.7.0",
+	"releasenote": "Avoid stale fields cache.",
+	"version": "0.7.1",
 	"url": "http://haxetink.org/tink_macro",
 	"dependencies": {
 		"tink_core": ""
