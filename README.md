@@ -38,7 +38,7 @@ The library is build on top of the haxe macro API and `tink_core`, having three 
 			- [Setter Bypass](#setter-bypass)
 			- [Initialization Options](#initialization-options)
 		- [Expression Level Transformation](#expression-level-transformation)
-- [Type Resolution Infrastructure](#type-resolution-infrastructure)
+- [TypeMap](#typemap)
 
 <!-- END INDEX -->
 
