@@ -409,3 +409,7 @@ Here, `Value` will just use a plain expression, whereas `Arg` and `OptArg` will 
 ### Expression Level Transformation
 
 Because the state of a constructor is rather delicate, the API prohibits you to just mess around with the whole constructor body at an expression level. For that to happen, you can register `onGenerate` hooks. These will be called when the corresponding `ClassBuilder` does its export. The hooks are cleared after the export.
+
+#  TypeMap
+
+You can find a type map, i.e. a map where the keys are `haxe.macro.Type`, in `tink.macro.TypeMap`. It's pretty much an ordinary map. Currently, it relies rather strongly on [`haxe.macro.TypeTools.toString()`](http://api.haxe.org/haxe/macro/TypeTools.html#toString) and it remains to be determined whether that is a reliable choice. Please report any issues you might face.

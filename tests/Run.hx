@@ -11,6 +11,7 @@ class Run {
     new Exprs(),
     new Types(),
     new Positions(),
+    new TypeMapTest(),
   ];
   #end
   macro static function test() {
