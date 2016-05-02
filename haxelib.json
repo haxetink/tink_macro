@@ -11,8 +11,8 @@
 	"contributors": [
 		"back2dos"
 	],
-	"releasenote": "Avoid stale fields cache.",
-	"version": "0.7.1",
+	"releasenote": "Add build cache utility.",
+	"version": "0.8.0",
 	"url": "http://haxetink.org/tink_macro",
 	"dependencies": {
 		"tink_core": ""
