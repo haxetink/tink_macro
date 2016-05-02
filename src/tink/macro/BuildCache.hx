@@ -5,6 +5,13 @@ import haxe.macro.Expr;
 import haxe.macro.Type;
 import tink.macro.TypeMap;
 
+typedef BuildContext = {
+  pos:Position,
+  type:Type,
+  usings:Array<TypePath>,
+  name:String,
+}
+
 class BuildCache { 
   
   static var cache = init();
@@ -22,7 +29,7 @@ class BuildCache {
     return cache;
   }
   
-  static public function getType(name, ?type, ?pos:Position, build:Position->Type->Array<TypePath>->String->TypeDefinition) {
+  static public function getType(name, ?type, ?pos:Position, build:BuildContext->TypeDefinition) {
     
     if (pos == null)
       pos = Context.currentPos();
@@ -45,7 +52,12 @@ class BuildCache {
       var path = '$name${Lambda.count(forName)}',
           usings = [];
           
-      var def = build(pos, type, usings, path.split('.').pop());
+      var def = build({
+        pos: pos, 
+        type: type, 
+        usings: usings, 
+        name: path.split('.').pop()
+      });
       
       Context.defineModule(path, [def], usings);
       forName.set(type, Context.getType(path));
