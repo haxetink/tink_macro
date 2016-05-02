@@ -11,8 +11,8 @@
 	"contributors": [
 		"back2dos"
 	],
-	"releasenote": "Add build cache utility.",
-	"version": "0.8.0",
+	"releasenote": "Minor API improvement.",
+	"version": "0.8.1",
 	"url": "http://haxetink.org/tink_macro",
 	"dependencies": {
 		"tink_core": ""
