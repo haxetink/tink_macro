@@ -16,8 +16,8 @@ class Types {
   static var types = new Map<Int,Void->Type>();
   static var idCounter = 0;
 
-  @:noUsing macro static public function getType(id:Int):Type
-    return types.get(id)();
+  //@:noUsing macro static public function getType(id:Int):Type
+    //return types.get(id)();
 
   static public function getID(t:Type, ?reduced = true)
     return
@@ -162,9 +162,20 @@ class Types {
   static public function lazyComplex(f:Void->Type)
     return
       TPath({
-        pack : ['haxe','macro'],
-        name : 'MacroType',
-        params : [TPExpr('tink.macro.Types.getType'.resolve().call([register(f).toExpr()]))],
+        pack : ['tink','macro'],
+        name : 'DirectType',
+        params : [TPExpr(register(f).toExpr())],
         sub : null,
       });
+      
+  
+  static function resolveDirectType() 
+    return 
+      switch reduce(Context.getLocalType()) {
+        case TInst(_, [TInst(_.get() => { kind: KExpr(e) }, _)]):  
+          types.get(Std.parseInt(e.toString()))();
+        default: 
+          throw 'assert';
+      }
+  
 }
