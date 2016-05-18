@@ -11,8 +11,8 @@
 	"contributors": [
 		"back2dos"
 	],
-	"releasenote": "Minor API improvement.",
-	"version": "0.8.1",
+	"releasenote": "Replace MacroType with @:genericBuild for direct type converions.",
+	"version": "0.9.0",
 	"url": "http://haxetink.org/tink_macro",
 	"dependencies": {
 		"tink_core": ""
