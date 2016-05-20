@@ -11,8 +11,8 @@
 	"contributors": [
 		"back2dos"
 	],
-	"releasenote": "Replace MacroType with @:genericBuild for direct type converions.",
-	"version": "0.9.0",
+	"releasenote": "Store user defined constructors.",
+	"version": "0.9.1",
 	"url": "http://haxetink.org/tink_macro",
 	"dependencies": {
 		"tink_core": ""
