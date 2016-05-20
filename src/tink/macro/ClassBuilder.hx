@@ -55,7 +55,7 @@ class ClassBuilder {
     init();
     if (constructor == null) 
       if (fallback != null)
-        new Constructor(this, fallback);
+        constructor = new Constructor(this, fallback);
       else {
         var sup = target.superClass;
         while (sup != null) {
