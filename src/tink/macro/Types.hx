@@ -168,12 +168,11 @@ class Types {
         sub : null,
       });
       
-  
   static function resolveDirectType() 
     return 
       switch reduce(Context.getLocalType()) {
         case TInst(_, [TInst(_.get() => { kind: KExpr(e) }, _)]):  
-          types.get(Std.parseInt(e.toString()))();
+          types[e.getInt().sure()]();
         default: 
           throw 'assert';
       }
