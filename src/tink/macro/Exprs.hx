@@ -27,10 +27,10 @@ private class Heureka { public function new() {} }
 class Exprs {
 
   static public function has(e:Expr, condition:Expr->Bool, ?options: { ?enterFunctions: Bool }) {
-    var enterFunctions = options != null && options.enterFunctions;
+    var skipFunctions = options == null || options.enterFunctions != true;
     function seek(e:Expr)
       switch e {
-        case { expr: EFunction(_) } if (options != null || options.enterFunctions != true):
+        case { expr: EFunction(_) } if (skipFunctions):
         case _ if (condition(e)): throw new Heureka();
         default: haxe.macro.ExprTools.iter(e, seek);
       }
