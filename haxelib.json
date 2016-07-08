@@ -11,8 +11,8 @@
 	"contributors": [
 		"back2dos"
 	],
-	"releasenote": "Store user defined constructors.",
-	"version": "0.9.1",
+	"releasenote": "Expand build cache for 2 and 3 type parameters.",
+	"version": "0.10.0",
 	"url": "http://haxetink.org/tink_macro",
 	"dependencies": {
 		"tink_core": ""
