@@ -388,10 +388,18 @@ class Exprs {
         case EFunction(_, f): Success(f);
         default: e.pos.makeFailure(NOT_A_FUNCTION);
       }
+      
+  static public function concat(e:Expr, with:Expr, ?pos)
+    return
+      switch [e.expr, with.expr] {
+        case [EBlock(e1), EBlock(e2)]: Success(EBlock(e1.concat(e2)).at(pos == null ? e.pos : pos));
+        default: e.pos.makeFailure(NOT_A_BLOCK);
+      }
   
   static inline var NOT_AN_INT = "integer constant expected";
   static inline var NOT_AN_IDENT = "identifier expected";
   static inline var NOT_A_STRING = "string constant expected";
   static inline var NOT_A_NAME = "name expected";
   static inline var NOT_A_FUNCTION = "function expected";
+  static inline var NOT_A_BLOCK = "block expected";
 }
