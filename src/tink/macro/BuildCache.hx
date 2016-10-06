@@ -93,6 +93,10 @@ class BuildCache {
       switch Context.getLocalType() {
         case TInst(_.toString() == name => true, [v]):
           type = v;
+        case TInst(_.toString() == name => true, _):
+          Context.fatalError('type parameter expected', pos);
+        case TInst(_.get() => { pos: pos }, _):
+          Context.fatalError('Expected $name', pos);
         default:
           throw 'assert';
       }  

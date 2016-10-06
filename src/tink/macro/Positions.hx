@@ -35,7 +35,7 @@ class Positions {
     return errorFunc(sanitize(pos), Std.string(error));
   
   static function contextError(pos:Position, error:String):Dynamic 
-    return Context.error(error, pos);
+    return Context.fatalError(error, pos);
   
   static function abortTypeBuild(pos:Position, error:String):Dynamic 
     return throw new AbortBuild(error, pos);
