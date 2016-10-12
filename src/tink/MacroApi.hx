@@ -19,8 +19,6 @@ typedef Unops = tink.macro.Ops.Unary;
 typedef MacroOutcome<D, F> = tink.core.Outcome<D, F>;
 typedef MacroOutcomeTools = tink.OutcomeTools;
 
-typedef Option<T> = haxe.ds.Option<T>;
-
 typedef Member = tink.macro.Member;
 typedef Constructor = tink.macro.Constructor;
 typedef ClassBuilder = tink.macro.ClassBuilder;
