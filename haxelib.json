@@ -11,8 +11,8 @@
 	"contributors": [
 		"back2dos"
 	],
-	"releasenote": "Expand build cache for 2 and 3 type parameters.",
-	"version": "0.10.0",
+	"releasenote": "Sidestep conflict with tink_core changes.",
+	"version": "0.11.0",
 	"url": "http://haxetink.org/tink_macro",
 	"dependencies": {
 		"tink_core": ""
