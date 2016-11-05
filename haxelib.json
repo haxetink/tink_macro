@@ -11,8 +11,8 @@
 	"contributors": [
 		"back2dos"
 	],
-	"releasenote": "Sidestep conflict with tink_core changes.",
-	"version": "0.11.0",
+	"releasenote": "Improved build cache.",
+	"version": "0.12.0",
 	"url": "http://haxetink.org/tink_macro",
 	"dependencies": {
 		"tink_core": ""
