@@ -405,5 +405,4 @@ class Exprs {
   static inline var NOT_A_STRING = "string constant expected";
   static inline var NOT_A_NAME = "name expected";
   static inline var NOT_A_FUNCTION = "function expected";
-  static inline var NOT_A_BLOCK = "block expected";
 }
