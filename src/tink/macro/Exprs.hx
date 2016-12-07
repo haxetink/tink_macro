@@ -389,12 +389,16 @@ class Exprs {
         default: e.pos.makeFailure(NOT_A_FUNCTION);
       }
       
-  static public function concat(e:Expr, with:Expr, ?pos)
+  static public function concat(e:Expr, with:Expr, ?pos) {
+    if(pos == null) pos = e.pos;
     return
       switch [e.expr, with.expr] {
-        case [EBlock(e1), EBlock(e2)]: Success(EBlock(e1.concat(e2)).at(pos == null ? e.pos : pos));
-        default: e.pos.makeFailure(NOT_A_BLOCK);
+        case [EBlock(e1), EBlock(e2)]: Success(EBlock(e1.concat(e2)).at(pos));
+        case [EBlock(e1), e2]: Success(EBlock(e1.concat([with])).at(pos));
+        case [e1, EBlock(e2)]: Success(EBlock([e].concat(e2)).at(pos));
+        default: Success(EBlock([e, with]).at(pos));
       }
+  }
   
   static inline var NOT_AN_INT = "integer constant expected";
   static inline var NOT_AN_IDENT = "identifier expected";
