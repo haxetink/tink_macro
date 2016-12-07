@@ -5,8 +5,15 @@ import haxe.macro.Expr;
 import haxe.macro.Type;
 import tink.macro.TypeMap;
 
-using haxe.macro.ComplexTypeTools;
-using haxe.macro.TypeTools;
+using haxe.macro.Tools;
+
+typedef BuildContextN = {
+  pos:Position,
+  types:Array<Type>,
+  usings:Array<TypePath>,
+  name:String,
+}
+
 
 typedef BuildContext = {
   pos:Position,
@@ -25,20 +32,7 @@ typedef BuildContext3 = {>BuildContext2,
 
 class BuildCache { 
   
-  static var cache = init();
-  
-  static function init() {
-    
-    function refresh() {
-      cache = new Map();
-      return true;
-    }
-    
-    Context.onMacroContextReused(refresh);
-    refresh();
-    
-    return cache;
-  }
+  static var cache = new Map();
   
   static public function getType3(name, ?types, ?pos:Position, build:BuildContext3->TypeDefinition) {
      if (types == null)
@@ -62,6 +56,33 @@ class BuildCache {
       usings: ctx.usings
     }));   
   }
+  
+  static public function getTypeN(name, ?types, ?pos:Position, build:BuildContextN->TypeDefinition) {
+    
+    if (pos == null)
+      pos = Context.currentPos();
+    
+    if (types == null)
+      switch Context.getLocalType() {
+        case TInst(_.toString() == name => true, params):
+          types = params;
+        default:
+          throw 'assert';
+      }  
+      
+    var compound = ComplexType.TAnonymous([for (i in 0...types.length) {
+      name: 't$i',
+      pos: pos,
+      kind: FVar(types[i].toComplexType()),
+    }]).toType();
+        
+    return getType(name, compound, pos, function (ctx) return build({
+      types: types,
+      pos: ctx.pos,
+      name: ctx.name,
+      usings: ctx.usings
+    }));
+  }  
   
   static public function getType2(name, ?types, ?pos:Position, build:BuildContext2->TypeDefinition) {
     if (types == null)
@@ -93,20 +114,42 @@ class BuildCache {
       switch Context.getLocalType() {
         case TInst(_.toString() == name => true, [v]):
           type = v;
+        case TInst(_.toString() == name => true, _):
+          Context.fatalError('type parameter expected', pos);
+        case TInst(_.get() => { pos: pos }, _):
+          Context.fatalError('Expected $name', pos);
         default:
           throw 'assert';
       }  
       
     var forName = 
       switch cache[name] {
-        case null: cache[name] = new TypeMap();
+        case null: cache[name] = new Group(name);
         case v: v;
       }
-          
-    if (!forName.exists(type)) {
-      var path = '$name${Lambda.count(forName)}',
-          usings = [];
-          
+    
+    return forName.get(type, pos, build);  
+  }
+}
+
+private typedef Entry = {
+  name:String,
+}
+
+private class Group {
+  
+  var name:String;
+  var counter = 0;
+  var entries = new TypeMap<Entry>();
+  
+  public function new(name) {
+    this.name = name;
+  }
+  
+  public function get(type:Type, pos:Position, build:BuildContext->TypeDefinition):Type {
+    
+    function make(path:String) {
+      var usings = [];
       var def = build({
         pos: pos, 
         type: type, 
@@ -115,9 +158,21 @@ class BuildCache {
       });
       
       Context.defineModule(path, [def], usings);
-      forName.set(type, Context.getType(path));
+      entries.set(type, { name: path } );
+      return Context.getType(path);
     }
     
-    return forName.get(type);  
+    return 
+      switch entries.get(type) {
+        case null:
+          make('$name${counter++}');
+        case v:
+          try {
+            Context.getType(v.name);
+          }
+          catch (e:Dynamic) {
+            make(v.name);
+          }
+      }
   }
 }
