@@ -393,10 +393,10 @@ class Exprs {
     if(pos == null) pos = e.pos;
     return
       switch [e.expr, with.expr] {
-        case [EBlock(e1), EBlock(e2)]: Success(EBlock(e1.concat(e2)).at(pos));
-        case [EBlock(e1), e2]: Success(EBlock(e1.concat([with])).at(pos));
-        case [e1, EBlock(e2)]: Success(EBlock([e].concat(e2)).at(pos));
-        default: Success(EBlock([e, with]).at(pos));
+        case [EBlock(e1), EBlock(e2)]: EBlock(e1.concat(e2)).at(pos);
+        case [EBlock(e1), e2]: EBlock(e1.concat([with])).at(pos);
+        case [e1, EBlock(e2)]: EBlock([e].concat(e2)).at(pos);
+        default: EBlock([e, with]).at(pos);
       }
   }
   
