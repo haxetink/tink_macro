@@ -80,4 +80,11 @@ class Exprs extends Base {
       ])
     );
   }
+  
+  function testConcat() {
+    exprEq(macro {a; b;}, (macro a).concat(macro b));
+    exprEq(macro {a; b; c;}, (macro {a; b;}).concat(macro c));
+    exprEq(macro {a; b; c;}, (macro a).concat(macro {b; c;}));
+    exprEq(macro {a; b; c; d;}, (macro {a; b;}).concat(macro {c; d;}));
+  }
 }

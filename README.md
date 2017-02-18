@@ -64,6 +64,8 @@ Rejects an expression and displays a generic or custom error message
 Converts an expression into the corresponding Haxe source code
 - `log(e:Expr, ?pos:Position):Expr`  
 Traces the string representation of an expression and returns it.
+- `concat(e1:Expr, e2:Expr):Expr`
+Concats two expressions into a block. If either sub-expression is a block itself, it gets flattened into the resulting block.
 
 #### Extracting Constants
 
