@@ -168,11 +168,11 @@ class Types {
         sub : null,
       });
       
-  static function resolveDirectType() 
+  static function resolveDirectType()
     return 
       switch reduce(Context.getLocalType()) {
         case TInst(_, [TInst(_.get() => { kind: KExpr(e) }, _)]):  
-          types[e.getInt().sure()]();
+          types[e.getInt().sure()]();//When using compiler server, this call throws on occasion, in which case modifying this file (to update mtime and invalidate the cache) will solve the problem
         default: 
           throw 'assert';
       }

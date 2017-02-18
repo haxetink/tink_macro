@@ -165,7 +165,17 @@ private class Group {
     return 
       switch entries.get(type) {
         case null:
-          make('$name${counter++}');
+          var ret = null;
+          while (ret == null) {
+            try {
+              Context.getType('$name$counter');
+            }
+            catch (e:Dynamic) { 
+              ret = make('$name$counter');
+            }
+            counter++;
+          }
+          ret;
         case v:
           try {
             Context.getType(v.name);
