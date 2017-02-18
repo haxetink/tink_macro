@@ -17,14 +17,15 @@ class TypeMap<V> extends BalancedTree<Type, V> implements IMap<Type, V> {
   }
   
   override function compare(k1:Type, k2:Type):Int {
+    
     if (follow) {
       k1 = k1.reduce();
       k2 = k2.reduce();
     }
-    //trace(k1.toString());
-    //trace(k2.toString());
+    
     return switch k1.getIndex() - k2.getIndex() {
-      case 0: Reflect.compare(k1.toString(), k2.toString());//TODO: this may be rather expensive and not very reliable
+      case 0: 
+        Reflect.compare(k1.toString(), k2.toString());//much to my surprise, this actually seems to work (at least with 3.4)
       case v: v;
     }
   }
