@@ -11,8 +11,8 @@
 	"contributors": [
 		"back2dos"
 	],
-	"releasenote": "Several minor improvements.",
-	"version": "0.12.1",
+	"releasenote": "Fix issue with .toComplex()",
+	"version": "0.12.2",
 	"url": "http://haxetink.org/tink_macro",
 	"dependencies": {
 		"tink_core": ""
