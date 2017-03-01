@@ -15,10 +15,6 @@ using tink.CoreApi;
 class Types {
   static var types = new Map<Int,Void->Type>();
   static var idCounter = 0;
-
-  //@:noUsing macro static public function getType(id:Int):Type
-    //return types.get(id)();
-
   static public function getID(t:Type, ?reduced = true)
     return
       if (reduced)
@@ -152,7 +148,7 @@ class Types {
 
   static public function toComplex(type:Type, ?options:{ ?direct: Bool }):ComplexType {
     var ret =
-      if (options == null || options.direct != true) haxe.macro.TypeTools.toComplexType(type);
+      if (options == null || options.direct != true) tink.macro.Sisyphus.toComplexType(type);
       else null;
     if (ret == null)
       ret = lazyComplex(function () return type);
