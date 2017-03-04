@@ -14,6 +14,7 @@ typedef Bouncer = tink.macro.Bouncer;
 typedef Types = tink.macro.Types;
 typedef Binops = tink.macro.Ops.Binary;
 typedef Unops = tink.macro.Ops.Unary;
+typedef TypeMap<T> = tink.macro.TypeMap<T>;
 
 //TODO: consider adding stuff from haxe.macro.Expr here
 typedef MacroOutcome<D, F> = tink.core.Outcome<D, F>;
