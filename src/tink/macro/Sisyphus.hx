@@ -57,7 +57,7 @@ class Sisyphus {
       case null:
         null;
       case TMono(_.get() => t):
-        t == null ? null : toComplexType(t);
+        t == null ? Types.toComplex(type, { direct: true }) : toComplexType(t);
       case TEnum(_.get() => baseType, params):
         TPath(toTypePath(baseType, params));
       case TInst(_.get() => classType, params):
