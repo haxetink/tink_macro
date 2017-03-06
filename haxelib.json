@@ -11,8 +11,8 @@
 	"contributors": [
 		"back2dos"
 	],
-	"releasenote": "Fix issue with .toComplex()",
-	"version": "0.12.2",
+	"releasenote": "Better converion for TMono",
+	"version": "0.12.3",
 	"url": "http://haxetink.org/tink_macro",
 	"dependencies": {
 		"tink_core": ""
