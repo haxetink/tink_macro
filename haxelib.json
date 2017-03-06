@@ -11,8 +11,8 @@
 	"contributors": [
 		"back2dos"
 	],
-	"releasenote": "Better converion for TMono",
-	"version": "0.12.3",
+	"releasenote": "Build cache works better with compiler server.",
+	"version": "0.13.0",
 	"url": "http://haxetink.org/tink_macro",
 	"dependencies": {
 		"tink_core": ""
