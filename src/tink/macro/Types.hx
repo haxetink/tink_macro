@@ -13,6 +13,16 @@ using tink.macro.Functions;
 using tink.CoreApi;
 
 class Types {
+
+  static public function definedType(typeName:String)
+    return
+      try {
+        Some(Context.getType(typeName));
+      }
+      catch (e:Dynamic) 
+        if (Std.string(e) == 'Type not found \'$typeName\'') None;
+        else neko.Lib.rethrow(e);
+  
   static var types = new Map<Int,Void->Type>();
   static var idCounter = 0;
   static public function getID(t:Type, ?reduced = true)
