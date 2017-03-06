@@ -5,6 +5,7 @@ import haxe.macro.Expr;
 import haxe.macro.Type;
 import tink.macro.TypeMap;
 
+using tink.MacroApi;
 using haxe.macro.Tools;
 
 typedef BuildContextN = {
@@ -104,7 +105,7 @@ class BuildCache {
       usings: ctx.usings
     }));
   }
-  
+
   static public function getType(name, ?type, ?pos:Position, build:BuildContext->TypeDefinition) {
     
     if (pos == null)
@@ -156,18 +157,29 @@ private class Group {
         usings: usings, 
         name: path.split('.').pop()
       });
-      
-      Context.defineModule(path, [def], usings);
+
       entries.set(type, { name: path } );
+      Context.defineModule(path, [def], usings);
       return Context.getType(path);
     }
-    
+
+    function doMake() 
+      while (true) 
+        switch '$name${counter++}' {
+          case _.definedType() => Some(_):
+          case v:
+            return make(v);
+        } 
+
     return 
       switch entries.get(type) {
         case null:
-          make('$name${counter++}');
+          doMake();
         case v:
-          Context.getType(v.name);
+          switch v.name.definedType() {
+            case Some(v): v;
+            default: doMake();
+          }
       }
   }
 }
