@@ -11,8 +11,8 @@
 	"contributors": [
 		"back2dos"
 	],
-	"releasenote": "Build cache works better with compiler server.",
-	"version": "0.13.0",
+	"releasenote": "Alias for TypeMap",
+	"version": "0.13.1",
 	"url": "http://haxetink.org/tink_macro",
 	"dependencies": {
 		"tink_core": ""
