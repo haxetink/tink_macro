@@ -25,4 +25,3 @@ deploy:
   script: haxe && haxelib run travix release
   on:
     tags: true
-    all_branches: true
