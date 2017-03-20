@@ -19,9 +19,9 @@ script:
 
 env:
   secure: T4SCtY5qmEsK1ARWPevJmqLm23tv4CobLrbPOQV3FsoQno7FCP1S/+9GmuoJKzeTjWMzdTeDsp8TVwZ6AyGjvhl2nZNjhU+QTsir4tfbYYRyvsz/QK6pveFbPQVv7OsnnaB4wbZtqGZ8mzFeQf7Ol4tsNe7iUFJb/iVc+4/lUxo=
-  
+
 deploy:
   provider: script
-  script: haxelib run travis release
+  script: ls && haxelib install travis && haxelib run travis release
   on:
     tags: true
