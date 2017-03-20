@@ -22,7 +22,7 @@ env:
 
 deploy:
   provider: script
-  script: haxelib run travix release
+  script: haxe && haxelib run travix release
   on:
     tags: true
     all_branches: true
