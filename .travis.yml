@@ -22,6 +22,6 @@ env:
 
 deploy:
   provider: script
-  script: ls && haxelib install travis && haxelib run travis release
+  script: haxelib run travix release
   on:
     tags: true
