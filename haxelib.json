@@ -12,7 +12,7 @@
 		"back2dos"
 	],
 	"releasenote": "Alias for TypeMap",
-	"version": "0.13.1",
+	"version": "0.13.2",
 	"url": "http://haxetink.org/tink_macro",
 	"dependencies": {
 		"tink_core": ""
