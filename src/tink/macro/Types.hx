@@ -51,9 +51,9 @@ class Types {
 
   static public function getMeta(type:Type) 
     return switch type {
-      case TInst(_.get().meta => m, _)
-         | TEnum(_.get().meta => m, _)
-         | TAbstract(_.get().meta => m, _): [m];
+      case TInst(_.get().meta => m, _): [m];
+      case TEnum(_.get().meta => m, _): [m];
+      case TAbstract(_.get().meta => m, _): [m];
       case TType(_.get() => t, _): [t.meta].concat(getMeta(t.type));
       case TLazy(f): getMeta(f());
       default: [];
