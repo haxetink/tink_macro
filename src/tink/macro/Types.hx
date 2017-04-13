@@ -49,6 +49,16 @@ class Types {
           throw 'not implemented';
       }
 
+  static public function getMeta(type:Type) 
+    return switch type {
+      case TInst(_.get().meta => m, _)
+         | TEnum(_.get().meta => m, _)
+         | TAbstract(_.get().meta => m, _): [m];
+      case TType(_.get() => t, _): [t.meta].concat(getMeta(t.type));
+      case TLazy(f): getMeta(f());
+      default: [];
+    }
+
   static function getDeclaredFields(t:ClassType, out:Array<ClassField>, marker:Map<String,Bool>) {
     for (field in t.fields.get())
       if (!marker.exists(field.name)) {
