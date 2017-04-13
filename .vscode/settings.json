@@ -1,0 +1,5 @@
+{
+    "haxe.displayConfigurations": [
+        ["tests.hxml"]
+    ]
+}
