@@ -11,8 +11,8 @@
 	"contributors": [
 		"back2dos"
 	],
-	"releasenote": "Added Types.getMeta",
-	"version": "0.13.4",
+	"releasenote": "Fix 3.2.1.",
+	"version": "0.13.5",
 	"url": "http://haxetink.org/tink_macro",
 	"dependencies": {
 		"tink_core": ""
