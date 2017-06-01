@@ -19,10 +19,10 @@ class Types {
       try {
         Some(Context.getType(typeName));
       }
-      catch (e:Dynamic) 
+      catch (e:Dynamic)
         if (Std.string(e) == 'Type not found \'$typeName\'') None;
-        else neko.Lib.rethrow(e);
-  
+        else #if neko neko.Lib.rethrow(e) #else throw e #end;
+
   static var types = new Map<Int,Void->Type>();
   static var idCounter = 0;
   static public function getID(t:Type, ?reduced = true)
@@ -49,7 +49,7 @@ class Types {
           throw 'not implemented';
       }
 
-  static public function getMeta(type:Type) 
+  static public function getMeta(type:Type)
     return switch type {
       case TInst(_.get().meta => m, _): [m];
       case TEnum(_.get().meta => m, _): [m];
@@ -183,14 +183,14 @@ class Types {
         params : [TPExpr(register(f).toExpr())],
         sub : null,
       });
-      
+
   static function resolveDirectType()
-    return 
+    return
       switch reduce(Context.getLocalType()) {
-        case TInst(_, [TInst(_.get() => { kind: KExpr(e) }, _)]):  
+        case TInst(_, [TInst(_.get() => { kind: KExpr(e) }, _)]):
           types[e.getInt().sure()]();//When using compiler server, this call throws on occasion, in which case modifying this file (to update mtime and invalidate the cache) will solve the problem
-        default: 
+        default:
           throw 'assert';
       }
-  
+
 }
