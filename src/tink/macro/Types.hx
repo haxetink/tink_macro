@@ -21,7 +21,7 @@ class Types {
       }
       catch (e:Dynamic)
         if (Std.string(e) == 'Type not found \'$typeName\'') None;
-        else #if neko neko.Lib.rethrow(e) #else throw e #end;
+        else tink.core.Error.rethrow(e);
 
   static var types = new Map<Int,Void->Type>();
   static var idCounter = 0;

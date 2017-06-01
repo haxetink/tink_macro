@@ -75,7 +75,7 @@ class ClassBuilder {
             }
             catch (e:Dynamic) {//fails for unknown reason
               if (e == 'assert')
-                #if neko neko.Lib.rethrow(e) #else throw e #end;
+                tink.core.Error.rethrow(e);
               constructor = new Constructor(this, null);
             }
             break;
