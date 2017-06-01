@@ -9,51 +9,51 @@ using tink.MacroApi;
 using Lambda;
 
 class ClassBuilder {
-  
+
   var memberList:Array<Member>;
   var macros:Map<String,Field>;
   var constructor:Null<Constructor>;
   public var target(default, null):ClassType;
   var superFields:Map<String,Bool>;
-  
+
   var initializeFrom:Array<Field>;
-    
-  public function new(?target, ?fields) { 
-    if (target == null) 
+
+  public function new(?target, ?fields) {
+    if (target == null)
       target = Context.getLocalClass().get();
-      
+
     if (fields == null)
       fields = Context.getBuildFields();
-    
+
     this.initializeFrom = fields;
     this.target = target;
   }
-  
+
   function init() {
     if (initializeFrom == null) return;
-    
+
     var fields = initializeFrom;
     initializeFrom = null;
-    
+
     this.memberList = [];
     this.macros = new Map();
-    
-    for (field in fields) 
+
+    for (field in fields)
       if (field.access.has(AMacro))
         macros.set(field.name, field)
       else if (field.name == 'new') {
         var m:Member = field;
         this.constructor = new Constructor(this, m.getFunction().sure(), m.isPublic, m.pos, field.meta);
       }
-      else 
+      else
         doAddMember(field);
-        
-    
+
+
   }
-  
+
   public function getConstructor(?fallback:Function):Constructor {
     init();
-    if (constructor == null) 
+    if (constructor == null)
       if (fallback != null)
         constructor = new Constructor(this, fallback);
       else {
@@ -64,18 +64,18 @@ class ClassBuilder {
             try {
               var ctor = cl.constructor.get();
               var func = Context.getTypedExpr(ctor.expr()).getFunction().sure();
-              
+
               for (arg in func.args) //this is to deal with type parameter substitutions
                 arg.type = null;
-                
+
               func.expr = "super".resolve().call(func.getArgIdents());
               constructor = new Constructor(this, func);
               if (ctor.isPublic)
-                constructor.publish();          
+                constructor.publish();
             }
             catch (e:Dynamic) {//fails for unknown reason
               if (e == 'assert')
-                neko.Lib.rethrow(e);
+                #if neko neko.Lib.rethrow(e) #else throw e #end;
               constructor = new Constructor(this, null);
             }
             break;
@@ -85,15 +85,15 @@ class ClassBuilder {
         if (constructor == null)
           constructor = new Constructor(this, null);
       }
-        
+
     return constructor;
   }
-  
+
   public function hasConstructor():Bool {
     init();
     return this.constructor != null;
   }
-    
+
   public function export(?verbose):Array<Field> {
     if (initializeFrom != null) return null;
     var ret = (constructor == null || target.isInterface) ? [] : [constructor.toHaxe()];
@@ -108,24 +108,24 @@ class ClassBuilder {
     }
     for (m in macros)
       ret.push(m);
-    
-    if (verbose) 
-      for (field in ret) 
+
+    if (verbose)
+      for (field in ret)
         Context.warning(new Printer().printField(field), field.pos);
-    
-    return ret;    
+
+    return ret;
   }
   public function iterator():Iterator<Member> {
     init();
     return this.memberList.copy().iterator();
   }
-    
+
   public function hasOwnMember(name:String):Bool {
     init();
-    return 
+    return
       macros.exists(name) || memberByName(name).isSuccess();
   }
-  
+
   public function hasSuperField(name:String):Bool {
     if (superFields == null) {
       superFields = new Map();
@@ -139,51 +139,51 @@ class ClassBuilder {
     }
     return superFields.get(name);
   }
-  
+
   public function memberByName(name:String, ?pos:Position) {
     init();
     for (m in memberList)
-      if (m.name == name) 
+      if (m.name == name)
         return Success(m);
-        
+
     return pos.makeFailure('unknown member $name');
   }
-  
+
   public function removeMember(member:Member):Bool {
     init();
-    return 
+    return
       memberList.remove(member);
   }
-  
-  public function hasMember(name:String):Bool 
+
+  public function hasMember(name:String):Bool
     return hasOwnMember(name) || hasSuperField(name);
 
   function doAddMember(m:Member, ?front:Bool = false):Member {
     init();
-    
-    if (m.name == 'new') 
+
+    if (m.name == 'new')
       throw 'Constructor must not be registered as ordinary member';
-      
-    //if (hasOwnMember(m.name)) 
+
+    //if (hasOwnMember(m.name))
       //m.pos.error('duplicate member declaration ' + m.name);
-      
-    if (front) 
+
+    if (front)
       memberList.unshift(m);
-    else 
-      memberList.push(m);        
-      
-    return m;
-  }    
-    
-  public function addMember(m:Member, ?front:Bool = false):Member {
-    doAddMember(m, front);
-    
-    if (!m.isStatic && hasSuperField(m.name))
-      m.overrides = true;
-      
+    else
+      memberList.push(m);
+
     return m;
   }
-  
+
+  public function addMember(m:Member, ?front:Bool = false):Member {
+    doAddMember(m, front);
+
+    if (!m.isStatic && hasSuperField(m.name))
+      m.overrides = true;
+
+    return m;
+  }
+
   static public function run(plugins:Array<ClassBuilder->Void>, ?verbose) {
     var builder = new ClassBuilder();
     for (p in plugins)
