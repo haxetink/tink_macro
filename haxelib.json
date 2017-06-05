@@ -11,8 +11,8 @@
 	"contributors": [
 		"back2dos"
 	],
-	"releasenote": "Fix 3.2.1.",
-	"version": "0.13.5",
+	"releasenote": "Support the new eval target.",
+	"version": "0.14.0",
 	"url": "http://haxetink.org/tink_macro",
 	"dependencies": {
 		"tink_core": ""
