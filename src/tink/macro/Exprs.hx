@@ -241,7 +241,7 @@ class Exprs {
         }
         
   static public inline function iterate(target:Expr, body:Expr, ?loopVar:String = 'i', ?pos:Position) 
-    return macro @:pos(pos.sanitize()) for ($i{loopVar) in $target) $body;
+    return macro @:pos(pos.sanitize()) for ($i{loopVar} in $target) $body;
   
   static public function toFields(object:Dynamic<Expr>, ?pos:Position)
     return EObjectDecl([for (field in Reflect.fields(object))
