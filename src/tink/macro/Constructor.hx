@@ -62,6 +62,10 @@ class Constructor {
         default: [].toBlock();
       }
   }
+
+  public function getArgList():Array<FunctionArg>
+    return beforeArgs.concat(args).concat(afterArgs);
+
   public function addStatement(e:Expr, ?prepend) 
     if (prepend)
       this.nuStatements.unshift(e)
