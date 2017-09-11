@@ -11,8 +11,8 @@
 	"contributors": [
 		"back2dos"
 	],
-	"releasenote": "Haxe 4 compatibility.",
-	"version": "0.14.1",
+	"releasenote": "Add way to get constructor args.",
+	"version": "0.14.2",
 	"url": "http://haxetink.org/tink_macro",
 	"dependencies": {
 		"tink_core": ""
