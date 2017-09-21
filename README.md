@@ -303,7 +303,7 @@ abstract Member from Field to Field {
 
 Most of the API should be self-explaining. The `isBound` property is a bad name to convey the concept that a field can be either `inline` (`true`) or `dynamic` (`false`) or neither (`null`). Equally, `isPublic` is nullable which means that normally defaults to `private`.
 
-The `publish` method will make a field `public` if it is not `private`. This can also be done with `if (m.isPublic == null) m.isPublic = true;` but the implementation is far more efficient - for what its worth.
+The `publish` method will make a field `public` if it is not explicitly marked as `private`. This can also be done with `if (m.isPublic == null) m.isPublic = true;` but the implementation is far more efficient - for what its worth.
 
 The `extractMeta` method will "peel of" the first tag with a given `name` - if available. Note that the tag will be removed from the member.
 
@@ -391,7 +391,7 @@ The `init` method is the swiss army knife of initializing fields. The `options.p
 
 #### Setter Bypass
 
-It is important to know that when you initialize a field with `options.bypass` set to true, existing setters will by bypassed. That's particularly helpful if your setter triggers a side effect that you don't want triggered. This is achieved by generating the assignment as `(untyped this).$name = $value`. To make the code typesafe again, this is prefixed with `if (false) { var __tmp = this.$name; __tmp = $value; }`. This code is later thrown out by the compiler. Its role is to ensure type safety without interfering with the normal typing order.
+It is important to know that when you initialize a field with `options.bypass` set to true, existing setters will be bypassed. That's particularly helpful if your setter triggers a side effect that you don't want triggered. This is achieved by generating the assignment as `(untyped this).$name = $value`. To make the code typesafe again, this is prefixed with `if (false) { var __tmp = this.$name; __tmp = $value; }`. This code is later thrown out by the compiler. Its role is to ensure type safety without interfering with the normal typing order.
 
 Setter bypass also causes the field to gain an `@:isVar`. And currently, with `-dce full`, additional code will be generated to avoid the field to be eliminated.
 
