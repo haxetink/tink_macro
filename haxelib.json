@@ -1,20 +1,20 @@
 {
 	"name": "tink_macro",
-	"license": "MIT",
+	"description": "The macro toolkit ;)",
+	"classPath": "src",
+	"dependencies": {
+		"tink_core": ""
+	},
+	"url": "http://haxetink.org/tink_macro",
+	"contributors": [
+		"back2dos"
+	],
+	"version": "0.15.0",
+	"releasenote": "Keep up with Haxe 4.",
 	"tags": [
 		"tink",
 		"macro",
 		"utility"
 	],
-	"classPath": "src",
-	"description": "The macro toolkit ;)",
-	"contributors": [
-		"back2dos"
-	],
-	"releasenote": "Add way to get constructor args.",
-	"version": "0.14.2",
-	"url": "http://haxetink.org/tink_macro",
-	"dependencies": {
-		"tink_core": ""
-	}
+	"license": "MIT"
 }
