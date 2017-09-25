@@ -17,6 +17,7 @@ class Sisyphus {
         case AccCall: getOrSet;
         case AccInline: "default";
         case AccRequire(_, _): "default";
+        default: throw "not implemented";
       }
     }
     if (cf.params.length == 0) {
