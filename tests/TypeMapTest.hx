@@ -2,7 +2,7 @@ package;
 
 import haxe.unit.TestCase;
 
-import tink.macro.TypeMap;
+using tink.MacroApi;
 using haxe.macro.Context;
 
 class TypeMapTest extends TestCase {
@@ -25,6 +25,15 @@ class TypeMapTest extends TestCase {
     assertEquals(t.get(t2), 3);
     
     assertTrue(true);
+  }
+  
+  function testAnonWithReducibleField() {
+    var t = new TypeMap();
+    var t1 = (macro:{i:Null<Int>}).toType().sure();
+    var t2 = (macro:{i:Null<Null<Int>>}).toType().sure();
+    t.set(t1, true);
+    assertTrue(t.exists(t2));
+    
   }
   
 }

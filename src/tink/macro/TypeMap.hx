@@ -25,7 +25,10 @@ class TypeMap<V> extends BalancedTree<Type, V> implements IMap<Type, V> {
     
     return switch k1.getIndex() - k2.getIndex() {
       case 0: 
-        Reflect.compare(k1.toString(), k2.toString());//much to my surprise, this actually seems to work (at least with 3.4)
+        if(Context.unify(k1, k2) && Context.unify(k2, k1))
+          0
+        else
+          Reflect.compare(k1.toString(), k2.toString());//much to my surprise, this actually seems to work (at least with 3.4)
       case v: v;
     }
   }
