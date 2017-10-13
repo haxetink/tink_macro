@@ -25,12 +25,17 @@ class TypeMap<V> extends BalancedTree<Type, V> implements IMap<Type, V> {
     
     return switch k1.getIndex() - k2.getIndex() {
       case 0: 
-        if(Context.unify(k1, k2) && Context.unify(k2, k1))
-          0
-        else
-          Reflect.compare(k1.toString(), k2.toString());//much to my surprise, this actually seems to work (at least with 3.4)
+        Reflect.compare(stringify(k1), stringify(k2));//much to my surprise, this actually seems to work (at least with 3.4)
       case v: v;
     }
+  }
+  
+  static var NESTED_NULL_REGEX = ~/Null<Null<([^>]*)>>/g; // a hack to flatten nested Null<T>
+  function stringify(type:Type) {
+    var s = type.toString();
+    while(NESTED_NULL_REGEX.match(s))
+      s = NESTED_NULL_REGEX.replace(s, "Null<$1>");
+    return s;
   }
   
 }
