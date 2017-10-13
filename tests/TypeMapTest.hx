@@ -34,6 +34,12 @@ class TypeMapTest extends TestCase {
     t.set(t1, true);
     assertTrue(t.exists(t2));
     
+    var t = new TypeMap();
+    var t1 = (macro:{?i:Int}).toType().sure();
+    var t2 = (macro:{i:Int}).toType().sure();
+    t.set(t1, true);
+    assertFalse(t.exists(t2));
+    
   }
   
 }
