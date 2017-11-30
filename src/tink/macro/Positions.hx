@@ -12,7 +12,7 @@ class Positions {
     return 
       switch outcome {
         case Success(d): d;
-        case Failure(f): sanitize(pos).error(f);
+        case Failure(f): pos.error(f);
       }
   
   static public function makeBlankType(pos:Position):ComplexType 
@@ -32,7 +32,17 @@ class Positions {
 
 
   static public function error(pos:Position, error:Dynamic):Dynamic 
-    return errorFunc(sanitize(pos), Std.string(error));
+    return 
+      switch Std.instance(error, tink.core.Error) {
+        case null: errorFunc(sanitize(pos), Std.string(error));
+        case error: 
+          errorFunc(
+            error.pos, 
+            error.message + 
+              if (pos == null) ''
+              else ' (referenced from ' + Std.string(pos).substr(5)
+          );
+      }
   
   static function contextError(pos:Position, error:String):Dynamic 
     return Context.fatalError(error, pos);
