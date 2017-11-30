@@ -1,20 +1,20 @@
 {
 	"name": "tink_macro",
-	"description": "The macro toolkit ;)",
-	"classPath": "src",
-	"dependencies": {
-		"tink_core": ""
-	},
-	"url": "http://haxetink.org/tink_macro",
-	"contributors": [
-		"back2dos"
-	],
-	"version": "0.15.0",
-	"releasenote": "Keep up with Haxe 4.",
+	"license": "MIT",
 	"tags": [
 		"tink",
 		"macro",
 		"utility"
 	],
-	"license": "MIT"
+	"classPath": "src",
+	"description": "The macro toolkit ;)",
+	"contributors": [
+		"back2dos"
+	],
+	"releasenote": "Don't drop positions when typing.",
+	"version": "0.15.1",
+	"url": "http://haxetink.org/tink_macro",
+	"dependencies": {
+		"tink_core": ""
+	}
 }
