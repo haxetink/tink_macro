@@ -319,7 +319,7 @@ class Exprs {
           expr = [EVars(locals).at(expr.pos), expr].toMBlock(expr.pos);
         Success(Context.typeof(expr));
       }
-      catch (e:Error) {
+      catch (e:haxe.macro.Error) {
         var m:Dynamic = e.message;
         e.pos.makeFailure(m);
       }
