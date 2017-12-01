@@ -11,8 +11,8 @@
 	"contributors": [
 		"back2dos"
 	],
-	"releasenote": "Improve position reporting.",
-	"version": "0.15.2",
+	"releasenote": "Fixes issues caused by private types.",
+	"version": "0.15.3",
 	"url": "http://haxetink.org/tink_macro",
 	"dependencies": {
 		"tink_core": ""
