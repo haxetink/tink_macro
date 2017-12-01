@@ -53,12 +53,18 @@ class Sisyphus {
     }
   }
 
-  public static function toComplexType(type : Null<Type>) : Null<ComplexType> return
+
+  public static function toComplexType(type : Null<Type>) : Null<ComplexType> return {
+    inline function direct()
+      return Types.toComplex(type, { direct: true });
     switch (type) {
       case null:
         null;
-      case TMono(_.get() => t):
-        t == null ? Types.toComplex(type, { direct: true }) : toComplexType(t);
+      case TEnum(_.get().isPrivate => true, _): direct();
+      case TInst(_.get().isPrivate => true, _): direct();
+      case TType(_.get().isPrivate => true, _): direct();
+      case TAbstract(_.get().isPrivate => true, _): direct();
+      case TMono(_): direct();
       case TEnum(_.get() => baseType, params):
         TPath(toTypePath(baseType, params));
       case TInst(_.get() => classType, params):
@@ -93,7 +99,7 @@ class Sisyphus {
       default:
         throw "Invalid type";
     }
-
+  }
   static function toTypePath(baseType : BaseType, params : Array<Type>) : TypePath return {
     var module = baseType.module;
     {
