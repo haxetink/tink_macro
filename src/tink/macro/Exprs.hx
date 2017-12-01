@@ -320,8 +320,7 @@ class Exprs {
         Success(Context.typeof(expr));
       }
       catch (e:haxe.macro.Error) {
-        var m:Dynamic = e.message;
-        e.pos.makeFailure(m);
+        e.pos.makeFailure(e.message);
       }
       catch (e:Dynamic) {
         expr.pos.makeFailure(e);
