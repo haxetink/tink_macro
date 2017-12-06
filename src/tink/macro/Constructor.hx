@@ -100,7 +100,7 @@ class Constructor {
         case Success(member): member.addMeta(':isVar');
         default:
       }
-      addStatement(macro @:pos(pos) (cast this).$name = if (true) $e else this.$name, options.prepend);//TODO: this seems to report type errors here rather than at the declaration position
+      addStatement(macro @:pos(pos) (cast this).$name = if (false) this.$name else $e, options.prepend);//TODO: this seems to report type errors here rather than at the declaration position
     }
     else 
       addStatement(macro @:pos(pos) this.$name = $e, options.prepend);
