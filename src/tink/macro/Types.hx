@@ -94,7 +94,7 @@ class Types {
           fieldsCache.remove(id);//TODO: find a proper solution to avoid stale cache
           ret;
         case TAnonymous(anon): Success(anon.get().fields);
-        default: Context.currentPos().makeFailure('type has no fields');
+        default: Context.currentPos().makeFailure('type $t has no fields');
       }
 
   static public function getStatics(t:Type)
