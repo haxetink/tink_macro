@@ -11,8 +11,8 @@
 	"contributors": [
 		"back2dos"
 	],
-	"releasenote": "Fixes issues caused by private types.",
-	"version": "0.15.3",
+	"releasenote": "Report invalid type in getFields.",
+	"version": "0.15.4",
 	"url": "http://haxetink.org/tink_macro",
 	"dependencies": {
 		"tink_core": ""
