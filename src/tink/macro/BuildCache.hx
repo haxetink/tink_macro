@@ -106,22 +106,23 @@ class BuildCache {
     }));
   }
 
-  static public function getType(name, ?type, ?pos:Position, build:BuildContext->TypeDefinition) {
-    
-    if (pos == null)
-      pos = Context.currentPos();
-    
-    if (type == null)
+  static public function getParam(name:String, ?pos:Position)     
+    return
       switch Context.getLocalType() {
         case TInst(_.toString() == name => true, [v]):
-          type = v;
+          v;
         case TInst(_.toString() == name => true, _):
-          Context.fatalError('type parameter expected', pos);
+          pos.error('type parameter expected');
         case TInst(_.get() => { pos: pos }, _):
-          Context.fatalError('Expected $name', pos);
+          pos.error('Expected $name');
         default:
           throw 'assert';
-      }  
+      }       
+
+  static public function getType(name, ?type, ?pos:Position, build:BuildContext->TypeDefinition) {
+    
+    if (type == null)
+      type = getParam(name, pos);
       
     var forName = 
       switch cache[name] {
@@ -129,7 +130,7 @@ class BuildCache {
         case v: v;
       }
     
-    return forName.get(type, pos, build);  
+    return forName.get(type, pos.sanitize(), build);  
   }
 }
 
