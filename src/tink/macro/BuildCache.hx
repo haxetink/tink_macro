@@ -106,23 +106,30 @@ class BuildCache {
     }));
   }
 
-  static public function getParam(name:String, ?pos:Position)     
+  static public function getParams(name:String, ?pos:Position)     
     return
       switch Context.getLocalType() {
-        case TInst(_.toString() == name => true, [v]):
-          v;
-        case TInst(_.toString() == name => true, _):
-          pos.error('type parameter expected');
+        case TInst(_.toString() == name => true, v):
+          Success(v);
         case TInst(_.get() => { pos: pos }, _):
-          pos.error('Expected $name');
-        default:
-          throw 'assert';
-      }       
+          pos.makeFailure('Expected $name');
+        case v:
+          pos.makeFailure('$v should be a class');
+      }  
+
+  static public function getParam(name:String, ?pos:Position)     
+    return
+      getParams(name, pos)
+        .flatMap(function (args:Array<Type>) return switch args {
+          case [v]: Success(v);
+          case []: pos.makeFailure('type parameter expected');
+          default: pos.makeFailure('too many parameters');
+        });
 
   static public function getType(name, ?type, ?pos:Position, build:BuildContext->TypeDefinition) {
     
     if (type == null)
-      type = getParam(name, pos);
+      type = getParam(name, pos).sure();
       
     var forName = 
       switch cache[name] {
