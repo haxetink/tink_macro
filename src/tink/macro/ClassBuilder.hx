@@ -175,9 +175,10 @@ class ClassBuilder {
     return m;
   }
 
-  public function addMembers(td:TypeDefinition) {
+  public function addMembers(td:TypeDefinition):Array<Member> {
     for (f in td.fields)
       addMember(f);
+    return td.fields;
   }
 
   public function addMember(m:Member, ?front:Bool = false):Member {
