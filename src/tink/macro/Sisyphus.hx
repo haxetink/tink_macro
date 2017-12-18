@@ -70,10 +70,7 @@ class Sisyphus {
       case TInst(_.get() => classType, params):
         switch (classType.kind) {
           case KTypeParameter(_):
-            TPath({
-              name: classType.name,
-              pack: [],
-            });
+            direct();//TODO: check if the parameter is in scope, in which case the name can simply be used
           default:
             TPath(toTypePath(classType, params));
         }
