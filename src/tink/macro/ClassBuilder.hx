@@ -175,6 +175,11 @@ class ClassBuilder {
     return m;
   }
 
+  public function addMembers(td:TypeDefinition) {
+    for (f in td.fields)
+      addMember(f);
+  }
+
   public function addMember(m:Member, ?front:Bool = false):Member {
     doAddMember(m, front);
 
