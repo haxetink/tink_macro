@@ -311,10 +311,39 @@ class Exprs {
   
   static public inline function resolve(s:String, ?pos) 
     return drill(s.split('.'), pos);
+
+  static var scopes = new Array<Array<Var>>();
+
+  static function inScope<T>(a:Array<Var>, f:Void->T) {
+    scopes.push(a);
+
+    inline function leave() 
+      scopes.pop();
+    try {
+      var ret = f();
+      leave();
+      return ret;
+    }
+    catch (e:Dynamic) {
+      leave();
+      return Error.rethrow(e);
+    }    
+  }
+
+  static public function scoped<T>(f:Void->T) 
+    return inScope([], f);
+
+  static public function inSubScope<T>(f:Void->T, a:Array<Var>) 
+    return inScope(switch scopes[scopes.length - 1] {
+      case null: a;
+      case v: v.concat(a);
+    }, f);
   
   static public function typeof(expr:Expr, ?locals)
     return
       try {
+        if (locals == null)
+          locals = scopes[scopes.length - 1];
         if (locals != null) 
           expr = [EVars(locals).at(expr.pos), expr].toMBlock(expr.pos);
         Success(Context.typeof(expr));
