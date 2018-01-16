@@ -11,8 +11,8 @@
 	"contributors": [
 		"back2dos"
 	],
-	"releasenote": "Report invalid type in getFields.",
-	"version": "0.15.4",
+	"releasenote": "Support artificial scopes when typing. Expose more BuildCache logic. Further improve Type -> ComplexType transformation.",
+	"version": "0.16.0",
 	"url": "http://haxetink.org/tink_macro",
 	"dependencies": {
 		"tink_core": ""
