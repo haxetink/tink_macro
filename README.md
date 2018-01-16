@@ -17,18 +17,17 @@ The library is build on top of the haxe macro API and `tink_core`, having three 
 
 <!-- START INDEX -->
 - [Macro API](#macro-api)
-	- 
-		- [Expression Tools](#expression-tools)
-			- [Basic Helpers](#basic-helpers)
-			- [Extracting Constants](#extracting-constants)
-			- [Shortcuts](#shortcuts)
-			- [Type Inspection](#type-inspection)
-			- [Advanced Transformations](#advanced-transformations)
-		- [Position Tools](#position-tools)
-		- [Type Tools](#type-tools)
-		- [Function Tools](#function-tools)
-		- [Operation Tools](#operation-tools)
-		- [Metadata Tools](#metadata-tools)
+	- [Expression Tools](#expression-tools)
+		- [Basic Helpers](#basic-helpers)
+		- [Extracting Constants](#extracting-constants)
+		- [Shortcuts](#shortcuts)
+		- [Type Inspection](#type-inspection)
+		- [Advanced Transformations](#advanced-transformations)
+	- [Position Tools](#position-tools)
+	- [Type Tools](#type-tools)
+	- [Function Tools](#function-tools)
+	- [Operation Tools](#operation-tools)
+	- [Metadata Tools](#metadata-tools)
 - [Build Infrastructure](#build-infrastructure)
 	- [Member](#member)
 	- [ClassBuilder](#classbuilder)
@@ -51,9 +50,9 @@ It is suggested to use this API by `using tink.MacroApi;`
 
 Apart form `tink_macro` specific things, it will also use `haxe.macro.ExprTools` and `tink.core.Outcome`.
 
-### Expression Tools
+## Expression Tools
 
-#### Basic Helpers
+### Basic Helpers
 
 - `at(e:ExprDef, ?pos:Position):Expr`  
 A short hand for creating expression as for example `EReturn(value).at(position)`, instead of the more verbose `{ expr: EReturn(value), pos: position }`.
@@ -69,7 +68,7 @@ Traces the string representation of an expression and returns it.
 - `concat(e1:Expr, e2:Expr):Expr`
 Concats two expressions into a block. If either sub-expression is a block itself, it gets flattened into the resulting block.
 
-#### Extracting Constants
+### Extracting Constants
 
 - `isWildcard(e:Expr):Bool`  
 Checks whether an expression is the identifier `_`
@@ -82,7 +81,7 @@ Attempts extracting an identifier from an expression. Note that an identifier ca
 - `getName(e:Expr):Outcome<String, tink.core.Error>`  
 Attempts extracting a name, i.e. a string constant or identifier from an expression
 
-#### Shortcuts
+### Shortcuts
 
 Often reification is prefereable to these shortcuts - if applicable. Unlike reification, the position of these expressions will default to `Context.currentPos()` rather than the position where they were created.
 
@@ -119,7 +118,7 @@ Generates a simple if statement.
 - `iterate(target:Expr, body:Expr, ?loopVar:String = 'i', ?pos:Position):Expr`  
 Will loop over `target` with a loop variable called `loopVar` using `body`-
 
-#### Type Inspection
+### Type Inspection
 
 - `is(e:Expr, c:ComplexType):Bool`  
 Tells you whether a given expression has a given type. 
@@ -129,7 +128,7 @@ Inspects, whether an expression can be iterated over and if so returns the eleme
 - `typeof(expr:Expr, ?locals:Array<Var>):Outcome<Type, tink.core.Error>`  
 Attempts to determine the type of an expression. Note that you can use `locals` to hint the compiler the type of certain identifiers. For example if you are in a build macro, and you want to get the type of a subexpression of a method body, you could "fake" the other members of the class as local variables, because in that context, the other members do not yet exists from the compiler's perspective.
 
-#### Advanced Transformations
+### Advanced Transformations
 
 - `has(e:Expr, condition:Expr->Bool, ?options: { ?enterFunctions: Bool })`
 This function actually does no transformation, but is very close to the rest of these functions. It allows you to check whether an expression has a sub-expression that satisfies `condition`. By default, it does not enter nested functions. 
@@ -187,7 +186,7 @@ This will traverse an expression and will apply the `yielder` to the "leafs", wh
 
 	If you set `options.leaveLoops` to `true`, then loops (both for and while) will be considered leafs. 
 	
-### Position Tools
+## Position Tools
 
 - `sanitize(pos:Position):Position`  
 Returns the position ITself or `Context.currentPos()` if it's null.
@@ -202,7 +201,7 @@ Creates a failed `Outcome` associated with the supplied position.
 - `getOutcome<D, F>(pos:Position, outcome:Outcome<D, F>):D`  
 Attempts getting the result of the supplied outcome. If it is a failure, it will cause an error at the given position.
 
-### Type Tools
+## Type Tools
 
 - `getID(t:Type, ?reduced = true):Null<String>`  
 Returns a String identifier for a type if available. By default, the type will be reduced prior to getting its name (typedefs are resolved etc.). With `reduced = false` you can also get the name of a typedef.
@@ -225,7 +224,7 @@ Will tell you whether a field is a variable or not. Signature is likely to chang
 - `toComplex(type:Type, ?option:{ ?direct: Bool }):ComplexType`  
 Will convert a `Type` to a `ComplexType`. Ideally this is done with `Context.toComplexType` but for monomorphs and the like, this builtin method fails and `tink_macro` uses a hack to make it work none the less. You can also use `{ direct : true }` to force this hack in case the translation fails (which can be the case with private types).
 
-### Function Tools
+## Function Tools
 
 - `asExpr(f:Function, ?name:String, ?pos:Position):Expr`  
 Converts a function to an expression, i.e. a local function definition.
@@ -236,7 +235,7 @@ A shorthand to create function arguments.
 - `getArgIdents(f:Function):Array<Expr>`  
 Will extract the argument list of a function as an expression list of identifiers (usefull when writing call-forwarding macros or the like).
 
-### Operation Tools
+## Operation Tools
 
 - `get(o:Binop, e:Expr):Outcome<{ e1:Expr, e2:Expr, pos:Position }, tink.core.Error>`  
 Attempts to extract a specific binary operation from an expression.
@@ -250,7 +249,7 @@ Attempts to extract a specific unary operation from an expression.
 - `getUnop(e:Expr):Outcome<{ op:Unop, e:Expr, postFix:Bool, pos:Position }, tink.core.Error>`  
 Attempts to decompose an expression into the parts of a unary operation.
 
-### Metadata Tools
+## Metadata Tools
 
 - `toMap(m:Metadata):Map<String, Array<Array<Expr>>`
 Will deconstruct an array of metadata tags to a `Map` mapping the tag names to an array of the argument lists of each tag with that name. So `@foo(1) @foo(2) @bar` becomes `["foo" => [[1], [2]], "bar" => [[]]]`
