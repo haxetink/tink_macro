@@ -1,0 +1,3 @@
+-D tink_macro
+-cp src
+-lib tink_core
