@@ -99,10 +99,16 @@ class Sisyphus {
   }
   static function toTypePath(baseType : BaseType, params : Array<Type>) : TypePath return {
     var module = baseType.module;
+    var name = module.substring(module.lastIndexOf(".") + 1);
+    var sub = switch baseType.name {
+      case _ == name => true: null;
+      case v: v;
+    }
+    
     {
       pack: baseType.pack,
-      name: module.substring(module.lastIndexOf(".") + 1),
-      sub: baseType.name,
+      name: name,
+      sub: sub,
       params: [ for (t in params) TPType(toComplexType(t)) ],
     }
   }
