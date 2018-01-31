@@ -1,1 +1,1 @@
-typedef VarChar<@:const L> = String;
+typedef VarChar<Const> = String;
