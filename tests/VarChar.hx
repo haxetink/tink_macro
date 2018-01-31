@@ -1,0 +1,1 @@
+typedef VarChar<@:const L> = String;

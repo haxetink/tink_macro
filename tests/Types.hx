@@ -45,6 +45,10 @@ class Types extends Base {
     MacroApi.pos().makeBlankType().toString();
   }
 
+  function testExpr() {
+    assertEquals('VarChar<255>', (macro : VarChar<255>).toType().sure().toComplex().toString());
+  }
+
   function testToComplex() {
     assertEquals('String', Context.getType('String').toComplex().toString());
     assertEquals('tink.CoreApi.Noise', Context.getType('tink.CoreApi.Noise').toComplex().toString());

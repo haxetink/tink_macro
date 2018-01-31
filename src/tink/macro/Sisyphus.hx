@@ -109,7 +109,10 @@ class Sisyphus {
       pack: baseType.pack,
       name: name,
       sub: sub,
-      params: [ for (t in params) TPType(toComplexType(t)) ],
+      params: [for (t in params) switch t {
+        case TInst(_.get().kind => KExpr(e), _): TPExpr(e);
+        default: TPType(toComplexType(t));
+      }],
     }
   }
 }
