@@ -11,8 +11,8 @@
 	"contributors": [
 		"back2dos"
 	],
-	"releasenote": "Handle module types properly.",
-	"version": "0.16.1",
+	"releasenote": "Support Type->ComplexType conversion for expression type params.",
+	"version": "0.16.2",
 	"url": "http://haxetink.org/tink_macro",
 	"dependencies": {
 		"tink_core": ""
