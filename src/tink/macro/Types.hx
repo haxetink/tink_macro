@@ -146,8 +146,16 @@ class Types {
   static public inline function asComplexType(s:String, ?params)
     return TPath(asTypePath(s, params));
 
-  static public inline function reduce(type:Type, ?once)
-    return Context.follow(type, once);
+  static public function reduce(type:Type, ?once) {
+    function rec(t:Type)
+      return if (once) t else reduce(t, false);
+    return switch type {
+      case TAbstract(_.get() => { name: 'Null', pack: [] }, [t]): rec(t);
+      case TLazy(f): rec(f());
+      case TType(_, _): rec(Context.follow(type, once));
+      default: type;
+    }
+  }
 
   static public function isVar(field:ClassField)
     return switch (field.kind) {
