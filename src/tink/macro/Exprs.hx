@@ -428,6 +428,22 @@ class Exprs {
       }
   }
   
+  static var FIRST = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  static var LATER = FIRST + '0123456789';
+
+  static public function shortIdent(i:Int) {
+    var ret = FIRST.charAt(i % FIRST.length);
+
+    i = Std.int(i / FIRST.length);
+    
+    while (i > 0) {
+      ret += LATER.charAt(i % LATER.length);
+      i = Std.int(i / LATER.length);
+    }
+
+    return ret;
+  }
+  
   static inline var NOT_AN_INT = "integer constant expected";
   static inline var NOT_AN_IDENT = "identifier expected";
   static inline var NOT_A_STRING = "string constant expected";

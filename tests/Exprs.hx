@@ -1,11 +1,20 @@
 package ;
 
+import haxe.macro.Context;
 import haxe.macro.Expr;
 using tink.MacroApi;
 
 class Exprs extends Base {
   function exprEq(e1:Expr, e2:Expr) {
     assertEquals(e1.toString(), e2.toString());
+  }
+
+  function testShort() {
+    for (i in 0...100) {
+      var id = (100 * i).shortIdent();
+      Context.parseInlineString(id, (macro null).pos);
+      assertTrue(id.length <= 3);
+    }
   }
   function testGet() {
     assertEquals('foo', (macro foo).getIdent().sure());
