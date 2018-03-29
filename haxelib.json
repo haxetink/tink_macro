@@ -9,8 +9,8 @@
 	"contributors": [
 		"back2dos"
 	],
-	"version": "0.16.3",
-	"releasenote": "Maintain Haxe 3 nullability semantics in Haxe 4.",
+	"version": "0.16.4",
+	"releasenote": "Helper for short identifiers.",
 	"tags": [
 		"tink",
 		"macro",
