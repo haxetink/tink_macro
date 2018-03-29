@@ -1,8 +1,10 @@
 package tink.macro;
 
+import haxe.macro.Type;
 import haxe.macro.Expr;
 import haxe.macro.Context;
 import tink.core.Pair;
+using haxe.macro.Tools;
 using tink.MacroApi;
 
 enum FieldInit {
@@ -100,7 +102,43 @@ class Constructor {
         case Success(member): member.addMeta(':isVar');
         default:
       }
-      addStatement(macro @:pos(pos) (cast this).$name = if (false) this.$name else $e, options.prepend);//TODO: this seems to report type errors here rather than at the declaration position
+      addStatement((function () {
+        var fields = [for (f in Context.getLocalClass().get().fields.get()) f.name => f];
+        
+        function setDirectly(t:TypedExpr) {
+          var direct = null;
+          function seek(t:TypedExpr) {
+            switch t.expr {
+              case TField({ expr: TConst(TThis) }, FInstance(_, _, f)) if (f.get().name == name): direct = t;
+              default: t.iter(seek);
+            }
+          }			
+          seek(t);
+          if (direct == null) pos.error('nope');
+          var direct = Context.storeTypedExpr(direct);
+          return macro @:pos(pos) $direct = $e;
+        }
+        
+        return switch fields[name] {
+          case null: //trace(Context.getLocalClass().get().fields.get().length);  throw ('assert');
+            macro @:pos(pos) this.$name = $e;
+          case f:
+            switch f.kind {
+              case FVar(_, AccNormal | AccNo):
+                macro @:pos(pos) this.$name = $e;
+              case FVar(AccNever, AccNever):
+                macro @:pos(pos) this.$name = $e;
+              case FVar(AccNo | AccNormal, AccNever):
+                setDirectly(Context.typeExpr(macro @:pos(pos) this.$name));
+              case FVar(AccCall, AccNever):
+                setDirectly(fields['get_$name'].expr());
+              case FVar(_, AccCall):
+                setDirectly(fields['set_$name'].expr());
+              default:
+                pos.error('not implemented');
+            }
+        }
+      }).bounce(), options.prepend);    
     }
     else 
       addStatement(macro @:pos(pos) this.$name = $e, options.prepend);
