@@ -74,7 +74,11 @@ class BuildCache {
     var compound = ComplexType.TAnonymous([for (i in 0...types.length) {
       name: 't$i',
       pos: pos,
-      kind: FVar(types[i].toComplexType()),
+      kind: FVar(switch types[i] {
+        case TInst(_.get().kind => KExpr(e), _): 
+          TPath('tink.macro.ConstParam'.asTypePath([TPExpr(e)]));
+        case t: t.toComplex();
+      }),
     }]).toType();
         
     return getType(name, compound, pos, function (ctx) return build({

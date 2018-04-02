@@ -121,7 +121,11 @@ class Constructor {
         
         return switch fields[name] {
           case null: //trace(Context.getLocalClass().get().fields.get().length);  throw ('assert');
-            macro @:pos(pos) this.$name = $e;
+            macro @:pos(pos) {
+              var v = this.$name;
+              v = $e;
+              (cast this).$name = v;
+            }
           case f:
             switch f.kind {
               case FVar(_, AccNormal | AccNo):
