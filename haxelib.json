@@ -9,8 +9,8 @@
 	"contributors": [
 		"back2dos"
 	],
-	"version": "0.16.4",
-	"releasenote": "Helper for short identifiers.",
+	"version": "0.16.5",
+	"releasenote": "Fix setter bypass.",
 	"tags": [
 		"tink",
 		"macro",
