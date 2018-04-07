@@ -103,7 +103,7 @@ class Constructor {
         default:
       }
       addStatement((function () {
-        var fields = [for (f in Context.getLocalClass().get().fields.get()) f.name => f];
+        var fields = [for (f in  (macro this).typeof().sure().getClass().fields.get()) f.name => f];
         
         function setDirectly(t:TypedExpr) {
           var direct = null;
@@ -120,12 +120,8 @@ class Constructor {
         }
         
         return switch fields[name] {
-          case null: //trace(Context.getLocalClass().get().fields.get().length);  throw ('assert');
-            macro @:pos(pos) {
-              var v = this.$name;
-              v = $e;
-              (cast this).$name = v;
-            }
+          case null: 
+            pos.error('this direct initialization causes the compiler to do really weird things');
           case f:
             switch f.kind {
               case FVar(_, AccNormal | AccNo):
