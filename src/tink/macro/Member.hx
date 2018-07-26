@@ -32,6 +32,7 @@ abstract Member(Field) from Field to Field {
   }
   
   public var name(get, set):String;
+  public var meta(get, set):Metadata;
   public var doc(get, set):Null<String>;
   public var kind(get, set):FieldType;
   public var pos(get, set):Position;
@@ -76,6 +77,11 @@ abstract Member(Field) from Field to Field {
       }
     return pos.makeFailure('missing @$name');
   }
+
+  public function metaNamed(name) 
+    return 
+      if (this.meta == null) [];
+      else [for (tag in this.meta) if (tag.name == name) tag];
   
   public inline function asField():Field return this;
   public function publish() 
@@ -86,6 +92,12 @@ abstract Member(Field) from Field to Field {
       this.access.push(APublic);
     }
   
+  inline function get_meta() return switch this.meta {
+    case null: this.meta = [];
+    case v: v;
+  }
+  inline function set_meta(param) return this.meta = param;
+
   inline function get_name() return this.name;
   inline function set_name(param) return this.name = param;
   
