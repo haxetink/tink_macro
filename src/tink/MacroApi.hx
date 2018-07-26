@@ -37,3 +37,50 @@ class MacroApi {
     return haxe.macro.Context.currentPos();
 
 }
+
+
+#if (haxe >= 4)
+  typedef ObjectField = haxe.macro.Expr.ObjectField;
+  typedef QuoteStatus = haxe.macro.Expr.QuoteStatus;
+#else
+  enum QuoteStatus {
+    Unquoted;
+    Quoted;
+  }
+  private typedef F = {
+    var field:String;
+    var expr:haxe.macro.Expr;
+  }
+
+  @:forward
+  abstract ObjectField(F) to F {
+
+    static var QUOTED = "@$__hx__"; 
+
+    inline function new(o) this = o;
+
+    public var field(get, never):String;
+    
+    function get_field()
+      return 
+        if (quotes == Quoted) 
+          this.field.substr(QUOTED.length);
+        else this.field;
+
+    public var quotes(get, never):QuoteStatus;
+    
+    function get_quotes()
+      return if (StringTools.startsWith(this.field, QUOTED)) Quoted else Unquoted;
+
+    @:from static function ofFull(o:{>F, quotes:QuoteStatus }):ObjectField
+      return switch o.quotes {
+        case null | Unquoted: 
+          new ObjectField({ field: o.field, expr: o.expr });
+        default:
+          new ObjectField({ field: QUOTED + o.field, expr: o.expr });
+      }
+
+    @:from static function ofOld(o:F):ObjectField
+      return new ObjectField(o);
+  }
+#end
