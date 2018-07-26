@@ -63,7 +63,9 @@ class ClassBuilder {
           if (cl.constructor != null) {
             try {
               var ctor = cl.constructor.get();
-              var func = Context.getTypedExpr(ctor.expr()).getFunction().sure();
+              var ctorExpr = ctor.expr();
+              if (ctorExpr == null) throw 'Super constructor has no expression';
+              var func = Context.getTypedExpr(ctorExpr).getFunction().sure();
 
               for (arg in func.args) //this is to deal with type parameter substitutions
                 arg.type = null;
