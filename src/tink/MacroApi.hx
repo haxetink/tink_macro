@@ -39,7 +39,7 @@ class MacroApi {
 }
 
 
-#if (haxe >= 4)
+#if (haxe_ver >= 4)
   typedef ObjectField = haxe.macro.Expr.ObjectField;
   typedef QuoteStatus = haxe.macro.Expr.QuoteStatus;
 #else
