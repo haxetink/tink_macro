@@ -193,12 +193,12 @@ class Types {
         case TPath(p): paths.push(p);
         case TAnonymous(f): 
           
-          for (f in fields) fields.push(f);
+          for (f in f) fields.push(f);
 
         case TExtend(p, f): 
           
-          for (f in fields) fields.push(f);
-          for (p in paths) paths.push(p);
+          for (f in f) fields.push(f);
+          for (p in p) paths.push(p);
 
         default:
           
