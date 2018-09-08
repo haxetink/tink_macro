@@ -11,8 +11,8 @@
 	"contributors": [
 		"back2dos"
 	],
-	"releasenote": "Add haxe3 polyfill for ObjectField.",
-	"version": "0.16.6",
+	"releasenote": "Fix haxe 4 compat.",
+	"version": "0.16.7",
 	"url": "http://haxetink.org/tink_macro",
 	"dependencies": {
 		"tink_core": ""

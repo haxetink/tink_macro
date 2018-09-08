@@ -7,9 +7,7 @@ import haxe.macro.Context;
 import haxe.macro.Expr;
 import haxe.macro.Type;
 
-using tink.macro.Exprs;
-using tink.macro.Positions;
-using tink.macro.Functions;
+using tink.MacroApi;
 using tink.CoreApi;
 
 class Types {
@@ -181,6 +179,33 @@ class Types {
     if (ret == null)
       ret = lazyComplex(function () return type);
     return ret;
+  }
+
+  static public function intersect(types:Array<ComplexType>, ?pos:Position):Outcome<ComplexType, Error> {
+    
+    if (types.length == 1) return Success(types[1]);
+
+    var paths = [],
+        fields = [];
+
+    for (t in types)
+      switch t {
+        case TPath(p): paths.push(p);
+        case TAnonymous(f): 
+          
+          for (f in f) fields.push(f);
+
+        case TExtend(p, f): 
+          
+          for (f in f) fields.push(f);
+          for (p in p) paths.push(p);
+
+        default:
+          
+          return Failure(new Error(t.toString() + ' cannot be interesected', pos));
+      }
+
+    return Success(TExtend(paths, fields));
   }
 
   static public function lazyComplex(f:Void->Type)
