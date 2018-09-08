@@ -11,8 +11,8 @@
 	"contributors": [
 		"back2dos"
 	],
-	"releasenote": "Fix haxe 4 compat.",
-	"version": "0.16.7",
+	"releasenote": "Add ComplexType::intersect.",
+	"version": "0.17.0",
 	"url": "http://haxetink.org/tink_macro",
 	"dependencies": {
 		"tink_core": ""
