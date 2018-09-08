@@ -13,10 +13,10 @@ jobs:
         - linux
         # - osx
       install:
-        - npm i -g lix haxe-travix
+        - npm i -g lix
         - lix download
       script:
-        - travix node -lib hx3compat
+        - lix run travix node -lib hx3compat
         
     - stage: deploy
       language: haxe
