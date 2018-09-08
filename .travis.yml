@@ -1,28 +1,29 @@
 sudo: required
 dist: trusty
 
-language: haxe
-haxe:
-- 3.2.1
-- development
-
-matrix:
-  allow_failures:
-  - haxe: development
-
-install:
-- haxelib install travix
-- haxelib run travix install
-- haxelib install hx3compat
-
-script:
-- haxelib run travix node -lib hx3compat
-
 env:
   secure: T4SCtY5qmEsK1ARWPevJmqLm23tv4CobLrbPOQV3FsoQno7FCP1S/+9GmuoJKzeTjWMzdTeDsp8TVwZ6AyGjvhl2nZNjhU+QTsir4tfbYYRyvsz/QK6pveFbPQVv7OsnnaB4wbZtqGZ8mzFeQf7Ol4tsNe7iUFJb/iVc+4/lUxo=
 
-deploy:
-  provider: script
-  script: haxe && haxelib run travix release
-  on:
-    tags: true
+jobs:
+  include:
+    - stage: test
+      language: node_js
+      node_js: 8
+      os:
+        - linux
+        # - osx
+      install:
+        - npm i -g lix haxe-travix
+        - lix download
+      script:
+        - travix node -lib hx3compat
+        
+    - stage: deploy
+      language: haxe
+      haxe: "3.4.7"
+      os: linux
+      script: skip
+      after_success:
+        - haxelib install travix
+        - haxelib run travix install
+        - haxelib run travix release
