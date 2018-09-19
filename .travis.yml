@@ -1,28 +1,40 @@
 sudo: required
 dist: trusty
 
+stages:
+  - test
+  - deploy
+
+language: node_js
+node_js: 8
+
+os:
+  - linux
+  # - osx
+
 env:
-  secure: T4SCtY5qmEsK1ARWPevJmqLm23tv4CobLrbPOQV3FsoQno7FCP1S/+9GmuoJKzeTjWMzdTeDsp8TVwZ6AyGjvhl2nZNjhU+QTsir4tfbYYRyvsz/QK6pveFbPQVv7OsnnaB4wbZtqGZ8mzFeQf7Ol4tsNe7iUFJb/iVc+4/lUxo=
+  - HAXE_VERSION=3.4.7
+  - HAXE_VERSION=latest
+  
+install:
+  - npm i -g lix
+  - lix install haxe $HAXE_VERSION
+  - lix download
+
+script:
+  - lix run travix node -lib hx3compat
 
 jobs:
   include:
-    - stage: test
-      language: node_js
-      node_js: 8
-      os:
-        - linux
-        # - osx
-      install:
-        - npm i -g lix
-        - lix download
-      script:
-        - lix run travix node -lib hx3compat
-        
+    # - stage: test # should uncomment this when there is no matrix above (e.g. only one os, one env, etc)
     - stage: deploy
       language: haxe
       haxe: "3.4.7"
       os: linux
+      install: skip
       script: skip
+      env:
+        secure: T4SCtY5qmEsK1ARWPevJmqLm23tv4CobLrbPOQV3FsoQno7FCP1S/+9GmuoJKzeTjWMzdTeDsp8TVwZ6AyGjvhl2nZNjhU+QTsir4tfbYYRyvsz/QK6pveFbPQVv7OsnnaB4wbZtqGZ8mzFeQf7Ol4tsNe7iUFJb/iVc+4/lUxo=
       after_success:
         - haxelib install travix
         - haxelib run travix install
