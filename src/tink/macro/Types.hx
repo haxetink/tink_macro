@@ -1,12 +1,12 @@
 package tink.macro;
 
 import haxe.macro.Printer;
-import Type in Enums;
 
 import haxe.macro.Context;
 import haxe.macro.Expr;
 import haxe.macro.Type;
 
+using haxe.macro.Tools;
 using tink.MacroApi;
 using tink.CoreApi;
 
@@ -225,5 +225,18 @@ class Types {
         default:
           throw 'assert';
       }
+
+  static public function compare(t1:Type, t2:Type, ?follow:Bool = true) {
+    if (follow) {
+      t1 = t1.reduce();
+      t2 = t2.reduce();
+    }
+    
+    return switch t1.getIndex() - t2.getIndex() {
+      case 0: 
+        Reflect.compare(t1.toString(), t2.toString());//much to my surprise, this actually seems to work (at least with 3.4)
+      case v: v;
+    }    
+  }
 
 }
