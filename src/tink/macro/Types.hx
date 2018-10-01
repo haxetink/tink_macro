@@ -239,4 +239,12 @@ class Types {
     }    
   }
 
+  static var SUGGESTIONS = ~/ \(Suggestions?: .*\)$/;
+
+  static public function getFieldSuggestions(type:ComplexType, name:String):String 
+    return switch (macro (null : $type).$name).typeof() {
+      case Failure(SUGGESTIONS.match(_.message) => true): SUGGESTIONS.matched(0);
+      default: '';
+    }
+
 }
