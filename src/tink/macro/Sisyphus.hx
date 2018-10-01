@@ -70,7 +70,16 @@ class Sisyphus {
       case TInst(_.get() => classType, params):
         switch (classType.kind) {
           case KTypeParameter(_):
-            direct();//TODO: check if the parameter is in scope, in which case the name can simply be used
+            var ct = Types.asComplexType(classType.name);
+            switch Types.toType(ct) {
+              case Success(TInst(_.get() => cl, _)) if (
+                cl.kind.match(KTypeParameter(_))
+                && cl.module == classType.module
+                && cl.pack.join('.') == classType.pack.join('.')
+              ): ct;                
+              default:
+                direct();
+            }
           default:
             TPath(toTypePath(classType, params));
         }
