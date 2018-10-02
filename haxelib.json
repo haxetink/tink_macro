@@ -1,20 +1,20 @@
 {
 	"name": "tink_macro",
-	"license": "MIT",
+	"description": "The macro toolkit ;)",
+	"classPath": "src",
+	"dependencies": {
+		"tink_core": ""
+	},
+	"url": "http://haxetink.org/tink_macro",
+	"contributors": [
+		"back2dos"
+	],
+	"version": "0.17.1",
+	"releasenote": "Improve type parameter treatment. Add helper for getting field suggestions. Make type comparator available.",
 	"tags": [
 		"tink",
 		"macro",
 		"utility"
 	],
-	"classPath": "src",
-	"description": "The macro toolkit ;)",
-	"contributors": [
-		"back2dos"
-	],
-	"releasenote": "Add ComplexType::intersect.",
-	"version": "0.17.0",
-	"url": "http://haxetink.org/tink_macro",
-	"dependencies": {
-		"tink_core": ""
-	}
+	"license": "MIT"
 }
