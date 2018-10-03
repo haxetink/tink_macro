@@ -43,8 +43,11 @@ class Exprs {
   }
 
   static public inline function is(e:Expr, c:ComplexType)
-    return ECheckType(e, c).at(e.pos).typeof().isSuccess();
-  
+    return e.as(c).typeof().isSuccess();
+
+  static public inline function as(e:Expr, c:ComplexType)
+    return ECheckType(e, c).at(e.pos);
+
   static public function finalize(e:Expr, ?nuPos:Position, ?rules:Dynamic<String>, ?skipFields = false, ?callPos:PosInfos) {
     if (nuPos == null)
       nuPos = Context.currentPos();
