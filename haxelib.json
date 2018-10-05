@@ -9,8 +9,8 @@
 	"contributors": [
 		"back2dos"
 	],
-	"version": "0.17.1",
-	"releasenote": "Improve type parameter treatment. Add helper for getting field suggestions. Make type comparator available.",
+	"version": "0.17.2",
+	"releasenote": "Add Exprs.as for ECheckType.",
 	"tags": [
 		"tink",
 		"macro",
