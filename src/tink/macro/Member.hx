@@ -9,7 +9,7 @@ abstract Member(Field) from Field to Field {
       name: name,
       pos: pos,
       access: [APublic],
-      kind: FProp(noread ? 'null' : 'get_' + name, nowrite ? 'null' : ('set_' + name), t),
+      kind: FProp(noread ? 'null' : 'get', nowrite ? 'null' : 'set', t),
     }
     return ret;
   }
