@@ -247,4 +247,13 @@ class Types {
       default: '';
     }
 
+  static public function toDecl(p:TypeParameter):TypeParamDecl 
+    return {
+      name: p.name,
+      constraints: switch p.t {
+        case TInst(_.get() => { kind: KTypeParameter(c)}, _): [for(c in c) c.toComplex()];
+        case _: throw 'unreachable';
+      }
+    }
+
 }
