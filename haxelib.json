@@ -1,20 +1,20 @@
 {
 	"name": "tink_macro",
-	"description": "The macro toolkit ;)",
-	"classPath": "src",
-	"dependencies": {
-		"tink_core": ""
-	},
-	"url": "http://haxetink.org/tink_macro",
-	"contributors": [
-		"back2dos"
-	],
-	"version": "0.17.2",
-	"releasenote": "Add Exprs.as for ECheckType.",
+	"license": "MIT",
 	"tags": [
 		"tink",
 		"macro",
 		"utility"
 	],
-	"license": "MIT"
+	"classPath": "src",
+	"description": "The macro toolkit ;)",
+	"contributors": [
+		"back2dos"
+	],
+	"releasenote": "Add helper for transforming TypeParameter to TypeParamDecl.",
+	"version": "0.17.3",
+	"url": "http://haxetink.org/tink_macro",
+	"dependencies": {
+		"tink_core": ""
+	}
 }
