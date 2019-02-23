@@ -101,6 +101,22 @@ class Types {
         case TInst(t, _): Success(t.get().statics.get());
         default: Failure('type has no statics');
       }
+      
+      
+  static public function getPosition(t:Type)
+    return
+      switch t {
+        case TInst(_.get() => {pos: pos}, _)
+        | TAbstract(_.get() => {pos: pos}, _)
+        | TType(_.get() => {pos: pos}, _)
+        | TEnum(_.get() => {pos: pos}, _) : Success(pos);
+        case TMono(ref): getPosition(ref.get());
+        case TLazy(f): getPosition(f());
+        case TDynamic(v) if(v != null): getPosition(v);
+        default: Failure('type "$t" has no position');
+      }
+      
+      
 
   static public function toString(t:ComplexType)
     return new Printer().printComplexType(t);
