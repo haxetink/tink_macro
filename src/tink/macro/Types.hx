@@ -110,7 +110,7 @@ class Types {
         | TAbstract(_.get() => {pos: pos}, _)
         | TType(_.get() => {pos: pos}, _)
         | TEnum(_.get() => {pos: pos}, _) : Success(pos);
-        case TMono(ref): getPosition(ref.get());
+        case TMono(_.get() => t) if (t != null): getPosition(t);
         case TLazy(f): getPosition(f());
         case TDynamic(v) if(v != null): getPosition(v);
         default: Failure('type "$t" has no position');
