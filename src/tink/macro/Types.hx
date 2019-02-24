@@ -121,6 +121,9 @@ class Types {
   static public function toString(t:ComplexType)
     return new Printer().printComplexType(t);
 
+  static public function unifiesWith(from:Type, to:Type)
+    return Context.unify(from, to);
+
   static public function isSubTypeOf(t:Type, of:Type, ?pos)
     return
       ECheckType(ECheckType(macro null, toComplex(t)).at(pos), toComplex(of)).at(pos).typeof();
