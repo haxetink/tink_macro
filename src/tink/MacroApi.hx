@@ -4,6 +4,7 @@ import haxe.macro.Expr.TypeDefinition;
 
 using tink.CoreApi;
 using tink.macro.Positions;
+using StringTools;
 
 typedef Positions = tink.macro.Positions;
 typedef ExprTools = haxe.macro.ExprTools;
@@ -35,6 +36,45 @@ class MacroApi {
     
   static public function pos() 
     return haxe.macro.Context.currentPos();
+
+  static public var completionPoint(default, null):Option<{
+    var file(default, never):String;
+    var pos(default, never):Int;
+  }>;
+
+  static public var args(default, null):Iterable<String>;
+  static var initialized = initArgs();
+
+  static function initArgs() {
+    var sysArgs = Sys.args();
+    args = sysArgs;
+    completionPoint = switch sysArgs.indexOf('--display') {
+      case -1: None;
+      case sysArgs[_ + 1] => arg: 
+        if (arg.startsWith('{"jsonrpc":')) {
+          var payload:{
+            jsonrpc:String,
+            method:String,
+            params:{
+              file:String,
+              offset:Int,
+            }
+          } = haxe.Json.parse(arg);
+          switch payload {
+            case { jsonrpc: '2.0', method: 'display/completion' }:
+              Some({
+                file: payload.params.file,
+                pos: payload.params.offset,
+              });
+            default: None;
+          }
+        }
+        else None;
+    }
+    try haxe.macro.Context.onMacroContextReused(initArgs)
+    catch (all:Dynamic) {}
+    return true;
+  }
 
 }
 
