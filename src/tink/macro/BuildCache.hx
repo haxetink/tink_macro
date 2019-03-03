@@ -141,7 +141,9 @@ class BuildCache {
         case v: v;
       }
     
-    return forName.get(type, pos.sanitize(), build);  
+    var ret = forName.get(type, pos.sanitize(), build);  
+    ret.getFields();// workaround for https://github.com/HaxeFoundation/haxe/issues/7905
+    return ret;
   }
 }
 
