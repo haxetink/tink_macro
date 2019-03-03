@@ -1,5 +1,6 @@
 package ;
 
+#if macro
 import haxe.macro.Expr;
 import haxe.macro.Context;
 
@@ -20,6 +21,7 @@ class Types extends Base {
     assertFalse(o.isSuccess());
     
   function testIs() {
+    
     assertSuccess(resolve('Int').isSubTypeOf(resolve('Float')));
     assertFailure(resolve('Float').isSubTypeOf(resolve('Int')));
   }  
@@ -41,9 +43,19 @@ class Types extends Base {
     var bool = type(macro : Bool);
     assertTrue(blank().isSubTypeOf(bool).isSuccess());
     assertTrue(bool.isSubTypeOf(blank()).isSuccess());
-    
-    MacroApi.pos().makeBlankType().toString();
   }
+
+  #if haxe4
+  function testFinal() {
+    var t = macro : {
+      final foo:Int;
+    };
+    switch t.toType().sure() {
+      case TAnonymous(_.get().fields => [f]): assertTrue(f.isFinal);
+      default:
+    }
+  }
+  #end
 
   function testExpr() {
     assertEquals('VarChar<255>', (macro : VarChar<255>).toType().sure().toComplex().toString());
@@ -54,3 +66,4 @@ class Types extends Base {
     assertEquals('tink.CoreApi.Noise', Context.getType('tink.CoreApi.Noise').toComplex().toString());
   }
 }
+#end

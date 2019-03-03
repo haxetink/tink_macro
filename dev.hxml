@@ -1,0 +1,6 @@
+tests.hxml
+-lib travix
+-lib tink_macro
+-lib hx3compat
+-js whatever.js
+--no-output

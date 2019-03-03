@@ -126,7 +126,8 @@ class Types {
 
   static public function isSubTypeOf(t:Type, of:Type, ?pos)
     return
-      ECheckType(ECheckType(macro null, toComplex(t)).at(pos), toComplex(of)).at(pos).typeof();
+      if (Context.unify(t, of)) ECheckType(ECheckType(macro null, toComplex(t)).at(pos), toComplex(of)).at(pos).typeof();
+      else Failure(new Error(t.toString() + ' should be ' + of.toString(), pos.sanitize()));
 
   static public function isDynamic(t:Type)
     return switch reduce(t) {
