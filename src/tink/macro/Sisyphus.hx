@@ -23,14 +23,22 @@ class Sisyphus {
     if (cf.params.length == 0) {
       name: cf.name,
       doc: cf.doc,
-      access: cf.isPublic ? [ APublic ] : [ APrivate ],
+      access: 
+        (cf.isPublic ? [ APublic ] : [ APrivate ]) 
+          #if haxe4 .concat(if (cf.isFinal) [AFinal] else []) #end
+        ,
       kind: switch([ cf.kind, cf.type ]) {
+        #if haxe4
+        case [ FVar(_, _), ret ] if (cf.isFinal):
+          FVar(toComplexType(ret), null);
+        #end
         case [ FVar(read, write), ret ]:
           FProp(
             varAccessToString(read, "get"),
             varAccessToString(write, "set"),
             toComplexType(ret),
-            null);
+            null
+          );
         case [ FMethod(_), TFun(args, ret) ]:
           FFun({
             args: [

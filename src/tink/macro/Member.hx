@@ -40,6 +40,22 @@ abstract Member(Field) from Field to Field {
   public var isStatic(get, set):Bool;
   public var isPublic(get, set):Null<Bool>;
   public var isBound(get, set):Null<Bool>;
+  #if haxe4
+  /**
+   * Setting this to true will erase any getters/setters.
+   */
+  public var isFinal(get, set):Bool;
+    function get_isFinal() return hasAccess(AFinal);
+    function set_isFinal(param) {
+      if (setAccess(AFinal, param)) //TODO: perhaps also do something about AInline
+        switch kind {
+          case FProp(_, _, t, e):
+            kind = FVar(t, e);
+          default:
+        }
+      return param;
+    }
+  #end
   
   public function getFunction()
     return
@@ -111,21 +127,10 @@ abstract Member(Field) from Field to Field {
   inline function set_pos(param) return this.pos = param;
   
   inline function get_overrides() return hasAccess(AOverride);
-  inline function set_overrides(param) {
-    changeAccess(
-      param ? AOverride : null, 
-      param ? null : AOverride
-    );
-    return param;
-  }
+  inline function set_overrides(param) return setAccess(AOverride, param);
+
   inline function get_isStatic() return hasAccess(AStatic);
-  function set_isStatic(param) {
-    changeAccess(
-      param ? AStatic : null, 
-      param ? null : AStatic
-    );
-    return param;
-  }
+  inline function set_isStatic(param) return setAccess(AStatic, param);
   
   function get_isPublic() {
     if (this.access != null)    
@@ -179,6 +184,15 @@ abstract Member(Field) from Field to Field {
         if (x == a) return true;
     return false;
   }
+
+  function setAccess(a:Access, isset:Bool) {
+    changeAccess(
+      isset ? a : null, 
+      isset ? null : a
+    );
+    return isset;
+  }
+    
   
   function changeAccess(add:Access, remove:Access) {
     var i = 0;
