@@ -96,12 +96,12 @@ class Constructor {
       }
       
     var tmp = MacroApi.tempName();
+    var member = owner.memberByName(name).sure();
     
-    if (options.bypass) {
-      switch owner.memberByName(name) {
-        case Success(member): member.addMeta(':isVar');
-        default:
-      }
+    if (options.bypass && member.kind.match(FProp(_, 'never' | 'set', _, _))) {
+      
+      member.addMeta(':isVar');
+
       addStatement((function () {
         var fields = [for (f in  (macro this).typeof().sure().getClass().fields.get()) f.name => f];
         
