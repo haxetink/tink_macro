@@ -276,4 +276,7 @@ class Types {
       }
     }
 
+  static public function toTypeParam(p:TypeParameter):TypeParam
+    return TPType(p.t.toComplex());
+
 }
