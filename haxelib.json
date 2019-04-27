@@ -11,8 +11,8 @@
 	"contributors": [
 		"back2dos"
 	],
-	"releasenote": "Add helper to extract position from a Type",
-	"version": "0.17.4",
+	"releasenote": "Various fixes",
+	"version": "0.17.5",
 	"url": "http://haxetink.org/tink_macro",
 	"dependencies": {
 		"tink_core": ""
