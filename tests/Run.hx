@@ -12,6 +12,7 @@ class Run {
     new Types(),
     new Positions(),
     new TypeMapTest(),
+    new Misc(),
   ];
   #end
   macro static function test() {

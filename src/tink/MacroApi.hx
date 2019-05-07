@@ -29,6 +29,19 @@ typedef TypeResolution = Ref<Either<String, TypeDefinition>>;
 
 class MacroApi {
   
+  static var MAIN_CANDIDATES = ['-main', '-x', '--run'];
+  static public function getMainClass():Option<String> {
+    var args = Sys.args();
+    
+    for (c in MAIN_CANDIDATES)
+      switch args.indexOf(c) {
+        case -1:
+        case v: return Some(args[v+1]);
+      }
+
+    return None;
+  }
+
   static var idCounter = 0;  
   
   @:noUsing static public inline function tempName(?prefix:String = 'tmp'):String
