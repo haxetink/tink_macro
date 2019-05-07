@@ -1,20 +1,20 @@
 {
 	"name": "tink_macro",
-	"license": "MIT",
+	"description": "The macro toolkit ;)",
+	"classPath": "src",
+	"dependencies": {
+		"tink_core": ""
+	},
+	"url": "http://haxetink.org/tink_macro",
+	"contributors": [
+		"back2dos"
+	],
+	"version": "0.17.6",
+	"releasenote": "Add call to find main class.",
 	"tags": [
 		"tink",
 		"macro",
 		"utility"
 	],
-	"classPath": "src",
-	"description": "The macro toolkit ;)",
-	"contributors": [
-		"back2dos"
-	],
-	"releasenote": "Various fixes",
-	"version": "0.17.5",
-	"url": "http://haxetink.org/tink_macro",
-	"dependencies": {
-		"tink_core": ""
-	}
+	"license": "MIT"
 }
