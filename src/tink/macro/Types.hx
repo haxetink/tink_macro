@@ -252,97 +252,11 @@ class Types {
       t2 = t2.reduce();
     }
     
-    return switch [t1, t2] {
-      case [TMono(_.get() => t1), TMono(_.get() => t2)]:
-        switch [t1, t2] {
-          case [null, null]: 0;
-          case [null, _]: -1;
-          case [_, null]: 1;
-          case _: compare(t1, t2, follow);
-        }
-      case [TInst(c1, p1), TInst(c2, p2)]:
-        switch Reflect.compare(c1.toString(), c2.toString()) {
-          case 0: compareMultiple(p1, p2, follow);
-          case v: v;
-        }
-        
-      case [TType(_.get() => {type: t1}, p1), TType(_.get() => {type: t2}, p2)]: 
-        switch compare(t1, t2) {
-          case 0: compareMultiple(p1, p2);
-          case v: v;
-        }
-        
-      case [TFun(a1, r1), TFun(a2, r2)]:
-        switch compare(r1, r2) {
-          case 0: compareMultiple([for(a in a1) a.t], [for(a in a2) a.t]);
-          case v: v;
-        }
-        
-      case [TAnonymous(_.get() => {fields: f1}), TAnonymous(_.get() => {fields: f2})]: 
-        switch [f1.length, f2.length] {
-          case [l1, l2] if(l1 == l2):
-            f1.sort(function(f1, f2) return Reflect.compare(f1.name, f2.name));
-            f2.sort(function(f1, f2) return Reflect.compare(f1.name, f2.name));
-            compareArray(f1, f2, compareClassField);
-          case [l1, l2]:
-            l1 - l2;
-        }
-        
-      case [TDynamic(null), TDynamic(null)]: 
-        0;
-      case [TDynamic(null), TDynamic(_)]:
-        1;
-      case [TDynamic(_), TDynamic(null)]: 
-        -1;
-      case [TDynamic(t1), TDynamic(t2)]: 
-        compare(t1, t2);
-      case [TLazy(f1), TLazy(f2)]: 
-        compare(f1(), f2());
-      case _:
-        t1.getIndex() - t2.getIndex();
-    }
-  }
-  
-  static function compareClassField(f1:ClassField, f2:ClassField) {
-    return switch Reflect.compare(f1.name, f2.name) {
-      case 0:
-        switch compare(f1.type, f2.type) {
-          case 0:
-            var m1 = [for(m in f1.meta.get()) m.toString()];
-            var m2 = [for(m in f2.meta.get()) m.toString()];
-            m1.sort(Reflect.compare);
-            m2.sort(Reflect.compare);
-            compareArray(m1, m2, function(m1, m2) return Reflect.compare(m1, m2));
-          case v: v;
-        }
+    return switch t1.getIndex() - t2.getIndex() {
+      case 0: 
+        Reflect.compare(t1.toString(), t2.toString());//much to my surprise, this actually seems to work (at least with 3.4)
       case v: v;
-    }
-  }
-  
-  static function compareMeta(m1:MetadataEntry, m2:MetadataEntry) {
-    return switch Reflect.compare(m1.name, m2.name) {
-      case 0: compareArray(m1.params, m2.params, function(e1, e2) return Reflect.compare(e1.toString(), e2.toString()));
-      case v: v;
-    }
-  }
-  
-  static function compareArray<T>(a1:Array<T>, a2:Array<T>, compare:T->T->Int) {
-    return switch [a1.length, a2.length] {
-      case [l1, l2] if(l1 == l2):
-        for(i in 0...l1) {
-          switch compare(a1[i], a2[i]) {
-            case 0: // skip
-            case v: return v;
-          }
-        }
-        0;
-      case [l1, l2]:
-        l1 - l2;
-    }
-  }
-  
-  static function compareMultiple(t1:Array<Type>, t2:Array<Type>, follow = true)  {
-    return compareArray(t1, t2, function(t1, t2) return compare(t1, t2, follow));
+    }    
   }
 
   static var SUGGESTIONS = ~/ \(Suggestions?: .*\)$/;
