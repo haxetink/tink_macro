@@ -42,7 +42,7 @@ class MacroApi {
     return None;
   }
 
-  static var idCounter = 0;  
+  @:persistent static var idCounter = 0;  
   
   @:noUsing static public inline function tempName(?prefix:String = 'tmp'):String
     return '__tink_' + prefix + Std.string(idCounter++);

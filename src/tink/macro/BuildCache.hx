@@ -33,7 +33,7 @@ typedef BuildContext3 = {>BuildContext2,
 
 class BuildCache { 
   
-  static var cache = new Map();
+  @:persistent static var cache = new Map();
   
   static public function getType3(name, ?types, ?pos:Position, build:BuildContext3->TypeDefinition) {
      if (types == null)
