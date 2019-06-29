@@ -9,8 +9,8 @@
 	"contributors": [
 		"back2dos"
 	],
-	"version": "0.17.6",
-	"releasenote": "Add call to find main class.",
+	"version": "0.17.7",
+	"releasenote": "Use @:persistent as necessary.",
 	"tags": [
 		"tink",
 		"macro",
