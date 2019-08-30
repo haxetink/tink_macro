@@ -6,7 +6,11 @@ using tink.macro.Exprs;
 
 class Functions {
   static public inline function asExpr(f:Function, ?name, ?pos) 
+  #if (haxe_ver >= 4)
+    return EFunction(name != null ? FNamed(name, false): FAnonymous, f).at(pos);
+  #else
     return EFunction(name, f).at(pos);
+  #end
   
   static public inline function toArg(name:String, ?t, ?opt = false, ?value = null):FunctionArg {
     return {
