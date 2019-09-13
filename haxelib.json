@@ -1,20 +1,20 @@
 {
 	"name": "tink_macro",
-	"description": "The macro toolkit ;)",
-	"classPath": "src",
-	"dependencies": {
-		"tink_core": ""
-	},
-	"url": "http://haxetink.org/tink_macro",
-	"contributors": [
-		"back2dos"
-	],
-	"version": "0.17.7",
-	"releasenote": "Use @:persistent as necessary.",
+	"license": "MIT",
 	"tags": [
 		"tink",
 		"macro",
 		"utility"
 	],
-	"license": "MIT"
+	"classPath": "src",
+	"description": "The macro toolkit ;)",
+	"contributors": [
+		"back2dos"
+	],
+	"releasenote": "Compat with haxe 4 rc4 onward.",
+	"version": "0.18.0",
+	"url": "http://haxetink.org/tink_macro",
+	"dependencies": {
+		"tink_core": ""
+	}
 }
