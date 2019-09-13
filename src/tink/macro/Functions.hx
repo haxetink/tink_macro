@@ -4,9 +4,18 @@ import haxe.macro.Expr;
 
 using tink.macro.Exprs;
 
+#if haxe4
+private abstract Kind(FunctionKind) from FunctionKind to FunctionKind {
+  @:from static function ofString(s:String):Kind
+    return FNamed(s);
+}
+#else
+private typedef Kind = String;
+#end
+
 class Functions {
-  static public inline function asExpr(f:Function, ?name, ?pos) 
-    return EFunction(name, f).at(pos);
+  static public inline function asExpr(f:Function, ?kind:Kind, ?pos) 
+    return EFunction(kind, f).at(pos);
   
   static public inline function toArg(name:String, ?t, ?opt = false, ?value = null):FunctionArg {
     return {

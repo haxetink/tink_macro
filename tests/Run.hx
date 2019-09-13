@@ -12,6 +12,7 @@ class Run {
     new Types(),
     new Positions(),
     new TypeMapTest(),
+    new Functions(),
     new Misc(),
   ];
   #end
