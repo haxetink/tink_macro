@@ -70,6 +70,68 @@ class Types {
       getDeclaredFields(t.superClass.t.get(), out, marker);
   }
 
+  static public function mapTypeParams(a:Array<TypeParam>, f)
+    return
+      if (a == null) null;
+      else [for (p in a) switch p {
+        case TPType(t): TPType(t.map(f));
+        default: p;
+      }];
+
+  static public function mapTypeParamDecls(a:Array<TypeParamDecl>, f:ComplexType->ComplexType):Array<TypeParamDecl>
+    return
+      if (a == null) null;
+      else [for (p in a) {
+        name: p.name,
+        meta: p.meta,
+        params: mapTypeParamDecls(p.params, f),
+        constraints: switch p.constraints {
+          case null: null;
+          case a: [for (t in a) map(t, f)];
+        }
+      }];
+
+  static public function mapTypePath(p:TypePath, transform):TypePath
+    return {
+      name: p.name,
+      pack: p.pack,
+      sub: p.sub,
+      params: mapTypeParams(p.params, transform),
+    }
+
+  static public function map(ct:ComplexType, transform:ComplexType->ComplexType) {
+    inline function rec(ct)
+      return map(transform(ct), transform);
+
+    function mapFields(fields:Array<Field>):Array<Field>
+      return [for (f in fields) {
+        name: f.name,
+        pos: f.pos,
+        kind: switch f.kind {
+          case FVar(t, e): FVar(rec(t), e);
+          case FProp(get, set, t, e): FProp(get, set, rec(t), e);
+          case FFun(f): FFun(Functions.mapSignature(f, transform));
+        },
+      }];
+    return transform(switch ct {
+      case null: null;
+      case TParent(t): TParent(rec(t));
+      #if haxe4
+      case TNamed(n, t): TNamed(n, rec(t));
+      case TIntersection(tl): TIntersection([for (t in tl) rec(t)]);
+      #end
+      case TOptional(t): TOptional(rec(t));
+      case TAnonymous(fields):
+        TAnonymous(mapFields(fields));
+      case TPath(p):
+        TPath(mapTypePath(p, transform));
+      case TExtend(paths, fields):
+        TExtend([for (p in paths) mapTypePath(p, transform)], mapFields(fields));
+      case TFunction(args, ret):
+        TFunction([for (a in args) rec(a)], rec(ret));
+    });
+  }
+
   static var fieldsCache = new Map();
   static public function getFields(t:Type, ?substituteParams = true)
     return
@@ -84,12 +146,28 @@ class Types {
           }
           var ret = fieldsCache.get(id);
           if (substituteParams && ret.isSuccess()) {
-            var fields = Reflect.copy(ret.sure());
-
-            for (field in fields)
-              field.type = haxe.macro.TypeTools.applyTypeParameters(field.type, c.params, params);
+            ret = Success([
+              for (field in ret.sure()) ({
+                name: field.name,
+                type: haxe.macro.TypeTools.applyTypeParameters(field.type, c.params, params),
+                pos: field.pos,
+                meta: field.meta,
+                doc: field.doc,
+                expr: function () return field.expr(),
+                isPublic: field.isPublic,
+                params: field.params,
+                kind: field.kind,
+                overloads: field.overloads,
+                #if haxe4
+                isExtern: field.isExtern,
+                isFinal: field.isFinal,
+                #end
+              }:ClassField)
+            ]);
           }
+          #if !haxe4
           fieldsCache.remove(id);//TODO: find a proper solution to avoid stale cache
+          #end
           ret;
         case TAnonymous(anon): Success(anon.get().fields);
         default: Context.currentPos().makeFailure('type $t has no fields');
@@ -101,8 +179,8 @@ class Types {
         case TInst(t, _): Success(t.get().statics.get());
         default: Failure('type has no statics');
       }
-      
-      
+
+
   static public function getPosition(t:Type)
     return
       switch t {
@@ -115,8 +193,8 @@ class Types {
         case TDynamic(v) if(v != null): getPosition(v);
         default: Failure('type "$t" has no position');
       }
-      
-      
+
+
 
   static public function toString(t:ComplexType)
     return new Printer().printComplexType(t);
@@ -202,7 +280,7 @@ class Types {
   }
 
   static public function intersect(types:Array<ComplexType>, ?pos:Position):Outcome<ComplexType, Error> {
-    
+
     if (types.length == 1) return Success(types[1]);
 
     var paths = [],
@@ -211,17 +289,17 @@ class Types {
     for (t in types)
       switch t {
         case TPath(p): paths.push(p);
-        case TAnonymous(f): 
-          
+        case TAnonymous(f):
+
           for (f in f) fields.push(f);
 
-        case TExtend(p, f): 
-          
+        case TExtend(p, f):
+
           for (f in f) fields.push(f);
           for (p in p) paths.push(p);
 
         default:
-          
+
           return Failure(new Error(t.toString() + ' cannot be interesected', pos));
       }
 
@@ -251,23 +329,23 @@ class Types {
       t1 = t1.reduce();
       t2 = t2.reduce();
     }
-    
+
     return switch t1.getIndex() - t2.getIndex() {
-      case 0: 
+      case 0:
         Reflect.compare(t1.toString(), t2.toString());//much to my surprise, this actually seems to work (at least with 3.4)
       case v: v;
-    }    
+    }
   }
 
   static var SUGGESTIONS = ~/ \(Suggestions?: .*\)$/;
 
-  static public function getFieldSuggestions(type:ComplexType, name:String):String 
+  static public function getFieldSuggestions(type:ComplexType, name:String):String
     return switch (macro (null : $type).$name).typeof() {
       case Failure(SUGGESTIONS.match(_.message) => true): SUGGESTIONS.matched(0);
       default: '';
     }
 
-  static public function toDecl(p:TypeParameter):TypeParamDecl 
+  static public function toDecl(p:TypeParameter):TypeParamDecl
     return {
       name: p.name,
       constraints: switch p.t {
