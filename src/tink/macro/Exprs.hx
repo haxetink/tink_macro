@@ -135,40 +135,50 @@ class Exprs {
     if (!subst.iterator().hasNext())
       return source;
 
-    function replace(ct:ComplexType) {
+    function replace(ct:ComplexType)
       return switch ct {
         case TPath({ pack: [], name: name }) if (subst.exists(name)):
           subst.get(name);
         default: ct;
       }
-    }
 
-    return source.transform(
+    return source
+      .transform(
+        function (e) return switch e {
+          case macro $i{name} if (subst.exists(name)):
+            switch subst.get(name) {
+              case TPath({ pack: pack, name: name }):
+                pack.concat([name]).drill(e.pos);
+              default: e;//TODO: report an error?
+            }
+          default: e;
+        })
+      .mapTypes(replace);
+  }
+
+  static public function mapTypes(e:Expr, transformer:ComplexType->ComplexType, ?pos:Position) {
+    return e.transform(
       function (e) return switch e {
         case { expr: ENew(p, args) }:
-          switch TPath(p).map(replace) {
+          switch TPath(p).map(transformer) {
             case TPath(nu):
               ENew(nu, args).at(e.pos);
             case v:
               pos.error(v.toString() + ' cannot be instantiated in ${e.pos}');
           }
-        case macro $i{name} if (subst.exists(name)):
-          switch subst.get(name) {
-            case TPath({ pack: pack, name: name }):
-              pack.concat([name]).drill(e.pos);
-            default: e;//TODO: report an error?
-          }
-        case macro ($v : $ct):
-          ct = ct.map(replace);
-          macro @:pos(e.pos) ($v : $ct);
+        case macro cast($v, $ct):
+          ct = ct.map(transformer);
+          (macro @:pos(e.pos) cast($v, $ct));
+        case { expr: ECheckType(v, ct) }: // cannot use reification, because that's `EParentheses(ECheckType)` and macros can (and apparently do) generate a non-wrapped one
+          ECheckType(v, ct.map(transformer)).at(e.pos);
         case { expr: EVars(vars) }:
           EVars([for (v in vars) {
             name: v.name,
-            type: v.type.map(replace),
+            type: v.type.map(transformer),
             expr: v.expr,
           }]).at(e.pos);
         case { expr: EFunction(kind, f) }:
-          EFunction(kind, Functions.mapSignature(f, replace)).at(e.pos);
+          EFunction(kind, Functions.mapSignature(f, transformer)).at(e.pos);
         default: e;
       }
     );

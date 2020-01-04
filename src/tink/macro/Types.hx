@@ -100,6 +100,8 @@ class Types {
     }
 
   static public function map(ct:ComplexType, transform:ComplexType->ComplexType) {
+    if (ct == null)
+      return null;
     inline function rec(ct)
       return map(transform(ct), transform);
 
@@ -112,9 +114,18 @@ class Types {
           case FProp(get, set, t, e): FProp(get, set, rec(t), e);
           case FFun(f): FFun(Functions.mapSignature(f, transform));
         },
+        access: f.access,
+        meta: switch f.meta {
+          case null: null;
+          case a: [for (m in a) {
+            name: m.name,
+            pos: m.pos,
+            params: [for (e in m.params) e.mapTypes(transform)],
+          }];
+        },
+        doc: f.doc,
       }];
     return transform(switch ct {
-      case null: null;
       case TParent(t): TParent(rec(t));
       #if haxe4
       case TNamed(n, t): TNamed(n, rec(t));
