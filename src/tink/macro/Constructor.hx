@@ -107,9 +107,11 @@ class Constructor {
           #if haxe4
           case FProp('default', 'never', _):
             member.isFinal = true;
+            false;
           case FProp(_, 'set', _):
             member.addMeta(':isVar');
             metaBypass = true;
+            false;
           #end
           case FProp(_):
             true;
@@ -120,14 +122,10 @@ class Constructor {
       case v: v;
     }
 
-    if (options.bypass && member.kind.match(FProp(_, 'never' | 'set', _, _))) {
+    if (bypass && member.kind.match(FProp(_, 'never' | 'set', _, _))) {
 
       member.addMeta(':isVar');
-      switch member.kind {
-        case FProp(get, set, _):
-          member.pos.warning('$get,$set');
-        default:
-      }
+
       addStatement((function () {
         var fields = [for (f in  (macro this).typeof().sure().getClass().fields.get()) f.name => f];
 
@@ -139,6 +137,7 @@ class Constructor {
               default: t.iter(seek);
             }
           }
+          trace(t);
           seek(t);
           if (direct == null) pos.error('nope');
           var direct = Context.storeTypedExpr(direct);
