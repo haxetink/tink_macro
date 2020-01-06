@@ -95,10 +95,9 @@ class Constructor {
         case Value(e): e;
       }
 
-    var tmp = MacroApi.tempName();
-    var member = owner.memberByName(name).sure();
+    var member = owner.memberByName(name).sure(),
+        initStatement = macro @:pos(pos) this.$name = $e;
 
-    var metaBypass = false;
     var bypass = switch options.bypass {
       case null:
         switch member.kind {
@@ -110,7 +109,7 @@ class Constructor {
             false;
           case FProp(_, 'set', _):
             member.addMeta(':isVar');
-            metaBypass = true;
+            initStatement = macro @:pos(pos) @:bypassAccessor this.$name = $e;
             false;
           #end
           case FProp(_):
@@ -137,7 +136,6 @@ class Constructor {
               default: t.iter(seek);
             }
           }
-          trace(t);
           seek(t);
           if (direct == null) pos.error('nope');
           var direct = Context.storeTypedExpr(direct);
@@ -155,8 +153,14 @@ class Constructor {
                 macro @:pos(pos) this.$name = $e;
               case FVar(AccNo | AccNormal, AccNever):
                 setDirectly(Context.typeExpr(macro @:pos(pos) this.$name));
+              #if haxe4
+              case FVar(AccCall, _):
+                var target = Context.storeTypedExpr(Context.typeExpr(macro @:pos(pos) @:bypassAccessor this.$name));
+                macro @:pos(pos) $target = $e;
+              #else
               case FVar(AccCall, AccNever):
                 setDirectly(fields['get_$name'].expr());
+              #end
               case FVar(_, AccCall):
                 setDirectly(fields['set_$name'].expr());
               default:
@@ -167,10 +171,7 @@ class Constructor {
     }
     else
       addStatement(
-        if (metaBypass)
-          macro @:pos(pos) @:bypassAccessor this.$name = $e
-        else
-          macro @:pos(pos) this.$name = $e,
+        initStatement,
         options.prepend
       );
   }
