@@ -14,9 +14,9 @@ private typedef Kind = String;
 #end
 
 class Functions {
-  static public inline function asExpr(f:Function, ?kind:Kind, ?pos) 
+  static public inline function asExpr(f:Function, ?kind:Kind, ?pos)
     return EFunction(kind, f).at(pos);
-  
+
   static public inline function toArg(name:String, ?t, ?opt = false, ?value = null):FunctionArg {
     return {
       name: name,
@@ -31,8 +31,24 @@ class Functions {
       ret: ret,
       params: params == null ? [] : params,
       expr: if (makeReturn) EReturn(e).at(e.pos) else e
-    }    
+    }
   }
+
+  static public function mapSignature(f:Function, transform):Function
+    return {
+      ret: Types.map(f.ret, transform),
+      args: [for (a in f.args) {
+        name: a.name,
+        value: a.value,
+        type: Types.map(a.type, transform),
+        #if haxe4
+        meta: a.meta,
+        #end
+      }],
+      expr: f.expr,
+      params: Types.mapTypeParamDecls(f.params, transform),
+    }
+
   static public function getArgIdents(f:Function):Array<Expr> {
     var ret = [];
     for (arg in f.args)

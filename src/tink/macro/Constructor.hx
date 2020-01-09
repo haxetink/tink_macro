@@ -25,20 +25,20 @@ class Constructor {
   var owner:ClassBuilder;
   var meta:Metadata;
   public var isPublic:Null<Bool>;
-  
+
   public function new(owner:ClassBuilder, f:Function, ?isPublic:Null<Bool> = null, ?pos:Position, ?meta:Metadata) {
     this.nuStatements = [];
     this.owner = owner;
     this.isPublic = isPublic;
     this.pos = pos.sanitize();
-    
+
     this.onGenerateHooks = [];
     this.args = [];
     this.beforeArgs = [];
     this.afterArgs = [];
     this.meta = meta;
-    
-    this.oldStatements = 
+
+    this.oldStatements =
       if (f == null) [];
       else {
         for (i in 0...f.args.length) {
@@ -49,15 +49,15 @@ class Constructor {
           }
           beforeArgs.push(a);
         }
-          
+
         if (f.expr == null) [];
         else
           switch (f.expr.expr) {
             case EBlock(exprs): exprs;
-            default: oldStatements = [f.expr]; 
+            default: oldStatements = [f.expr];
           }
       }
-    superCall = 
+    superCall =
       if (oldStatements.length == 0) [].toBlock();
       else switch oldStatements[0] {
         case macro super($a{_}): oldStatements.shift();
@@ -68,43 +68,66 @@ class Constructor {
   public function getArgList():Array<FunctionArg>
     return beforeArgs.concat(args).concat(afterArgs);
 
-  public function addStatement(e:Expr, ?prepend) 
+  public function addStatement(e:Expr, ?prepend)
     if (prepend)
       this.nuStatements.unshift(e)
     else
       this.nuStatements.push(e);
-  
-  public function addArg(name:String, ?t:ComplexType, ?e:Expr, ?opt = false) 
+
+  public function addArg(name:String, ?t:ComplexType, ?e:Expr, ?opt = false)
     args.push( { name : name, opt : opt || e != null, type : t, value: e } );
-  
+
   public function init(name:String, pos:Position, with:FieldInit, ?options:{ ?prepend:Bool, ?bypass:Bool }) {
-    if (options == null) 
+    if (options == null)
       options = {};
     var e =
       switch with {
         case Arg(t, noPublish):
-          if (noPublish != true) 
+          if (noPublish != true)
             publish();
           args.push( { name : name, opt : false, type : t } );
           name.resolve(pos);
         case OptArg(e, t, noPublish):
-          if (noPublish != true) 
+          if (noPublish != true)
             publish();
           args.push( { name : name, opt : true, type : t, value: e } );
           name.resolve(pos);
         case Value(e): e;
       }
-      
-    var tmp = MacroApi.tempName();
-    var member = owner.memberByName(name).sure();
-    
-    if (options.bypass && member.kind.match(FProp(_, 'never' | 'set', _, _))) {
-      
+
+    var member = owner.memberByName(name).sure(),
+        initStatement = macro @:pos(pos) this.$name = $e;
+
+    var bypass = switch options.bypass {
+      case null:
+        switch member.kind {
+          case FProp(_, 'default' | 'null', _):
+            false;
+          #if haxe4
+          case FProp('default', 'never', _):
+            member.isFinal = true;
+            false;
+          case FProp(_, 'set', _):
+            member.addMeta(':isVar');
+            initStatement = macro @:pos(pos) @:bypassAccessor this.$name = $e;
+            false;
+          #end
+          case FProp(_):
+            true;
+          case FFun(_):
+            pos.error('cannot rebind function');
+          default: false;
+        }
+      case v: v;
+    }
+
+    if (bypass && member.kind.match(FProp(_, 'never' | 'set', _, _))) {
+
       member.addMeta(':isVar');
 
       addStatement((function () {
         var fields = [for (f in  (macro this).typeof().sure().getClass().fields.get()) f.name => f];
-        
+
         function setDirectly(t:TypedExpr) {
           var direct = null;
           function seek(t:TypedExpr) {
@@ -112,15 +135,15 @@ class Constructor {
               case TField({ expr: TConst(TThis) }, FInstance(_, _, f)) if (f.get().name == name): direct = t;
               default: t.iter(seek);
             }
-          }			
+          }
           seek(t);
           if (direct == null) pos.error('nope');
           var direct = Context.storeTypedExpr(direct);
           return macro @:pos(pos) $direct = $e;
         }
-        
+
         return switch fields[name] {
-          case null: 
+          case null:
             pos.error('this direct initialization causes the compiler to do really weird things');
           case f:
             switch f.kind {
@@ -130,32 +153,41 @@ class Constructor {
                 macro @:pos(pos) this.$name = $e;
               case FVar(AccNo | AccNormal, AccNever):
                 setDirectly(Context.typeExpr(macro @:pos(pos) this.$name));
+              #if haxe4
+              case FVar(AccCall, _):
+                var target = Context.storeTypedExpr(Context.typeExpr(macro @:pos(pos) @:bypassAccessor this.$name));
+                macro @:pos(pos) $target = $e;
+              #else
               case FVar(AccCall, AccNever):
                 setDirectly(fields['get_$name'].expr());
+              #end
               case FVar(_, AccCall):
                 setDirectly(fields['set_$name'].expr());
               default:
                 pos.error('not implemented');
             }
         }
-      }).bounce(), options.prepend);    
+      }).bounce(), options.prepend);
     }
-    else 
-      addStatement(macro @:pos(pos) this.$name = $e, options.prepend);
+    else
+      addStatement(
+        initStatement,
+        options.prepend
+      );
   }
-  public inline function publish() 
-    if (isPublic == null) 
+  public inline function publish()
+    if (isPublic == null)
       isPublic = true;
-  
-  function toBlock() 
+
+  function toBlock()
     return [superCall]
       .concat(nuStatements)
       .concat(oldStatements)
       .toBlock(pos);
-  
-  public function onGenerate(hook) 
+
+  public function onGenerate(hook)
     this.onGenerateHooks.push(hook);
-    
+
   public function toHaxe():Field {
     var f:Function = {
       args: this.beforeArgs.concat(this.args).concat(this.afterArgs),
