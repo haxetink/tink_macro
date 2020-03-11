@@ -11,8 +11,8 @@
 	"contributors": [
 		"back2dos"
 	],
-	"releasenote": "Compat with haxe 4 rc4 onward.",
-	"version": "0.18.0",
+	"releasenote": "Internal refactor: remove reflections",
+	"version": "0.19.0",
 	"url": "http://haxetink.org/tink_macro",
 	"dependencies": {
 		"tink_core": ""
