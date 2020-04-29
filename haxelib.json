@@ -1,20 +1,20 @@
 {
 	"name": "tink_macro",
-	"license": "MIT",
+	"description": "The macro toolkit ;)",
+	"classPath": "src",
+	"dependencies": {
+		"tink_core": ""
+	},
+	"url": "https://github.com/haxetink/tink_macro",
+	"contributors": [
+		"back2dos"
+	],
+	"version": "0.19.1",
+	"releasenote": "More fine grained control over type normalization in BuildCache.",
 	"tags": [
 		"tink",
 		"macro",
 		"utility"
 	],
-	"classPath": "src",
-	"description": "The macro toolkit ;)",
-	"contributors": [
-		"back2dos"
-	],
-	"releasenote": "Internal refactor: remove reflections",
-	"version": "0.19.0",
-	"url": "https://github.com/haxetink/tink_macro",
-	"dependencies": {
-		"tink_core": ""
-	}
+	"license": "MIT"
 }
