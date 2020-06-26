@@ -9,8 +9,8 @@
 	"contributors": [
 		"back2dos"
 	],
-	"version": "0.19.1",
-	"releasenote": "More fine grained control over type normalization in BuildCache.",
+	"version": "0.19.2",
+	"releasenote": "Fix issues in ComplexType -> Type conversion for functions.",
 	"tags": [
 		"tink",
 		"macro",
