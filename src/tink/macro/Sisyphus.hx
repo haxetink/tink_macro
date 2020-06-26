@@ -23,8 +23,8 @@ class Sisyphus {
     if (cf.params.length == 0) {
       name: cf.name,
       doc: cf.doc,
-      access: 
-        (cf.isPublic ? [ APublic ] : [ APrivate ]) 
+      access:
+        (cf.isPublic ? [ APublic ] : [ APrivate ])
           #if haxe4 .concat(if (cf.isFinal) [AFinal] else []) #end
         ,
       kind: switch([ cf.kind, cf.type ]) {
@@ -84,7 +84,7 @@ class Sisyphus {
                 cl.kind.match(KTypeParameter(_))
                 && cl.module == classType.module
                 && cl.pack.join('.') == classType.pack.join('.')
-              ): ct;                
+              ): ct;
               default:
                 direct();
             }
@@ -95,8 +95,12 @@ class Sisyphus {
         TPath(toTypePath(baseType, params));
       case TFun(args, ret):
         TFunction(
-          [ for (a in args) a.opt ? nullable(toComplexType(a.t)) : toComplexType(a.t) ],
-          toComplexType(ret));
+          [for (a in args) {
+            var t = TNamed(a.name, toComplexType(a.t));
+            if (a.opt) TOptional(t) else t;
+          }],
+          toComplexType(ret)
+        );
       case TAnonymous(_.get() => { fields: fields }):
         TAnonymous([ for (cf in fields) toField(cf) ]);
       case TDynamic(t):
@@ -121,7 +125,7 @@ class Sisyphus {
       case _ == name => true: null;
       case v: v;
     }
-    
+
     {
       pack: baseType.pack,
       name: name,
