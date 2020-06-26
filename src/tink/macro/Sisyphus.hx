@@ -96,7 +96,7 @@ class Sisyphus {
       case TFun(args, ret):
         TFunction(
           [for (a in args) {
-            var t = TNamed(a.name, toComplexType(a.t));
+            var t = #if haxe4 TNamed(a.name, #else ( #end toComplexType(a.t));
             if (a.opt) TOptional(t) else t;
           }],
           toComplexType(ret)
