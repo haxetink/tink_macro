@@ -258,8 +258,7 @@ class Types {
       return if (once) t else reduce(t, false);
     return switch type {
       case TAbstract(_.get() => { name: 'Null', pack: [] }, [t]): rec(t);
-      case TLazy(f): rec(f());
-      case TType(_, _): rec(Context.follow(type, once));
+      case TLazy(_) | TType(_): rec(Context.follow(type, once));
       default: type;
     }
   }
