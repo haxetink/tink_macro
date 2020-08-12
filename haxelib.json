@@ -9,8 +9,8 @@
 	"contributors": [
 		"back2dos"
 	],
-	"version": "0.20.0",
-	"releasenote": "Add TypedExpr helpers.",
+	"version": "0.20.1",
+	"releasenote": "Avoid messing with typing order.",
 	"tags": [
 		"tink",
 		"macro",
