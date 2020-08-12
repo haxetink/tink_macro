@@ -8,6 +8,8 @@ using StringTools;
 
 typedef Positions = tink.macro.Positions;
 typedef ExprTools = haxe.macro.ExprTools;
+typedef TypedExprTools = haxe.macro.TypedExprTools;
+typedef TypedExprs = tink.macro.TypedExprs;
 typedef Exprs = tink.macro.Exprs;
 typedef Functions = tink.macro.Functions;
 typedef Metadatas = tink.macro.Metadatas;
@@ -28,11 +30,11 @@ typedef ClassBuilder = tink.macro.ClassBuilder;
 typedef TypeResolution = Ref<Either<String, TypeDefinition>>;
 
 class MacroApi {
-  
+
   static var MAIN_CANDIDATES = ['-main', '-x', '--run'];
   static public function getMainClass():Option<String> {
     var args = Sys.args();
-    
+
     for (c in MAIN_CANDIDATES)
       switch args.indexOf(c) {
         case -1:
@@ -42,12 +44,12 @@ class MacroApi {
     return None;
   }
 
-  @:persistent static var idCounter = 0;  
-  
+  @:persistent static var idCounter = 0;
+
   @:noUsing static public inline function tempName(?prefix:String = 'tmp'):String
     return '__tink_' + prefix + Std.string(idCounter++);
-    
-  static public function pos() 
+
+  static public function pos()
     return haxe.macro.Context.currentPos();
 
   static public var completionPoint(default, null):Option<{
@@ -63,7 +65,7 @@ class MacroApi {
     args = sysArgs;
     completionPoint = switch sysArgs.indexOf('--display') {
       case -1: None;
-      case sysArgs[_ + 1] => arg: 
+      case sysArgs[_ + 1] => arg:
         if (arg.startsWith('{"jsonrpc":')) {
           var payload:{
             jsonrpc:String,
@@ -108,26 +110,26 @@ class MacroApi {
   @:forward
   abstract ObjectField(F) to F {
 
-    static var QUOTED = "@$__hx__"; 
+    static var QUOTED = "@$__hx__";
 
     inline function new(o) this = o;
 
     public var field(get, never):String;
-    
+
     function get_field()
-      return 
-        if (quotes == Quoted) 
+      return
+        if (quotes == Quoted)
           this.field.substr(QUOTED.length);
         else this.field;
 
     public var quotes(get, never):QuoteStatus;
-    
+
     function get_quotes()
       return if (StringTools.startsWith(this.field, QUOTED)) Quoted else Unquoted;
 
     @:from static function ofFull(o:{>F, quotes:QuoteStatus }):ObjectField
       return switch o.quotes {
-        case null | Unquoted: 
+        case null | Unquoted:
           new ObjectField({ field: o.field, expr: o.expr });
         default:
           new ObjectField({ field: QUOTED + o.field, expr: o.expr });
