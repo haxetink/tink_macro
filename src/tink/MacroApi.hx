@@ -54,8 +54,15 @@ class MacroApi {
 
   static public var completionPoint(default, null):Option<{
     var file(default, never):String;
+    var content(default, never):Null<String>;
     var pos(default, never):Int;
   }>;
+
+  static public function getBuildFields():Option<Array<haxe.macro.Expr.Field>>
+    return switch completionPoint {
+      case Some(v) if (v.content != null && (v.content.charAt(v.pos - 1) == '@' || (v.content.charAt(v.pos - 1) == ':' && v.content.charAt(v.pos - 2) == '@'))): None;
+      default: Some(haxe.macro.Context.getBuildFields());
+    }
 
   static public var args(default, null):Iterable<String>;
   static var initialized = initArgs();
@@ -73,12 +80,15 @@ class MacroApi {
             params:{
               file:String,
               offset:Int,
+              contents:String,
             }
           } = haxe.Json.parse(arg);
+
           switch payload {
             case { jsonrpc: '2.0', method: 'display/completion' }:
               Some({
                 file: payload.params.file,
+                content: payload.params.contents,
                 pos: payload.params.offset,
               });
             default: None;

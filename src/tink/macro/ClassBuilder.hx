@@ -23,7 +23,10 @@ class ClassBuilder {
       target = Context.getLocalClass().get();
 
     if (fields == null)
-      fields = Context.getBuildFields();
+      switch MacroApi.getBuildFields() {
+        case None: target.pos.error('Impossible to get builds fields now. Possible cause: https://github.com/HaxeFoundation/haxe/issues/9853');
+        case Some(_):
+      }
 
     this.initializeFrom = fields;
     this.target = target;
@@ -192,10 +195,14 @@ class ClassBuilder {
     return m;
   }
 
-  static public function run(plugins:Array<ClassBuilder->Void>, ?verbose) {
-    var builder = new ClassBuilder();
-    for (p in plugins)
-      p(builder);
-    return builder.export(verbose);
-  }
+  static public function run(plugins:Array<ClassBuilder->Void>, ?verbose)
+    return switch MacroApi.getBuildFields() {
+      case None: null;
+      case Some(fields):
+        var builder = new ClassBuilder(fields);
+        for (p in plugins)
+          p(builder);
+        return builder.export(verbose);
+
+    }
 }
