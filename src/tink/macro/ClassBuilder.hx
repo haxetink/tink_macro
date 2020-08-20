@@ -23,9 +23,9 @@ class ClassBuilder {
       target = Context.getLocalClass().get();
 
     if (fields == null)
-      switch MacroApi.getBuildFields() {
+      fields = switch MacroApi.getBuildFields() {
         case None: target.pos.error('Impossible to get builds fields now. Possible cause: https://github.com/HaxeFoundation/haxe/issues/9853');
-        case Some(_):
+        case Some(v): v;
       }
 
     this.initializeFrom = fields;
