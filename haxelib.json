@@ -9,8 +9,8 @@
 	"contributors": [
 		"back2dos"
 	],
-	"version": "0.20.1",
-	"releasenote": "Avoid messing with typing order.",
+	"version": "0.20.2",
+	"releasenote": "Expose autocompletion contents. Work around metadata completion issue.",
 	"tags": [
 		"tink",
 		"macro",
