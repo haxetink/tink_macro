@@ -9,8 +9,8 @@
 	"contributors": [
 		"back2dos"
 	],
-	"version": "0.21.0",
-	"releasenote": "Expose autocompletion contents. Work around compiler metadata completion issues.",
+	"version": "0.21.1",
+	"releasenote": "Fix issue with build field retrieval.",
 	"tags": [
 		"tink",
 		"macro",
