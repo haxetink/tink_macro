@@ -172,6 +172,9 @@ class Types {
                 #if haxe4
                 isExtern: field.isExtern,
                 isFinal: field.isFinal,
+                #if (haxe >= version("4.2.0-rc.1"))
+                isAbstract: field.isAbstract,
+                #end
                 #end
               }:ClassField)
             ]);
