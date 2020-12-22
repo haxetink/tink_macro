@@ -65,5 +65,19 @@ class Types extends Base {
     assertEquals('String', Context.getType('String').toComplex().toString());
     assertEquals('tink.CoreApi.Noise', Context.getType('tink.CoreApi.Noise').toComplex().toString());
   }
+  
+  function testDeduceCommonType() {
+    assertEquals('StdTypes.Float', tink.macro.Types.deduceCommonType([(macro:Float), (macro:Int)].map(ct -> ct.toType().sure())).sure().toComplex().toString());
+    assertEquals('Types.CommonI1', tink.macro.Types.deduceCommonType([(macro:Types.CommonA), (macro:Types.CommonB), (macro:Types.CommonC)].map(ct -> ct.toType().sure())).sure().toComplex().toString());
+    assertEquals('Types.CommonI2', tink.macro.Types.deduceCommonType([(macro:Types.CommonB), (macro:Types.CommonC)].map(ct -> ct.toType().sure())).sure().toComplex().toString());
+    // assertEquals('Types.CommonI3', tink.macro.Types.deduceCommonType([(macro:Types.CommonC)].map(ct -> ct.toType().sure())).sure().toComplex().toString());
+  }
 }
 #end
+
+interface CommonI1 {}
+interface CommonI2 {}
+interface CommonI3 {}
+class CommonA implements CommonI1 {}
+class CommonB implements CommonI2 implements CommonI1 {}
+class CommonC implements CommonI3 implements CommonI2 implements CommonI1 {}

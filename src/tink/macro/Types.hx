@@ -207,8 +207,19 @@ class Types {
         case TDynamic(v) if(v != null): getPosition(v);
         default: Failure('type "$t" has no position');
       }
-
-
+  
+  static public function deduceCommonType(types:Array<Type>):Outcome<Type, Error> {
+    var exprs = types.map(t ->{
+      var ct = t.toComplex();
+      macro (null:$ct);
+    });
+    
+    return switch (macro $a{exprs}).typeof() {
+      case Success(TInst(_, [v])): Success(v);
+      case Success(_): throw 'unreachable';
+      case Failure(e): Failure(new Error('Unable to deduce common type among $types'));
+    }
+  }
 
   static public function toString(t:ComplexType)
     return new Printer().printComplexType(t);
