@@ -67,10 +67,11 @@ class Types extends Base {
   }
   
   function testDeduceCommonType() {
-    assertEquals('StdTypes.Float', tink.macro.Types.deduceCommonType([(macro:Float), (macro:Int)].map(ct -> ct.toType().sure())).sure().toComplex().toString());
-    assertEquals('Types.CommonI1', tink.macro.Types.deduceCommonType([(macro:Types.CommonA), (macro:Types.CommonB), (macro:Types.CommonC)].map(ct -> ct.toType().sure())).sure().toComplex().toString());
-    assertEquals('Types.CommonI2', tink.macro.Types.deduceCommonType([(macro:Types.CommonB), (macro:Types.CommonC)].map(ct -> ct.toType().sure())).sure().toComplex().toString());
-    // assertEquals('Types.CommonI3', tink.macro.Types.deduceCommonType([(macro:Types.CommonC)].map(ct -> ct.toType().sure())).sure().toComplex().toString());
+    function ct2t(ct:ComplexType) return ct.toType().sure();
+    assertEquals('StdTypes.Float', tink.macro.Types.deduceCommonType([(macro:Float), (macro:Int)].map(ct2t)).sure().toComplex().toString());
+    assertEquals('Types.CommonI1', tink.macro.Types.deduceCommonType([(macro:Types.CommonA), (macro:Types.CommonB), (macro:Types.CommonC)].map(ct2t)).sure().toComplex().toString());
+    assertEquals('Types.CommonI2', tink.macro.Types.deduceCommonType([(macro:Types.CommonB), (macro:Types.CommonC)].map(ct2t)).sure().toComplex().toString());
+    // assertEquals('Types.CommonI3', tink.macro.Types.deduceCommonType([(macro:Types.CommonC)].map(ct2t)).sure().toComplex().toString());
   }
 }
 #end

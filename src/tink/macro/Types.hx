@@ -209,9 +209,9 @@ class Types {
       }
   
   static public function deduceCommonType(types:Array<Type>):Outcome<Type, Error> {
-    var exprs = types.map(t ->{
+    var exprs = types.map(function(t) {
       var ct = t.toComplex();
-      macro (null:$ct);
+      return macro (null:$ct);
     });
     
     return switch (macro $a{exprs}).typeof() {
