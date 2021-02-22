@@ -9,8 +9,8 @@
 	"contributors": [
 		"back2dos"
 	],
-	"version": "0.21.1",
-	"releasenote": "Fix issue with build field retrieval.",
+	"version": "0.22.0",
+	"releasenote": "Support Haxe 4.2",
 	"tags": [
 		"tink",
 		"macro",
