@@ -207,13 +207,13 @@ class Types {
         case TDynamic(v) if(v != null): getPosition(v);
         default: Failure('type "$t" has no position');
       }
-  
+
   static public function deduceCommonType(types:Array<Type>):Outcome<Type, Error> {
     var exprs = types.map(function(t) {
       var ct = t.toComplex();
       return macro (null:$ct);
     });
-    
+
     return switch (macro $a{exprs}).typeof() {
       case Success(TInst(_, [v])): Success(v);
       case Success(_): throw 'unreachable';
@@ -307,6 +307,9 @@ class Types {
 
     if (types.length == 1) return Success(types[1]);
 
+    #if haxe4
+    return TIntersection(types);
+    #end
     var paths = [],
         fields = [];
 
