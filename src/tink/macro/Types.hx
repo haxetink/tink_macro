@@ -308,7 +308,7 @@ class Types {
     if (types.length == 1) return Success(types[1]);
 
     #if haxe4
-    return TIntersection(types);
+    return Success(TIntersection(types));
     #end
     var paths = [],
         fields = [];
