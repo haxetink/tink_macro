@@ -155,18 +155,21 @@ class Sisyphus {
     }
   }
 
+  static inline function isFinal(c:ClassField)
+    return #if haxe4 c.isFinal #else false #end;
+
   static function exactAnonField(c:ClassField) {
     var kw =
       switch c.kind {
         case FMethod(_): 'function';
         case FVar(_):
-          if (c.isFinal) 'final' else 'var';
+          if (isFinal(c)) 'final' else 'var';
       }
 
     return [for (m in c.meta.get()) m.toString() + ' '].join('') + '$kw ${c.name}' + (switch c.kind {
       case FVar(read, write):
         (
-          if (c.isFinal || (read == AccNormal && write == AccNormal)) ''
+          if (isFinal(c) || (read == AccNormal && write == AccNormal)) ''
           else '(${read.accessToName()}, ${read.accessToName(false)})'
         ) + ':' + c.type.toExactString();
       case FMethod(_):
