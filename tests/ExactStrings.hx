@@ -1,4 +1,3 @@
-import haxe.macro.Context;
 import haxe.macro.Context.typeof;
 using tink.MacroApi;
 
@@ -12,6 +11,8 @@ class ExactStrings extends Base {
     expect('Dummy.Private', macro Dummy.p);
     expect('nested.Dummy.Private', macro nested.Dummy.p);
     expect('{ @foo var x:Int; }', macro (null:{@foo var x:Int;}));
+    expect('{ @foo @bar var x:Int; }', macro (null:{@foo @bar var x:Int;}));
+    expect('{ @bar @foo var x:Int; }', macro (null:{@bar @foo var x:Int;}));// not 100% sure this is always the best choice, but let's roll with it
     expect('{ @bar var x:Int; }', macro (null:{@bar var x:Int;}));
     expect('{ var x:Int; var y:Int; }', macro (null:{x:Int,y:Int}));
     expect('{ var x:Int; var y:Int; }', macro (null:{y:Int,x:Int}));

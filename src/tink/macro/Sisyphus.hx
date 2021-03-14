@@ -138,7 +138,7 @@ class Sisyphus {
     }
   }
 
-  static function exactBase<T:BaseType>(r:haxe.macro.Type.Ref<T>, params:Array<Type>) {
+  static function exactBase<T:BaseType>(r:Ref<T>, params:Array<Type>) {
     var t = r.get();
     var isMain = !t.isPrivate && switch t.pack {
       case []: t.module == t.name || t.module == 'StdTypes';
@@ -197,4 +197,29 @@ class Sisyphus {
       case TLazy(f): toExactString(f());
     }
 
+    static function eager(t:Type)
+      return switch t {
+        case TLazy(f): eager(f());
+        default: t;
+      }
+
+    static public function compare(t1:Type, t2:Type, ?follow:Bool = true) {
+      if (follow) {
+        t1 = t1.reduce();
+        t2 = t2.reduce();
+      }
+      else {
+        t1 = eager(t1);
+        t2 = eager(t2);
+      }
+
+      return switch t1.getIndex() - t2.getIndex() {
+        case 0:
+          switch Reflect.compare(t1.toString(), t2.toString()) {
+            case 0: Reflect.compare(t1.toExactString(), t2.toExactString());
+            case v: v;
+          }
+        case v: v;
+      }
+    }
 }

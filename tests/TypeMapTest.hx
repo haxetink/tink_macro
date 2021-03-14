@@ -11,6 +11,8 @@ class TypeMapTest extends TestCase {
     var t = new TypeMap();
     var t1 = (macro [{ foo: [{ bar: '5' }]}]).typeof().sure();
     var t2 = (macro [{ foo: [{ bar: 5 }]}]).typeof().sure();
+    var t3 = (macro [{ foo: [{ bar: 5 }]}]).typeof().sure();
+    var t4 = (macro [{ foo: [({ bar: 5 }:{ @foo var bar:Int; })]}]).typeof().sure();
 
     t.set(t1, 0);
     assertEquals(Lambda.count(t), 1);
@@ -19,7 +21,10 @@ class TypeMapTest extends TestCase {
     t.set(t1, 2);
     assertEquals(Lambda.count(t), 2);
     t.set(t2, 3);
+    t.set(t3, 3);
     assertEquals(Lambda.count(t), 2);
+    t.set(t4, 4);
+    assertEquals(Lambda.count(t), 3);
 
     assertEquals(t.get(t1), 2);
     assertEquals(t.get(t2), 3);
