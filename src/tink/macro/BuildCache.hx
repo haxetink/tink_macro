@@ -131,30 +131,24 @@ private class Group {//TODO: this is somewhat obsolete
 
   public function get(types:Array<Type>, pos:Position, build:BuildContextN->TypeDefinition, ?normalizer):Type {
 
-    var normalized = switch normalizer {
+    types = types.map(switch normalizer {
       case null: function (t) return Context.follow(t);
       case f: f;
-    }
+    });
 
-    types = types.map(normalizer);
-
-    var retName = name + Sisyphus.exactParams(types);
+    var retName = name + '_' + Context.signature(Sisyphus.exactParams(types));
 
     return switch retName.definedType() {
       case Some(v): v;
       case None:
         var usings = [];
+        var path = name.split('.');
+
         var ret = build({
           pos: pos,
           types: types,
           usings: usings,
-          name: retName
-        });
-
-        ret.meta.push({
-          name: ':native',
-          params: [macro $v{name + '_'+ Context.signature(name)}],
-          pos: (macro null).pos,
+          name: retName.split('.').pop(),
         });
 
         Context.defineModule(retName, [ret], usings);
