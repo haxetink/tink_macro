@@ -148,11 +148,7 @@ class Sisyphus {
     return (
       if (isMain) t.pack.concat([t.name]).join('.')
       else t.module + '.' + t.name
-    ) + switch params {
-      case []: '';
-      case params:
-        '<${params.map(toExactString).join(', ')}>';
-    }
+    ) + exactParams(params);
   }
 
   static inline function isFinal(c:ClassField)
@@ -183,6 +179,12 @@ class Sisyphus {
   static function exactSig(args:Array<{name:String, opt:Bool, t:Type}>, ret:Type, sep:String)
     return '(${[for (a in args) (if (a.opt) '?' else '') + a.name + ':' + toExactString(a.t)].join(', ')})$sep${toExactString(ret)}';
 
+  static public function exactParams(params:Array<Type>)
+    return switch params {
+      case []: '';
+      case params:
+        '<${params.map(toExactString).join(', ')}>';
+    }
   static public function toExactString(t:Type)
     return switch t {
       case TMono(t): t.toString();

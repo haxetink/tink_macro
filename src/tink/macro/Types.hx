@@ -14,7 +14,7 @@ import haxe.macro.Type.Ref;
 
 class Types {
 
-  static public function definedType(typeName:String)
+  static public function definedType(typeName:String):Option<Type>
     return
       try {
         Some(Context.getType(typeName));

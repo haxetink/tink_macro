@@ -17,18 +17,18 @@ typedef BuildContextN = {
 
 
 typedef BuildContext = {
-  pos:Position,
-  type:Type,
-  usings:Array<TypePath>,
-  name:String,
+  var pos(default, never):Position;
+  var type(default, never):Type;
+  var usings(default, never):Array<TypePath>;
+  var name(default, never):String;
 }
 
 typedef BuildContext2 = {>BuildContext,
-  type2:Type,
+  var type2(default, never):Type;
 }
 
 typedef BuildContext3 = {>BuildContext2,
-  type3:Type,
+  var type3(default, never):Type;
 }
 
 class BuildCache {
@@ -36,29 +36,20 @@ class BuildCache {
   @:persistent static var cache = new Map();
 
   static public function getType3(name, ?types, ?pos:Position, build:BuildContext3->TypeDefinition, ?normalizer:Type->Type) {
-     if (types == null)
-      switch Context.getLocalType() {
-        case TInst(_.toString() == name => true, [t1, t2, t3]):
-          types = { t1: t1, t2: t2, t3: t3 };
-        default:
-          throw 'assert';
-      }
-
-    var t1 = types.t1.toComplexType(),
-        t2 = types.t2.toComplexType(),
-        t3 = types.t2.toComplexType();
-
-    return getType(name, (macro : { t1: $t1, t2: $t2, t3: $t3 } ).toType(), pos, function (ctx) return build({
-      type: types.t1,
-      type2: types.t2,
-      type3: types.t3,
+    return _getTypeN(name, 3, switch types {
+      case null: null;
+      case v: [types.t1, types.t2, types.t3];
+    }, pos, ctx -> build({
       pos: ctx.pos,
-      name: ctx.name,
-      usings: ctx.usings
+      type: ctx.types[0],
+      type2: ctx.types[1],
+      type3: ctx.types[2],
+      usings: ctx.usings,
+      name: ctx.name
     }), normalizer);
   }
 
-  static public function getTypeN(name, ?types, ?pos:Position, build:BuildContextN->TypeDefinition, ?normalizer:Type->Type) {
+  static function _getTypeN(name, length, ?types, ?pos:Position, build:BuildContextN->TypeDefinition, ?normalizer:Type->Type) {
 
     if (pos == null)
       pos = Context.currentPos();
@@ -67,50 +58,37 @@ class BuildCache {
       switch Context.getLocalType() {
         case TInst(_.toString() == name => true, params):
           types = params;
-        default:
-          throw 'assert';
+        case t:
+          pos.error('expected $name but found ${t.toString()}');
       }
 
-    var compound = ComplexType.TAnonymous([for (i in 0...types.length) {
-      name: 't$i',
-      pos: pos,
-      kind: FVar(switch types[i] {
-        case TInst(_.get().kind => KExpr(e), _):
-          TPath('tink.macro.ConstParam'.asTypePath([TPExpr(e)]));
-        case t: t.toComplex();
-      }),
-    }]).toType();
+    if (length != -1 && types.length != length)
+      pos.error('expected $length parameter${if (length == 1) '' else 's'}');
 
-    return getType(name, compound, pos, function (ctx) return build({
-      types: types,
-      pos: ctx.pos,
-      name: ctx.name,
-      usings: ctx.usings
-    }), normalizer);
-  }
-
-  static public function getType2(name, ?types, ?pos:Position, build:BuildContext2->TypeDefinition, ?normalizer:Type->Type) {
-    if (types == null)
-      switch Context.getLocalType() {
-        case TInst(_.toString() == name => true, [t1, t2]):
-          types = { t1: t1, t2: t2 };
-        default:
-          throw 'assert';
+    var forName =
+      switch cache[name] {
+        case null: cache[name] = new Group(name);
+        case v: v;
       }
 
-    var t1 = types.t1.toComplexType(),
-        t2 = types.t2.toComplexType();
-
-    return getType(name, (macro : { t1: $t1, t2: $t2 } ).toType(), pos, function (ctx) return build({
-      type: types.t1,
-      type2: types.t2,
-      pos: ctx.pos,
-      name: ctx.name,
-      usings: ctx.usings
-    }), normalizer);
+    var ret = forName.get(types, pos.sanitize(), build, normalizer);
+    ret.getFields();// workaround for https://github.com/HaxeFoundation/haxe/issues/7905
+    return ret;
   }
 
-  static public function getParams(name:String, ?pos:Position)
+  static public function getType2(name, ?types, ?pos:Position, build:BuildContext2->TypeDefinition, ?normalizer:Type->Type)
+    return _getTypeN(name, 2, switch types {
+      case null: null;
+      case v: [types.t1, types.t2];
+    }, pos, ctx -> build({
+      pos: ctx.pos,
+      type: ctx.types[0],
+      type2: ctx.types[1],
+      usings: ctx.usings,
+      name: ctx.name
+    }), normalizer);
+
+  static public function getParams(name:String, ?pos:Position, ?count:Int)
     return
       switch Context.getLocalType() {
         case TInst(_.toString() == name => true, v):
@@ -131,70 +109,56 @@ class BuildCache {
         });
 
   static public function getType(name, ?type, ?pos:Position, build:BuildContext->TypeDefinition, ?normalizer:Type->Type) {
-
-    if (type == null)
-      type = getParam(name, pos).sure();
-
-    var forName =
-      switch cache[name] {
-        case null: cache[name] = new Group(name, normalizer);
-        case v: v;
-      }
-
-    var ret = forName.get(type, pos.sanitize(), build);
-    ret.getFields();// workaround for https://github.com/HaxeFoundation/haxe/issues/7905
-    return ret;
+    return _getTypeN(name, 1, switch type {
+      case null: null;
+      case v: [v];
+    }, pos, ctx -> build({
+      pos: ctx.pos,
+      type: ctx.types[0],
+      usings: ctx.usings,
+      name: ctx.name
+    }), normalizer);
   }
 }
 
-private typedef Entry = {
-  name:String,
-}
-
-private class Group {
+private class Group {//TODO: this is somewhat obsolete
 
   var name:String;
-  var counter = 0;
-  var entries:TypeMap<Entry>;
 
-  public function new(name, ?normalizer) {
+  public function new(name) {
     this.name = name;
-    this.entries = new TypeMap(normalizer);
   }
 
-  public function get(type:Type, pos:Position, build:BuildContext->TypeDefinition):Type {
+  public function get(types:Array<Type>, pos:Position, build:BuildContextN->TypeDefinition, ?normalizer):Type {
 
-    function make(path:String) {
-      var usings = [];
-      var def = build({
-        pos: pos,
-        type: type,
-        usings: usings,
-        name: path.split('.').pop()
-      });
-
-      entries.set(type, { name: path } );
-      Context.defineModule(path, [def], usings);
-      return Context.getType(path);
+    var normalized = switch normalizer {
+      case null: function (t) return Context.follow(t);
+      case f: f;
     }
 
-    function doMake()
-      while (true)
-        switch '$name${counter++}' {
-          case _.definedType() => Some(_):
-          case v:
-            return make(v);
-        }
+    types = types.map(normalizer);
 
-    return
-      switch entries.get(type) {
-        case null:
-          doMake();
-        case v:
-          switch v.name.definedType() {
-            case Some(v): v;
-            default: doMake();
-          }
-      }
+    var retName = name + Sisyphus.exactParams(types);
+
+    return switch retName.definedType() {
+      case Some(v): v;
+      case None:
+        var usings = [];
+        var ret = build({
+          pos: pos,
+          types: types,
+          usings: usings,
+          name: retName
+        });
+
+        ret.meta.push({
+          name: ':native',
+          params: [macro $v{name + '_'+ Context.signature(name)}],
+          pos: (macro null).pos,
+        });
+
+        Context.defineModule(retName, [ret], usings);
+        Context.getType(retName);
+    }
   }
 }
