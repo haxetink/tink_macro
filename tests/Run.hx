@@ -1,6 +1,9 @@
 package ;
 
 import haxe.unit.*;
+#if macro
+using haxe.macro.Tools;
+#end
 
 class Run {
   #if !macro
@@ -14,6 +17,7 @@ class Run {
     new TypeMapTest(),
     new Functions(),
     new Misc(),
+    new ExactStrings(),
   ];
   #end
   macro static function test() {

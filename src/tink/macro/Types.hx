@@ -221,6 +221,10 @@ class Types {
     }
   }
 
+  /// like haxe.macro.TypeTools.toString, but not lossy
+  static public function toExactString(t:Type)
+    return Sisyphus.toExactString(t);
+
   static public function toString(t:ComplexType)
     return new Printer().printComplexType(t);
 

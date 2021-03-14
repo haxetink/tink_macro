@@ -2,6 +2,8 @@ package tink.macro;
 
 import haxe.macro.Expr;
 import haxe.macro.Type;
+using haxe.macro.Tools;
+using tink.MacroApi;
 
 class Sisyphus {
 
@@ -61,8 +63,7 @@ class Sisyphus {
     }
   }
 
-
-  public static function toComplexType(type : Null<Type>) : Null<ComplexType> return {
+  static public function toComplexType(type : Null<Type>) : Null<ComplexType> return {
     inline function direct()
       return Types.toComplex(type, { direct: true });
     switch (type) {
@@ -136,4 +137,61 @@ class Sisyphus {
       }],
     }
   }
+
+  static function exactBase<T:BaseType>(r:haxe.macro.Type.Ref<T>, params:Array<Type>) {
+    var t = r.get();
+    var isMain = !t.isPrivate && switch t.pack {
+      case []: t.module == t.name || t.module == 'StdTypes';
+      default: StringTools.endsWith(t.module, '.${t.name}');
+    }
+
+    return (
+      if (isMain) t.pack.concat([t.name]).join('.')
+      else t.module + '.' + t.name
+    ) + switch params {
+      case []: '';
+      case params:
+        '<${params.map(toExactString).join(', ')}>';
+    }
+  }
+
+  static function exactAnonField(c:ClassField) {
+    var kw =
+      switch c.kind {
+        case FMethod(_): 'function';
+        case FVar(_):
+          if (c.isFinal) 'final' else 'var';
+      }
+
+    return [for (m in c.meta.get()) m.toString() + ' '].join('') + '$kw ${c.name}' + (switch c.kind {
+      case FVar(read, write):
+        (
+          if (c.isFinal || (read == AccNormal && write == AccNormal)) ''
+          else '(${read.accessToName()}, ${read.accessToName(false)})'
+        ) + ':' + c.type.toExactString();
+      case FMethod(_):
+        switch haxe.macro.Context.follow(c.type) {
+          case TFun(arg, ret): exactSig(arg, ret, ':');
+          default: throw 'assert';
+        }
+    }) + ';';
+  }
+
+  static function exactSig(args:Array<{name:String, opt:Bool, t:Type}>, ret:Type, sep:String)
+    return '(${[for (a in args) (if (a.opt) '?' else '') + a.name + ':' + toExactString(a.t)].join(', ')})$sep${toExactString(ret)}';
+
+  static public function toExactString(t:Type)
+    return switch t {
+      case TMono(t): t.toString();
+      case TEnum(r, params): exactBase(r, params);
+      case TInst(r, params): exactBase(r, params);
+      case TType(r, params): exactBase(r, params);
+      case TAbstract(r, params): exactBase(r, params);
+      case TFun(args, ret): exactSig(args, ret, '->');
+      case TAnonymous(a): '{ ${[for (f in a.get().fields) exactAnonField(f)].join(' ')} }';
+      case TDynamic(null): 'Dynamic';
+      case TDynamic(t): 'Dynamic<${toExactString(t)}>';
+      case TLazy(f): toExactString(f());
+    }
+
 }
