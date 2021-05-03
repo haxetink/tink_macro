@@ -41,9 +41,10 @@ class Types {
   static public function accessToName(v:VarAccess, ?read = true)
     return
       switch (v) {
-        case AccNormal, AccInline: 'default';
+        case AccNormal: 'default';
+        case AccInline: if (read) 'default' else 'never';
         case AccNo: 'null';
-        case AccNever: 'never';
+        case AccNever | AccCtor: 'never';
         case AccCall: if (read) 'get' else 'set';
         default:
           throw 'not implemented';
