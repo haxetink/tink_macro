@@ -44,7 +44,7 @@ class Types {
         case AccNormal: 'default';
         case AccInline: if (read) 'default' else 'never';
         case AccNo: 'null';
-        case AccNever | AccCtor: 'never';
+        case AccNever #if haxe4 | AccCtor #end: 'never';
         case AccCall: if (read) 'get' else 'set';
         default:
           throw 'not implemented';
