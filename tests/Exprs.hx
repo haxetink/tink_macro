@@ -16,38 +16,46 @@ class Exprs extends Base {
       assertTrue(id.length <= 3);
     }
   }
+
+  function testEval() {
+    var expr = macro (untyped {foo:[{bar:234},'bar']});
+    var str = Std.string(untyped {foo:[{bar:234},'bar']});
+    assertEquals(Std.string(expr.eval()), Std.string(untyped {foo:[{bar:234},'bar']}));
+    assertEquals(Std.string(Context.typeExpr(expr).eval()), Std.string(untyped {foo:[{bar:234},'bar']}));
+
+  }
   function testGet() {
     assertEquals('foo', (macro foo).getIdent().sure());
     assertEquals('foo', (macro "foo").getString().sure());
     assertEquals('foo', (macro foo).getName().sure());
     assertEquals('foo', (macro "foo").getName().sure());
     assertEquals(5, (macro 5).getInt().sure());
-    
+
     exprEq(macro [a, b, c], (macro function (a, b, c) [a, b, c]).getFunction().sure().expr);
     assertEquals('a,b,c', [for (arg in (macro function (a, b, c) [a, b, c]).getFunction().sure().args) arg.name].join(','));
-    
+
     assertFalse((macro 'foo').getIdent().isSuccess());
     assertFalse((macro foo).getString().isSuccess());
     assertFalse((macro 5).getName().isSuccess());
     assertFalse((macro 5.1).getInt().isSuccess());
     assertFalse((macro foo).getFunction().isSuccess());
   }
-  
+
   function testShortcuts() {
     assertTrue(true);
   }
-  
+
   function testIterType() {
     assertEquals('Int', (macro [1, 2]).getIterType().sure().getID());
     assertEquals('Int', (macro [1, 2].iterator()).getIterType().sure().getID());
     assertEquals('Int', ECheckType(macro null, macro: Arrayish).at().getIterType().sure().getID());
   }
-  
+
   function testYield() {
     function yielder(e) return macro @yield $e;
     function test(x:Expr, e:Expr, ?options)
       exprEq(x, e.yield(yielder, options));
-      
+
     test(macro @yield foo, macro foo);
     test(macro @yield (foo), macro (foo));
     test(macro for (_) @yield foo, macro for (_) foo);
@@ -57,10 +65,10 @@ class Exprs extends Base {
   }
   function testSubstitute() {
     exprEq(
-      macro foo.call(arg1, arg2), 
+      macro foo.call(arg1, arg2),
       (macro bar.call(x, y)).substitute({ x: macro arg1, y: macro arg2, bar: macro foo })
     );
-    
+
     exprEq(
       macro {
         var x:Map<Int, String> = new Map(),
@@ -89,7 +97,7 @@ class Exprs extends Base {
       ])
     );
   }
-  
+
   function testConcat() {
     exprEq(macro {a; b;}, (macro a).concat(macro b));
     exprEq(macro {a; b; c;}, (macro {a; b;}).concat(macro c));

@@ -3,7 +3,7 @@ package tink.macro;
 #if macro
   import haxe.macro.Context;
   import haxe.macro.Expr;
-  
+
   using tink.macro.Positions;
   using tink.macro.Exprs;
 #end
@@ -15,7 +15,7 @@ package tink.macro;
     static public function bounceExpr(e:Expr, transform:Expr->Expr) {
       var id = idCounter++,
         pos = e.pos;
-      outerMap.set(id, transform);      
+      outerMap.set(id, transform);
       return macro @:pos(e.pos) tink.macro.Bouncer.catchBounceExpr($e, $v{id});
     }
     static public function bounce(f:Void->Expr, ?pos:Position) {
@@ -29,35 +29,41 @@ package tink.macro;
         pos = e.pos;
       outerMap.set(id, transform);
       return macro @:pos(e.pos) tink.macro.Bouncer.makeOuter($e).andBounce($v{id});
-    }    
+    }
     static function doOuter(id:Int, e:Expr) {
       return
-        if (outerMap.exists(id)) 
+        if (outerMap.exists(id))
           outerMap.get(id)(e);
         else
-          Context.currentPos().error('unknown id ' + id);  
+          Context.currentPos().error('unknown id ' + id);
     }
     static function doBounce(id:Int) {
       return
-        if (bounceMap.exists(id)) 
+        if (bounceMap.exists(id))
           bounceMap.get(id)();
         else
-          Context.currentPos().error('unknown id ' + id);  
+          Context.currentPos().error('unknown id ' + id);
     }
+    static public var lastEvaled(default, null):Dynamic;
   #else
-  @:noUsing static public function makeOuter<A>(a:A):Bouncer 
+  @:noUsing static public function makeOuter<A>(a:A):Bouncer
     return null;
   #end
-  @:noUsing macro public function andBounce(ethis:Expr, id:Int) 
+  @:noUsing macro public function andBounce(ethis:Expr, id:Int)
     return
       switch (ethis.expr) {
         case ECall(_, params): doOuter(id, params[0]);
         default: ethis.reject();
       }
 
-  @:noUsing macro static public function catchBounce(id:Int) 
+  @:noUsing static public macro function eval(f:Void->Dynamic) {
+    lastEvaled = f();
+    return macro null;
+  }
+
+  @:noUsing macro static public function catchBounce(id:Int)
     return doBounce(id);
-  
+
   @:noUsing macro static public function catchBounceExpr(e:Expr, id:Int)
     return doOuter(id, e);
 }

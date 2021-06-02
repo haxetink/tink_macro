@@ -1,5 +1,6 @@
 package tink.macro;
 
+import haxe.macro.Context;
 import haxe.macro.Type;
 import haxe.ds.Option;
 using haxe.macro.Tools;
@@ -30,6 +31,9 @@ class TypedExprs {
     catch (e:Option<Dynamic>) return cast e;
     return None;
   }
+
+  static public function eval(t:TypedExpr)
+    return Exprs.eval(Context.storeTypedExpr(t));
 
   static public function isThis(t:TypedExpr):Bool
     return switch t {

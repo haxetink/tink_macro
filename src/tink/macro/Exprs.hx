@@ -48,6 +48,11 @@ class Exprs {
   static public inline function as(e:Expr, c:ComplexType)
     return ECheckType(e, c).at(e.pos);
 
+  static public function eval(e:Expr):Dynamic {
+    Context.typeof(macro tink.macro.Bouncer.eval(function () return $e));
+    return Bouncer.lastEvaled;
+  }
+
   static public function finalize(e:Expr, ?nuPos:Position, ?rules:Dict<String>, ?skipFields = false, ?callPos:PosInfos) {
     if (nuPos == null)
       nuPos = Context.currentPos();
