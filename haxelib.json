@@ -9,8 +9,8 @@
 	"contributors": [
 		"back2dos"
 	],
-	"version": "0.23.0",
-	"releasenote": "Make TypeMap work exacly with anons.",
+	"version": "0.24.0",
+	"releasenote": "Add eval to Expr/TypedExpr.",
 	"tags": [
 		"tink",
 		"macro",
