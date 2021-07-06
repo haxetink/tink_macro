@@ -9,8 +9,8 @@
 	"contributors": [
 		"back2dos"
 	],
-	"version": "0.24.0",
-	"releasenote": "Add eval to Expr/TypedExpr.",
+	"version": "1.0.0",
+	"releasenote": "Let's just commit to the API and move on.",
 	"tags": [
 		"tink",
 		"macro",
