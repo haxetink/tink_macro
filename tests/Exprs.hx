@@ -21,8 +21,9 @@ class Exprs extends Base {
     var expr = macro (untyped {foo:[{bar:234},'bar']});
     var str = Std.string(untyped {foo:[{bar:234},'bar']});
     assertEquals(Std.string(expr.eval()), Std.string(untyped {foo:[{bar:234},'bar']}));
-    assertEquals(Std.string(Context.typeExpr(expr).eval()), Std.string(untyped {foo:[{bar:234},'bar']}));
 
+    // This doesn't work in Haxe 4.3, which is correct, because typeExpr types an expression into target context, rather than macro context
+    // assertEquals(Std.string(Context.typeExpr(expr).eval()), Std.string(untyped {foo:[{bar:234},'bar']}));
   }
   function testGet() {
     assertEquals('foo', (macro foo).getIdent().sure());
