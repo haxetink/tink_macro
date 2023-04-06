@@ -33,15 +33,22 @@ class MacroApi {
 
   static var MAIN_CANDIDATES = ['-main', '-x', '--run'];
   static public function getMainClass():Option<String> {
-    var args = Sys.args();
-
-    for (c in MAIN_CANDIDATES)
-      switch args.indexOf(c) {
-        case -1:
-        case v: return Some(args[v+1]);
+    #if (haxe_ver >= 4.3)
+      return switch haxe.macro.Compiler.getConfiguration().mainClass {
+        case null: None;
+        case p: Some(p.pack.concat([p.name]).join('.'));
       }
+    #else
+      var args = Sys.args();
 
-    return None;
+      for (c in MAIN_CANDIDATES)
+        switch args.indexOf(c) {
+          case -1:
+          case v: return Some(args[v+1]);
+        }
+
+      return None;
+    #end
   }
 
   @:persistent static var idCounter = 0;

@@ -29,7 +29,9 @@ abstract PhysicalType<T>(Either<Class<T>, Enum<T>>) {
 }
 //TODO: this helper should go somewhere
 class Base extends TestCase {
-  
+  function stringCompare<A>(v1:A, v2:A, ?pos) 
+    assertEquals(Std.string(v1), Std.string(v2), pos);
+
   function fail(msg:String, ?c : PosInfos) {
     currentTest.done = true;
     currentTest.success = false;
