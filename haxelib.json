@@ -9,8 +9,8 @@
 	"contributors": [
 		"back2dos"
 	],
-	"version": "1.0.1",
-	"releasenote": "Haxe 4.3 support.",
+	"version": "1.0.2",
+	"releasenote": "Add Member::hasMeta.",
 	"tags": [
 		"tink",
 		"macro",
