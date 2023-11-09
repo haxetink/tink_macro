@@ -99,11 +99,14 @@ abstract Member(Field) from Field to Field {
       if (this.meta == null) [];
       else [for (tag in this.meta) if (tag.name == name) tag];
 
-  public function hasMeta(name) {
-    for (m in this.meta)
-      if (m.name == name) return true;
-    return false;
-  }
+  public function hasMeta(name) 
+    return switch this.meta {
+      case null | []: false;
+      case meta:
+        for (m in meta)
+          if (m.name == name) return true;
+        false;
+    }
   
   public inline function asField():Field return this;
   public function publish() 
