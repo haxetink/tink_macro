@@ -98,6 +98,12 @@ abstract Member(Field) from Field to Field {
     return 
       if (this.meta == null) [];
       else [for (tag in this.meta) if (tag.name == name) tag];
+
+  public function hasMeta(name) {
+    for (m in this.meta)
+      if (m.name == name) return true;
+    return false;
+  }
   
   public inline function asField():Field return this;
   public function publish() 
