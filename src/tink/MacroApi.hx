@@ -21,7 +21,7 @@ typedef TypeMap<T> = tink.macro.TypeMap<T>;
 
 //TODO: consider adding stuff from haxe.macro.Expr here
 typedef MacroOutcome<D, F> = tink.core.Outcome<D, F>;
-typedef MacroOutcomeTools = tink.OutcomeTools;
+typedef MacroOutcomeTools = tink.core.Outcome.OutcomeTools;
 
 typedef Member = tink.macro.Member;
 typedef Constructor = tink.macro.Constructor;
