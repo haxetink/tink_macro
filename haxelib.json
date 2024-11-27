@@ -9,8 +9,8 @@
 	"contributors": [
 		"back2dos"
 	],
-	"version": "1.0.3",
-	"releasenote": "Make Member::hasMeta null safe.",
+	"version": "1.0.4",
+	"releasenote": "Haxe 5 compat",
 	"tags": [
 		"tink",
 		"macro",
