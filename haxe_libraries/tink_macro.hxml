@@ -1,3 +1,4 @@
--D tink_macro
--cp src
+# @install: lix --silent download "gh://github.com/haxetink/tink_macro#b05b830e4b16719bbaaf4948970f926adea8ff00" into tink_macro/1.0.4/github/b05b830e4b16719bbaaf4948970f926adea8ff00
 -lib tink_core
+-cp ${HAXE_LIBCACHE}/tink_macro/1.0.4/github/b05b830e4b16719bbaaf4948970f926adea8ff00/src
+-D tink_macro=1.0.4
