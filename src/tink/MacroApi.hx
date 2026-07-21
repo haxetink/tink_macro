@@ -32,11 +32,11 @@ typedef TypeResolution = Ref<Either<String, TypeDefinition>>;
 class MacroApi {
 
   static var MAIN_CANDIDATES = ['-main', '-x', '--run'];
-  static public function getMainClass():Option<String> {
+  static public function getMainClass():Option<MainClass> {
     #if (haxe_ver >= 4.3)
       return switch haxe.macro.Compiler.getConfiguration().mainClass {
         case null: None;
-        case p: Some(p.pack.concat([p.name]).join('.'));
+        case p: Some(p);
       }
     #else
       var args = Sys.args();
@@ -156,3 +156,23 @@ class MacroApi {
       return new ObjectField(o);
   }
 #end
+
+
+@:forward
+abstract MainClass({pack:Array<String>, name:String}) from {pack:Array<String>, name:String} to {pack:Array<String>, name:String} {
+	public function new(v)
+		this = v;
+
+	@:from static function ofString(v:String):MainClass {
+		final pack = v.split('.');
+		final name = pack.pop();
+		return new MainClass({pack: pack, name: name});
+	}
+
+	@:to public function toString():String
+		return this.pack.concat([this.name]).join('.');
+
+	public function getModuleLevelMainClass() {
+		return this.pack.concat(['_${this.name}', '${this.name}_Fields_']).join('.');
+	}
+}
