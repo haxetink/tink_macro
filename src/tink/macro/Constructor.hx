@@ -19,7 +19,7 @@ class Constructor {
   var beforeArgs:Array<FunctionArg>;
   var args:Array<FunctionArg>;
   var afterArgs:Array<FunctionArg>;
-  var pos:Position;
+  public var pos(efault, null):Position;
   var onGenerateHooks:Array<Function->Void>;
   var superCall:Expr;
   var owner:ClassBuilder;
