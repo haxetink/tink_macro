@@ -33,7 +33,7 @@ class Positions {
 
   static public function error(pos:Position, error:Dynamic):Dynamic 
     return 
-      switch Std.instance(error, tink.core.Error) {
+      switch #if haxe4 Std.downcast #else Std.instance #end(error, tink.core.Error) {
         case null: errorFunc(sanitize(pos), Std.string(error));
         case error: 
           errorFunc(
